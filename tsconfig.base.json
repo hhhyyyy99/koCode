@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@kocode/ko-ai": ["./packages/ko-ai/src/index.ts"],
+      "@kocode/ko-agent": ["./packages/ko-agent/src/index.ts"],
+      "@kocode/ko-tui": ["./packages/ko-tui/src/index.ts"]
+    }
+  }
+}

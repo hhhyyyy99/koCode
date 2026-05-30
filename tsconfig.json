@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/ko-ai" },
+    { "path": "./packages/ko-agent" },
+    { "path": "./packages/ko-tui" },
+    { "path": "./packages/ko-cli" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../ko-ai" },
+    { "path": "../ko-agent" },
+    { "path": "../ko-tui" }
+  ]
+}

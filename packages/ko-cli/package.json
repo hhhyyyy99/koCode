@@ -1,0 +1,27 @@
+{
+  "name": "@kocode/ko-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "kocode": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@kocode/ko-agent": "workspace:*",
+    "@kocode/ko-ai": "workspace:*",
+    "@kocode/ko-tui": "workspace:*"
+  }
+}
