@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./src/index.ts"
     }
   },
   "scripts": {
@@ -19,7 +19,8 @@
   "dependencies": {
     "@kocode/ko-agent": "workspace:*",
     "ink": "^5.2.1",
-    "react": "^19.1.0"
+    "ink-text-input": "^6.0.0",
+    "react": "^18.2.0"
   },
   "peerDependencies": {
     "react": ">=18"
