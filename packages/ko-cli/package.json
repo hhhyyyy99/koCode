@@ -22,6 +22,7 @@
   "dependencies": {
     "@kocode/ko-agent": "workspace:*",
     "@kocode/ko-ai": "workspace:*",
-    "@kocode/ko-tui": "workspace:*"
+    "@kocode/ko-tui": "workspace:*",
+    "yaml": "^2.7.0"
   }
 }
