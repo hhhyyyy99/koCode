@@ -13,6 +13,7 @@ import {
   type StopReason,
   type Usage,
   stream,
+  complete,
   type AssistantMessageEvent,
   calculateCost,
 } from "@kocode/ko-ai";
@@ -86,6 +87,7 @@ export class AgentSession {
   private pendingPermissions: Map<string, { resolve: (action: "approve" | "deny" | "approve_all") => void }> = new Map();
   private checkpoints: Map<string, { filePath: string; backupContent: string | null }> = new Map(); // trackId -> backup
   private turnCheckpoints: Map<number, string[]> = new Map(); // turn index -> trackIds
+  private sessionApprovedCategories: Set<ToolPermissionCategory> = new Set();
 
   constructor(config: AgentSessionConfig) {
     this.model = config.model;
@@ -256,6 +258,7 @@ export class AgentSession {
   /** Replace the in-memory conversation with another persisted session. */
   resumeSession(sessionId: string): void {
     this.messages = loadSession(sessionId);
+    this.sessionApprovedCategories.clear();
     this.emit({ type: "session_resumed", sessionId, messages: this.getMessages() } as AgentSessionEvent);
   }
 
@@ -531,8 +534,7 @@ export class AgentSession {
             }
 
             if (permission === "approve_all") {
-              // Approve all future tools of same type in this directory
-              // For now, just continue without changing mode
+              this.sessionApprovedCategories.add(permissionDecision.category);
             }
           }
 
@@ -589,6 +591,7 @@ export class AgentSession {
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   private checkToolPermission(category: ToolPermissionCategory): boolean {
+    if (this.sessionApprovedCategories.has(category)) return false;
     return shouldRequestToolPermission(category, this.permissionMode);
   }
 
@@ -703,16 +706,16 @@ export class AgentSession {
     this.emit({ type: "thinking_delta", index: thinkIdx, delta, partial });
   }
 
-  /** Rough token estimate: 4 chars ~= 1 token. */
+  /** CJK-aware token estimate. */
   estimateTokens(): number {
     let total = 0;
     for (const msg of this.messages) {
       if (typeof msg.content === "string") {
-        total += Math.ceil(msg.content.length / 4);
+        total += estimateTextTokens(msg.content);
       } else {
         for (const block of msg.content) {
           if (block.type === "text" || block.type === "thinking") {
-            total += Math.ceil(("text" in block ? (block as any).text : (block as any).thinking).length / 4);
+            total += estimateTextTokens("text" in block ? (block as any).text : (block as any).thinking);
           }
         }
       }
@@ -735,17 +738,53 @@ export class AgentSession {
     return total;
   }
 
-  /** Simple compaction: keep first (system+first user) + last 10 messages. */
+  /** Compaction: preserve tool pairs + LLM summary of discarded messages. */
   private async performCompaction(): Promise<void> {
-    if (this.messages.length <= 12) return; // too small to compact
+    if (this.messages.length <= 14) return; // too small to compact
 
-    const keepFirst = 2; // system prompt equivalent + first user
-    const keepLast = 8;
+    const keepFirst = 2; // first user + first assistant (or second message)
+    const keepLast = 12; // increased from 8
 
     const head = this.messages.slice(0, keepFirst);
     const tail = this.messages.slice(-keepLast);
+    const discarded = this.messages.slice(keepFirst, -keepLast);
 
-    // TODO: Summary of skipped messages via a separate LLM call
+    if (discarded.length === 0) {
+      this.messages = [...head, ...tail];
+      return;
+    }
+
+    // Try LLM summary of discarded messages
+    try {
+      const summaryPrompt = "Summarize the following conversation messages in one concise paragraph, preserving key facts, decisions, and file changes:\n\n" +
+        discarded.map((m) => {
+          const text = typeof m.content === "string" ? m.content : JSON.stringify(m.content);
+          return `[${m.role}] ${text.slice(0, 500)}`;
+        }).join("\n");
+
+      const summaryContext: Context = {
+        messages: [{ role: "user", content: summaryPrompt, timestamp: Date.now() }],
+      };
+      const result = await complete(this.model, summaryContext, { maxTokens: 500 });
+      const summaryText = result.content
+        .filter((b): b is { type: "text"; text: string } => b.type === "text")
+        .map((b) => b.text)
+        .join(" ");
+
+      if (summaryText) {
+        const summaryMsg: UserMessage = {
+          role: "user",
+          content: `[Context summary] ${summaryText}`,
+          timestamp: Date.now(),
+        };
+        this.messages = [...head, summaryMsg, ...tail];
+        return;
+      }
+    } catch {
+      // Fallback to truncation on any error
+    }
+
+    // Fallback: simple truncation
     this.messages = [...head, ...tail];
   }
 }
@@ -798,8 +837,22 @@ function stableStringify(value: unknown): string {
   return JSON.stringify(value);
 }
 
+/** Count CJK characters in text (U+4E00–U+9FFF, U+3400–U+4DBF, U+F900–U+FAFF). */
+function countCJK(text: string): number {
+  let count = 0;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if ((code >= 0x4E00 && code <= 0x9FFF) || (code >= 0x3400 && code <= 0x4DBF) || (code >= 0xF900 && code <= 0xFAFF)) {
+      count++;
+    }
+  }
+  return count;
+}
+
 function estimateTextTokens(text: string): number {
-  return Math.ceil(text.length / 4);
+  const cjk = countCJK(text);
+  const other = text.length - cjk;
+  return Math.ceil(cjk * 0.5 + other * 0.25);
 }
 
 function generateSystemPromptPreview(tools: ToolExecutor[], model: Model): string {

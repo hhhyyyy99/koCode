@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { resolve } from "node:path";
 import type { ToolExecutor } from "../agent-session.js";
 
@@ -167,6 +167,7 @@ export const editTool: ToolExecutor = {
       file_path: { type: "string", description: "Absolute path to the file" },
       old_string: { type: "string", description: "Exact text to replace" },
       new_string: { type: "string", description: "Replacement text" },
+      replace_all: { type: "boolean", description: "Replace all occurrences (default: false)" },
     },
     required: ["file_path", "old_string", "new_string"],
   },
@@ -183,7 +184,9 @@ export const editTool: ToolExecutor = {
     if (!content.includes(input.old_string)) {
       return { isError: true, content: `String not found in file: "${input.old_string.slice(0, 60)}..."` };
     }
-    const newContent = content.replace(input.old_string, input.new_string);
+    const newContent = input.replace_all
+      ? content.split(input.old_string).join(input.new_string)
+      : content.replace(input.old_string, input.new_string);
     writeFileSync(path, newContent, "utf-8");
     return { isError: false, content: `Edited file: ${input.file_path}` };
   },
@@ -207,17 +210,29 @@ export const bashTool: ToolExecutor = {
     if (policyErr) return { isError: true, content: policyErr };
     const permErr = await checkPermission("bash", input);
     if (permErr) return { isError: true, content: permErr };
-    try {
-      const result = execSync(input.command, {
-        cwd,
-        timeout: input.timeout ?? 30000,
-        encoding: "utf-8",
-        maxBuffer: 10 * 1024 * 1024,
+    const timeoutMs = input.timeout ?? 30000;
+    return new Promise((resolve) => {
+      const proc = spawn(input.command, { shell: true, cwd, detached: true });
+      let stdout = "";
+      let stderr = "";
+      const timer = setTimeout(() => {
+        try { process.kill(-proc.pid!, "SIGKILL"); } catch { proc.kill("SIGKILL"); }
+      }, timeoutMs);
+      proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
+      proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+      proc.on("close", (code) => {
+        clearTimeout(timer);
+        if (code === 0) {
+          resolve({ isError: false, content: stdout });
+        } else {
+          resolve({ isError: true, content: stderr || stdout || `Process exited with code ${code}` });
+        }
       });
-      return { isError: false, content: result };
-    } catch (e: any) {
-      return { isError: true, content: e.stderr ?? e.message };
-    }
+      proc.on("error", (e) => {
+        clearTimeout(timer);
+        resolve({ isError: true, content: e.message });
+      });
+    });
   },
 };
 

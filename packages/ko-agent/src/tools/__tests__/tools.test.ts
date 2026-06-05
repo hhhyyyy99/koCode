@@ -65,6 +65,30 @@ describe("editTool", () => {
     unlinkSync(filePath);
   });
 
+  it("replaces only first occurrence by default", async () => {
+    const filePath = join(tmpDir, "edit-first.txt");
+    writeFileSync(filePath, "aaa bbb aaa", "utf-8");
+    const result = await editTool.execute(
+      { file_path: filePath, old_string: "aaa", new_string: "ccc" },
+      tmpDir,
+    );
+    expect(result.isError).toBe(false);
+    expect(readFileSync(filePath, "utf-8")).toBe("ccc bbb aaa");
+    unlinkSync(filePath);
+  });
+
+  it("replaces all occurrences when replace_all is true", async () => {
+    const filePath = join(tmpDir, "edit-all.txt");
+    writeFileSync(filePath, "aaa bbb aaa ccc aaa", "utf-8");
+    const result = await editTool.execute(
+      { file_path: filePath, old_string: "aaa", new_string: "zzz", replace_all: true },
+      tmpDir,
+    );
+    expect(result.isError).toBe(false);
+    expect(readFileSync(filePath, "utf-8")).toBe("zzz bbb zzz ccc zzz");
+    unlinkSync(filePath);
+  });
+
   it("rejects when old_string not found", async () => {
     const filePath = join(tmpDir, "edit-test2.txt");
     writeFileSync(filePath, "abc", "utf-8");
@@ -96,6 +120,17 @@ describe("bashTool", () => {
     const result = await bashTool.execute({ command: "echo allowed" }, tmpDir);
     expect(result.isError).toBe(false);
     setBashPolicy({});
+  });
+
+  it("captures stderr on non-zero exit", async () => {
+    const result = await bashTool.execute({ command: "echo err >&2; exit 1" }, tmpDir);
+    expect(result.isError).toBe(true);
+    expect(result.content).toContain("err");
+  });
+
+  it("enforces timeout", { timeout: 10000 }, async () => {
+    const result = await bashTool.execute({ command: "sleep 10", timeout: 200 }, tmpDir);
+    expect(result.isError).toBe(true);
   });
 });
 
