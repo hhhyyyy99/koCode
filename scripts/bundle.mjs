@@ -21,6 +21,8 @@ await esbuild.build({
   external: [
     // Native modules
     "fsevents",
+    // Optional Ink peer dependency loaded only when DEV=true.
+    "react-devtools-core",
   ],
   alias: {
     "@kocode/ko-ai": resolve(root, "packages/ko-ai/src/index.ts"),

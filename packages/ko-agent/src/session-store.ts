@@ -26,25 +26,28 @@ export interface BranchInfo {
 // JSONL-based session persistence
 // ============================================================================
 
-const SESSIONS_DIR = join(os.homedir(), ".kocode", "sessions");
+function getSessionsDirPath(): string {
+  return process.env.KOCODE_SESSIONS_DIR || join(os.homedir(), ".kocode", "sessions");
+}
 
 function ensureSessionsDir(): void {
-  if (!existsSync(SESSIONS_DIR)) {
-    mkdirSync(SESSIONS_DIR, { recursive: true });
+  const sessionsDir = getSessionsDirPath();
+  if (!existsSync(sessionsDir)) {
+    mkdirSync(sessionsDir, { recursive: true });
   }
 }
 
 export function createSession(): { id: string; path: string } {
   ensureSessionsDir();
   const id = randomUUID();
-  const path = join(SESSIONS_DIR, `${id}.jsonl`);
+  const path = join(getSessionsDirPath(), `${id}.jsonl`);
   writeFileSync(path, "");
   return { id, path };
 }
 
 export function sessionPathFor(sessionId: string): string {
   ensureSessionsDir();
-  return join(SESSIONS_DIR, `${sessionId}.jsonl`);
+  return join(getSessionsDirPath(), `${sessionId}.jsonl`);
 }
 
 export function loadSession(sessionId: string): Message[] {
@@ -63,14 +66,15 @@ export function appendMessage(sessionPath: string, message: Message): void {
 
 export function getSessionsDir(): string {
   ensureSessionsDir();
-  return SESSIONS_DIR;
+  return getSessionsDirPath();
 }
 
 export function listSessions(): { id: string; path: string }[] {
   ensureSessionsDir();
-  return readdirSync(SESSIONS_DIR)
+  const sessionsDir = getSessionsDirPath();
+  return readdirSync(sessionsDir)
     .filter((f) => f.endsWith(".jsonl"))
-    .map((f) => ({ id: basename(f, ".jsonl"), path: join(SESSIONS_DIR, f) }));
+    .map((f) => ({ id: basename(f, ".jsonl"), path: join(sessionsDir, f) }));
 }
 
 export function listSessionSummaries(): SessionSummary[] {
@@ -125,12 +129,12 @@ export function listBranches(sessionId: string): BranchInfo[] {
 
 function branchesPathFor(sessionId: string): string {
   ensureSessionsDir();
-  return join(SESSIONS_DIR, `${sessionId}.branches.json`);
+  return join(getSessionsDirPath(), `${sessionId}.branches.json`);
 }
 
 function metaPathFor(sessionId: string): string {
   ensureSessionsDir();
-  return join(SESSIONS_DIR, `${sessionId}.meta.json`);
+  return join(getSessionsDirPath(), `${sessionId}.meta.json`);
 }
 
 function readSessionMeta(sessionId: string): Record<string, any> {
@@ -144,7 +148,7 @@ function writeSessionMeta(sessionId: string, patch: Record<string, any>): void {
 }
 
 export function deleteSession(sessionId: string): boolean {
-  const path = join(SESSIONS_DIR, `${sessionId}.jsonl`);
+  const path = sessionPathFor(sessionId);
   if (!existsSync(path)) return false;
   unlinkSync(path);
   return true;

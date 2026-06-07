@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [resolveTsPlugin()],
   test: {
     environment: "node",
+    env: {
+      KOCODE_SESSIONS_DIR: "/tmp/kocode-vitest-sessions",
+    },
     include: ["src/__tests__/**/*.test.ts"],
   },
 });
