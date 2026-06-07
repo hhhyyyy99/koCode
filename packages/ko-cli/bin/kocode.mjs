@@ -56281,14 +56281,15 @@ var init_Header = __esm({
 });
 
 // packages/ko-tui/src/types.ts
+function turnToolCalls(turn) {
+  return turn.assistant.items.filter((item) => item.type === "tool").map((item) => item.toolCall);
+}
 function createTurn(id, event) {
   return {
     id,
     userMessage: { content: event.content, images: event.images },
     assistant: {
-      textContent: "",
-      thinkingBlocks: [],
-      toolCalls: []
+      items: []
     },
     status: "streaming"
   };
@@ -56302,10 +56303,18 @@ var init_types2 = __esm({
 // packages/ko-tui/src/useTurns.ts
 function useTurns(events) {
   const turnsRef = (0, import_react23.useRef)([]);
+  const eventsRef = (0, import_react23.useRef)(events);
   const lastIndexRef = (0, import_react23.useRef)(0);
   const [, setVersion] = (0, import_react23.useState)(0);
   (0, import_react23.useEffect)(() => {
     let changed = false;
+    const replacedEvents = events !== eventsRef.current && events.length <= lastIndexRef.current;
+    if (replacedEvents) {
+      turnsRef.current = [];
+      lastIndexRef.current = 0;
+      changed = true;
+    }
+    eventsRef.current = events;
     for (let i = lastIndexRef.current; i < events.length; i++) {
       processEvent(events[i], turnsRef.current);
       changed = true;
@@ -56314,7 +56323,7 @@ function useTurns(events) {
     if (changed) {
       setVersion((v) => v + 1);
     }
-  }, [events.length]);
+  }, [events]);
   const allTurns = turnsRef.current;
   const lastTurn2 = allTurns[allTurns.length - 1];
   const isLastActive = lastTurn2 && lastTurn2.status === "streaming";
@@ -56351,33 +56360,45 @@ function processEvent(event, turns) {
     case "message_delta": {
       const last = lastTurn(turns);
       if (last) {
-        last.assistant.textContent = mergeDelta(
-          last.assistant.textContent,
-          event.delta
-        );
+        const cur = last.assistant.items[last.assistant.items.length - 1];
+        if (cur?.type === "text") {
+          cur.content = mergeDelta(cur.content, event.delta);
+        } else {
+          last.assistant.items.push({
+            type: "text",
+            key: `${last.id}:${last.assistant.items.length}:text`,
+            content: event.delta
+          });
+        }
       }
       break;
     }
     case "tool_start": {
       const last = lastTurn(turns);
       if (last) {
-        const existingRunning = findLatestToolCall(
-          last.assistant.toolCalls,
+        const existingRunning = findLatestToolItem(
+          last.assistant.items,
           event.toolCallId,
           "running"
         );
         if (existingRunning) {
-          existingRunning.name = event.toolName;
-          existingRunning.input = event.input;
+          existingRunning.toolCall.name = event.toolName;
+          existingRunning.toolCall.input = event.input;
           break;
         }
-        const key = `${last.id}:${last.assistant.toolCalls.length}:${event.toolCallId}`;
-        last.assistant.toolCalls.push({
+        const toolOrdinal = turnToolCalls(last).length;
+        const key = `${last.id}:${toolOrdinal}:${event.toolCallId}`;
+        const toolCall = {
           key,
           id: event.toolCallId,
           name: event.toolName,
           input: event.input,
           status: "running"
+        };
+        last.assistant.items.push({
+          type: "tool",
+          key,
+          toolCall
         });
       }
       break;
@@ -56385,17 +56406,17 @@ function processEvent(event, turns) {
     case "tool_end": {
       const last = lastTurn(turns);
       if (last) {
-        const tc = findLatestToolCall(
-          last.assistant.toolCalls,
+        const tc = findLatestToolItem(
+          last.assistant.items,
           event.toolCallId,
           "running"
-        ) ?? findLatestToolCall(
-          last.assistant.toolCalls,
+        ) ?? findLatestToolItem(
+          last.assistant.items,
           event.toolCallId
         );
         if (tc) {
-          tc.result = event.result;
-          tc.status = event.result.isError ? "error" : "done";
+          tc.toolCall.result = event.result;
+          tc.toolCall.status = event.result.isError ? "error" : "done";
         }
       }
       break;
@@ -56403,12 +56424,16 @@ function processEvent(event, turns) {
     case "thinking_delta": {
       const last = lastTurn(turns);
       if (last) {
-        const blocks = last.assistant.thinkingBlocks;
-        const cur = blocks[blocks.length - 1];
-        if (cur) {
+        const cur = last.assistant.items[last.assistant.items.length - 1];
+        if (cur?.type === "thinking") {
           cur.content = mergeDelta(cur.content, event.delta);
         } else {
-          blocks.push({ content: event.delta, collapsed: true });
+          last.assistant.items.push({
+            type: "thinking",
+            key: `${last.id}:${last.assistant.items.length}:thinking`,
+            content: event.delta,
+            collapsed: true
+          });
         }
       }
       break;
@@ -56430,19 +56455,22 @@ function processEvent(event, turns) {
       break;
     }
     case "shell_start": {
+      const key = `${turns.length}:0:shell`;
       const turn = {
         id: turns.length,
         userMessage: { content: `!${event.command}` },
         assistant: {
-          textContent: "",
-          thinkingBlocks: [],
-          toolCalls: [
+          items: [
             {
-              key: `${turns.length}:0:shell`,
-              id: "shell",
-              name: "bash",
-              input: { command: event.command },
-              status: "running"
+              type: "tool",
+              key,
+              toolCall: {
+                key,
+                id: "shell",
+                name: "bash",
+                input: { command: event.command },
+                status: "running"
+              }
             }
           ]
         },
@@ -56454,11 +56482,11 @@ function processEvent(event, turns) {
     }
     case "shell_end": {
       const last = lastTurn(turns);
-      const shell = last?.assistant.toolCalls.find((tc) => tc.id === "shell" && tc.status === "running");
+      const shell = last ? findLatestToolItem(last.assistant.items, "shell", "running") : void 0;
       if (last && shell) {
         const output = event.stdout || event.stderr || "Done";
-        shell.status = event.exitCode === 0 ? "done" : "error";
-        shell.result = { isError: event.exitCode !== 0, content: output };
+        shell.toolCall.status = event.exitCode === 0 ? "done" : "error";
+        shell.toolCall.result = { isError: event.exitCode !== 0, content: output };
         last.status = event.exitCode === 0 ? "complete" : "error";
         last.completedAt = Date.now();
         if (event.exitCode !== 0) last.errorMessage = `Shell exited with code ${event.exitCode}`;
@@ -56474,7 +56502,7 @@ function processEvent(event, turns) {
         const errTurn = {
           id: turns.length,
           userMessage: { content: "(error)" },
-          assistant: { textContent: "", thinkingBlocks: [], toolCalls: [] },
+          assistant: { items: [] },
           status: "error",
           errorMessage: event.errorMessage
         };
@@ -56500,11 +56528,12 @@ function processEvent(event, turns) {
 function lastTurn(turns) {
   return turns[turns.length - 1];
 }
-function findLatestToolCall(toolCalls, id, status) {
-  for (let i = toolCalls.length - 1; i >= 0; i--) {
-    const toolCall = toolCalls[i];
-    if (toolCall.id === id && (!status || toolCall.status === status)) {
-      return toolCall;
+function findLatestToolItem(items, id, status) {
+  for (let i = items.length - 1; i >= 0; i--) {
+    const item = items[i];
+    if (item.type !== "tool") continue;
+    if (item.toolCall.id === id && (!status || item.toolCall.status === status)) {
+      return item;
     }
   }
   return void 0;
@@ -57272,10 +57301,7 @@ function formatDuration(ms) {
 }
 function Turn({ turn, streaming, toolFocusKey, expandedToolIds }) {
   const { theme } = useTheme();
-  const hasThinking = turn.assistant.thinkingBlocks.length > 0;
-  const hasText = turn.assistant.textContent.length > 0;
-  const hasTools = turn.assistant.toolCalls.length > 0;
-  const hasAssistant = hasThinking || hasText || hasTools;
+  const hasAssistant = turn.assistant.items.length > 0;
   return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Box_default, { flexDirection: "column", paddingY: 0, children: [
     /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
       UserBubble,
@@ -57285,23 +57311,27 @@ function Turn({ turn, streaming, toolFocusKey, expandedToolIds }) {
       }
     ),
     hasAssistant && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(40) }) }),
-    hasThinking && turn.assistant.thinkingBlocks.map((tb, i) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
-      ThinkingBlock,
-      {
-        content: tb.content,
-        focused: false
-      },
-      `think-${turn.id}-${i}`
-    )),
-    hasText && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(AssistantBlock, { text: turn.assistant.textContent }),
-    hasTools && turn.assistant.toolCalls.map((tc) => {
-      const key = tc.key;
+    turn.assistant.items.map((item) => {
+      if (item.type === "thinking") {
+        return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+          ThinkingBlock,
+          {
+            content: item.content,
+            focused: false
+          },
+          item.key
+        );
+      }
+      if (item.type === "text") {
+        return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(AssistantBlock, { text: item.content }, item.key);
+      }
+      const key = item.toolCall.key;
       return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
         ToolCallCard,
         {
-          toolCall: tc,
+          toolCall: item.toolCall,
           focused: toolFocusKey === key,
-          expanded: expandedToolIds?.has(tc.key) ?? false
+          expanded: expandedToolIds?.has(key) ?? false
         },
         key
       );
@@ -57354,7 +57384,7 @@ function Conversation({ events, model, cwd: cwd2, toolFocusKey, expandedToolIds,
     [completedTurns, activeTurn]
   );
   const toolKeyList = (0, import_react25.useMemo)(
-    () => turns.flatMap((turn) => turn.assistant.toolCalls.map((tc) => tc.key)),
+    () => turns.flatMap((turn) => turnToolCalls(turn).map((tc) => tc.key)),
     [turns]
   );
   (0, import_react25.useEffect)(() => {
@@ -57395,6 +57425,7 @@ var init_Conversation = __esm({
     init_useTurns();
     await init_Turn();
     init_Welcome();
+    init_types2();
     import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   }
 });
@@ -58528,6 +58559,27 @@ function normalizeToolIndex(index, count) {
 function moveToolIndex(index, count, direction) {
   return normalizeToolIndex(index + (direction === "next" ? 1 : -1), count);
 }
+function isCtrlOInput(input, key) {
+  return key.ctrl === true && (input === "o" || input === "");
+}
+function toggleExpandedToolId(expanded, toolKey) {
+  const next = new Set(expanded);
+  if (!toolKey) return next;
+  if (next.has(toolKey)) next.delete(toolKey);
+  else next.add(toolKey);
+  return next;
+}
+function applyCtrlOToolToggle(state) {
+  if (state.toolKeys.length === 0) return state;
+  const selectedToolIndex = Math.min(state.selectedToolIndex, state.toolKeys.length - 1);
+  const toolKey = state.toolKeys[selectedToolIndex];
+  return {
+    ...state,
+    focusMode: "tool-output",
+    selectedToolIndex,
+    expandedToolIds: toggleExpandedToolId(state.expandedToolIds, toolKey)
+  };
+}
 function busySubmitMessage(text) {
   return text.trim() ? "Agent is still running; draft kept. Submit after this turn finishes." : "Agent is still running.";
 }
@@ -59059,21 +59111,16 @@ function App2({ session, onThemeChange }) {
       if (key.escape) closeModal();
       return;
     }
-    if (key.ctrl && _input === "" && toolKeys.length > 0) {
-      if (focusMode !== "tool-output") {
-        setFocusMode("tool-output");
-        setSelectedToolIndex((prev) => Math.min(prev, toolKeys.length - 1));
-        return;
-      }
-      const toolKey = toolKeys[selectedToolIndex];
-      if (toolKey) {
-        setExpandedToolIds((prev) => {
-          const next = new Set(prev);
-          if (next.has(toolKey)) next.delete(toolKey);
-          else next.add(toolKey);
-          return next;
-        });
-      }
+    if (isCtrlOInput(_input, key) && toolKeys.length > 0) {
+      const next = applyCtrlOToolToggle({
+        focusMode,
+        selectedToolIndex,
+        toolKeys,
+        expandedToolIds
+      });
+      setFocusMode(next.focusMode);
+      setSelectedToolIndex(next.selectedToolIndex);
+      setExpandedToolIds(next.expandedToolIds);
       return;
     }
     if (focusMode === "tool-output") {
@@ -59189,10 +59236,35 @@ function messagesToEvents(messages) {
     }
     if (message.role === "assistant") {
       const assistant = message;
-      const text = assistant.content.filter((part) => part.type === "text").map((part) => part.text).join("\n");
-      if (text) events.push({ type: "message_delta", index, delta: text, partial: assistant });
+      for (const part of assistant.content) {
+        if (part.type === "text") {
+          events.push({ type: "message_delta", index, delta: part.text, partial: assistant });
+          continue;
+        }
+        if (part.type === "thinking") {
+          events.push({ type: "thinking_delta", index, delta: part.thinking, partial: assistant });
+          continue;
+        }
+        if (part.type === "toolCall") {
+          events.push({ type: "tool_start", toolCallId: part.id, toolName: part.name, input: part.arguments });
+          const result = findToolResult(messages, index + 1, part.id);
+          if (result) {
+            events.push({
+              type: "tool_end",
+              toolCallId: part.id,
+              toolName: part.name,
+              result: {
+                isError: result.isError,
+                content: toolResultText(result)
+              }
+            });
+          }
+        }
+      }
       events.push({ type: "message_end", index, message: assistant });
-      events.push({ type: "turn_end", usage: assistant.usage, stopReason: assistant.stopReason });
+      if (assistant.stopReason !== "toolUse") {
+        events.push({ type: "turn_end", usage: assistant.usage, stopReason: assistant.stopReason });
+      }
     }
   }
   return events;
@@ -59203,6 +59275,17 @@ function userMessageText(content) {
     return content.map((part) => part.type === "text" ? part.text : `[${part.type}]`).join(" ");
   }
   return String(content);
+}
+function findToolResult(messages, startIndex, toolCallId) {
+  for (let index = startIndex; index < messages.length; index++) {
+    const message = messages[index];
+    if (message.role === "user" || message.role === "assistant") return void 0;
+    if (message.role === "toolResult" && message.toolCallId === toolCallId) return message;
+  }
+  return void 0;
+}
+function toolResultText(message) {
+  return message.content.map((part) => part.type === "text" ? part.text : `[${part.type}]`).join("\n");
 }
 var import_react32, import_jsx_runtime17;
 var init_App2 = __esm({

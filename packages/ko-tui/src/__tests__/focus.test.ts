@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyCtrlOToolToggle,
   busySubmitMessage,
   canUseGlobalShortcut,
   isBareEscapeInput,
+  isCtrlOInput,
   isModalFocus,
   moveToolIndex,
   normalizeToolIndex,
@@ -38,6 +40,37 @@ describe("focus routing helpers", () => {
     expect(normalizeToolIndex(-1, 3)).toBe(2);
     expect(moveToolIndex(2, 3, "next")).toBe(0);
     expect(moveToolIndex(0, 3, "previous")).toBe(2);
+  });
+
+  it("recognizes Ctrl+O from Ink and raw control input", () => {
+    expect(isCtrlOInput("o", { ctrl: true })).toBe(true);
+    expect(isCtrlOInput("\u000f", { ctrl: true })).toBe(true);
+    expect(isCtrlOInput("o", { ctrl: false })).toBe(false);
+    expect(isCtrlOInput("\u000f", { ctrl: false })).toBe(false);
+  });
+
+  it("enters tool-output focus and toggles on the first Ctrl+O action", () => {
+    const next = applyCtrlOToolToggle({
+      focusMode: "input",
+      selectedToolIndex: 1,
+      toolKeys: ["tool-a", "tool-b"],
+      expandedToolIds: new Set(),
+    });
+
+    expect(next.focusMode).toBe("tool-output");
+    expect(next.selectedToolIndex).toBe(1);
+    expect(next.expandedToolIds.has("tool-b")).toBe(true);
+  });
+
+  it("collapses an expanded focused tool on Ctrl+O", () => {
+    const next = applyCtrlOToolToggle({
+      focusMode: "tool-output",
+      selectedToolIndex: 0,
+      toolKeys: ["tool-a"],
+      expandedToolIds: new Set(["tool-a"]),
+    });
+
+    expect(next.expandedToolIds.has("tool-a")).toBe(false);
   });
 
   it("identifies bare escape input without matching escape sequences", () => {

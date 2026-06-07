@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import type { AgentSessionEvent } from "@kocode/ko-agent";
-import { type Turn, createTurn } from "./types.js";
+import { type ToolCallState, type Turn, createTurn, turnToolCalls } from "./types.js";
 
 export interface TurnState {
   completedTurns: Turn[];
@@ -9,11 +9,21 @@ export interface TurnState {
 
 export function useTurns(events: AgentSessionEvent[]): TurnState {
   const turnsRef = useRef<Turn[]>([]);
+  const eventsRef = useRef(events);
   const lastIndexRef = useRef(0);
   const [, setVersion] = useState(0);
 
   useEffect(() => {
     let changed = false;
+    const replacedEvents =
+      events !== eventsRef.current && events.length <= lastIndexRef.current;
+    if (replacedEvents) {
+      turnsRef.current = [];
+      lastIndexRef.current = 0;
+      changed = true;
+    }
+    eventsRef.current = events;
+
     for (let i = lastIndexRef.current; i < events.length; i++) {
       processEvent(events[i]!, turnsRef.current);
       changed = true;
@@ -22,7 +32,7 @@ export function useTurns(events: AgentSessionEvent[]): TurnState {
     if (changed) {
       setVersion((v) => v + 1);
     }
-  }, [events.length]);
+  }, [events]);
 
   const allTurns = turnsRef.current;
   const lastTurn = allTurns[allTurns.length - 1];
@@ -67,10 +77,16 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
     case "message_delta": {
       const last = lastTurn(turns);
       if (last) {
-        last.assistant.textContent = mergeDelta(
-          last.assistant.textContent,
-          event.delta,
-        );
+        const cur = last.assistant.items[last.assistant.items.length - 1];
+        if (cur?.type === "text") {
+          cur.content = mergeDelta(cur.content, event.delta);
+        } else {
+          last.assistant.items.push({
+            type: "text",
+            key: `${last.id}:${last.assistant.items.length}:text`,
+            content: event.delta,
+          });
+        }
       }
       break;
     }
@@ -78,24 +94,30 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
     case "tool_start": {
       const last = lastTurn(turns);
       if (last) {
-        const existingRunning = findLatestToolCall(
-          last.assistant.toolCalls,
+        const existingRunning = findLatestToolItem(
+          last.assistant.items,
           event.toolCallId,
           "running",
         );
         if (existingRunning) {
-          existingRunning.name = event.toolName;
-          existingRunning.input = event.input;
+          existingRunning.toolCall.name = event.toolName;
+          existingRunning.toolCall.input = event.input;
           break;
         }
 
-        const key = `${last.id}:${last.assistant.toolCalls.length}:${event.toolCallId}`;
-        last.assistant.toolCalls.push({
+        const toolOrdinal = turnToolCalls(last).length;
+        const key = `${last.id}:${toolOrdinal}:${event.toolCallId}`;
+        const toolCall: ToolCallState = {
           key,
           id: event.toolCallId,
           name: event.toolName,
           input: event.input,
           status: "running",
+        };
+        last.assistant.items.push({
+          type: "tool",
+          key,
+          toolCall,
         });
       }
       break;
@@ -104,17 +126,17 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
     case "tool_end": {
       const last = lastTurn(turns);
       if (last) {
-        const tc = findLatestToolCall(
-          last.assistant.toolCalls,
+        const tc = findLatestToolItem(
+          last.assistant.items,
           event.toolCallId,
           "running",
-        ) ?? findLatestToolCall(
-          last.assistant.toolCalls,
+        ) ?? findLatestToolItem(
+          last.assistant.items,
           event.toolCallId,
         );
         if (tc) {
-          tc.result = event.result;
-          tc.status = event.result.isError ? "error" : "done";
+          tc.toolCall.result = event.result;
+          tc.toolCall.status = event.result.isError ? "error" : "done";
         }
       }
       break;
@@ -123,12 +145,16 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
     case "thinking_delta": {
       const last = lastTurn(turns);
       if (last) {
-        const blocks = last.assistant.thinkingBlocks;
-        const cur = blocks[blocks.length - 1];
-        if (cur) {
+        const cur = last.assistant.items[last.assistant.items.length - 1];
+        if (cur?.type === "thinking") {
           cur.content = mergeDelta(cur.content, event.delta);
         } else {
-          blocks.push({ content: event.delta, collapsed: true });
+          last.assistant.items.push({
+            type: "thinking",
+            key: `${last.id}:${last.assistant.items.length}:thinking`,
+            content: event.delta,
+            collapsed: true,
+          });
         }
       }
       break;
@@ -153,19 +179,22 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
     }
 
     case "shell_start": {
+      const key = `${turns.length}:0:shell`;
       const turn = {
         id: turns.length,
         userMessage: { content: `!${event.command}` },
         assistant: {
-          textContent: "",
-          thinkingBlocks: [],
-          toolCalls: [
+          items: [
             {
-              key: `${turns.length}:0:shell`,
-              id: "shell",
-              name: "bash",
-              input: { command: event.command },
-              status: "running" as const,
+              type: "tool" as const,
+              key,
+              toolCall: {
+                key,
+                id: "shell",
+                name: "bash",
+                input: { command: event.command },
+                status: "running" as const,
+              },
             },
           ],
         },
@@ -178,11 +207,11 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
 
     case "shell_end": {
       const last = lastTurn(turns);
-      const shell = last?.assistant.toolCalls.find((tc) => tc.id === "shell" && tc.status === "running");
+      const shell = last ? findLatestToolItem(last.assistant.items, "shell", "running") : undefined;
       if (last && shell) {
         const output = event.stdout || event.stderr || "Done";
-        shell.status = event.exitCode === 0 ? "done" : "error";
-        shell.result = { isError: event.exitCode !== 0, content: output };
+        shell.toolCall.status = event.exitCode === 0 ? "done" : "error";
+        shell.toolCall.result = { isError: event.exitCode !== 0, content: output };
         last.status = event.exitCode === 0 ? "complete" : "error";
         last.completedAt = Date.now();
         if (event.exitCode !== 0) last.errorMessage = `Shell exited with code ${event.exitCode}`;
@@ -199,7 +228,7 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
         const errTurn: Turn = {
           id: turns.length,
           userMessage: { content: "(error)" },
-          assistant: { textContent: "", thinkingBlocks: [], toolCalls: [] },
+          assistant: { items: [] },
           status: "error",
           errorMessage: event.errorMessage,
         };
@@ -228,15 +257,16 @@ function lastTurn(turns: Turn[]): Turn | undefined {
   return turns[turns.length - 1];
 }
 
-function findLatestToolCall(
-  toolCalls: Turn["assistant"]["toolCalls"],
+function findLatestToolItem(
+  items: Turn["assistant"]["items"],
   id: string,
-  status?: Turn["assistant"]["toolCalls"][number]["status"],
-): Turn["assistant"]["toolCalls"][number] | undefined {
-  for (let i = toolCalls.length - 1; i >= 0; i--) {
-    const toolCall = toolCalls[i]!;
-    if (toolCall.id === id && (!status || toolCall.status === status)) {
-      return toolCall;
+  status?: ToolCallState["status"],
+): Extract<Turn["assistant"]["items"][number], { type: "tool" }> | undefined {
+  for (let i = items.length - 1; i >= 0; i--) {
+    const item = items[i]!;
+    if (item.type !== "tool") continue;
+    if (item.toolCall.id === id && (!status || item.toolCall.status === status)) {
+      return item;
     }
   }
   return undefined;

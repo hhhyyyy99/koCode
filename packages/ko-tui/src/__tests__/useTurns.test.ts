@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { processEvent, mergeDelta } from "../useTurns.js";
-import type { Turn } from "../types.js";
+import { turnTextContent, turnThinkingBlocks, turnToolCalls, type Turn } from "../types.js";
 import type { AgentSessionEvent } from "@kocode/ko-agent";
 
 function makeEvent(overrides: Partial<AgentSessionEvent> & { type: AgentSessionEvent["type"] }): AgentSessionEvent {
@@ -29,8 +29,8 @@ describe("processEvent (full turn lifecycle)", () => {
       makeEvent({ type: "thinking_delta", delta: " said hello" }),
       turns,
     );
-    expect(turns[0]!.assistant.thinkingBlocks).toHaveLength(1);
-    expect(turns[0]!.assistant.thinkingBlocks[0]!.content).toBe(
+    expect(turnThinkingBlocks(turns[0]!)).toHaveLength(1);
+    expect(turnThinkingBlocks(turns[0]!)[0]!.content).toBe(
       "The user said hello",
     );
 
@@ -47,7 +47,7 @@ describe("processEvent (full turn lifecycle)", () => {
       makeEvent({ type: "message_delta", delta: "可以帮你的吗？" }),
       turns,
     );
-    expect(turns[0]!.assistant.textContent).toBe(
+    expect(turnTextContent(turns[0]!)).toBe(
       "你好！有什么可以帮你的吗？",
     );
 
@@ -81,7 +81,7 @@ describe("processEvent (full turn lifecycle)", () => {
       turns,
     );
     // Should not duplicate — only the last full text is kept
-    expect(turns[0]!.assistant.thinkingBlocks[0]!.content).toBe(
+    expect(turnThinkingBlocks(turns[0]!)[0]!.content).toBe(
       "The user said 你好 which means Hello. I should respond in Chinese.",
     );
 
@@ -93,7 +93,7 @@ describe("processEvent (full turn lifecycle)", () => {
       turns,
     );
     // Should not duplicate
-    expect(turns[0]!.assistant.textContent).toBe(
+    expect(turnTextContent(turns[0]!)).toBe(
       "你好！有什么可以帮你的吗？",
     );
 
@@ -119,7 +119,7 @@ describe("processEvent (full turn lifecycle)", () => {
     processEvent(makeEvent({ type: "message_delta", delta: "Bye!" }), turns);
     processEvent(makeEvent({ type: "turn_end" }), turns);
     expect(turns[1]!.status).toBe("complete");
-    expect(turns[1]!.assistant.textContent).toBe("Bye!");
+    expect(turnTextContent(turns[1]!)).toBe("Bye!");
   });
 
   it("handles tool calls within a turn", () => {
@@ -135,8 +135,8 @@ describe("processEvent (full turn lifecycle)", () => {
       }),
       turns,
     );
-    expect(turns[0]!.assistant.toolCalls).toHaveLength(1);
-    expect(turns[0]!.assistant.toolCalls[0]!.status).toBe("running");
+    expect(turnToolCalls(turns[0]!)).toHaveLength(1);
+    expect(turnToolCalls(turns[0]!)[0]!.status).toBe("running");
 
     processEvent(
       makeEvent({
@@ -147,13 +147,57 @@ describe("processEvent (full turn lifecycle)", () => {
       }),
       turns,
     );
-    expect(turns[0]!.assistant.toolCalls[0]!.status).toBe("done");
-    expect(turns[0]!.assistant.toolCalls[0]!.result?.content).toBe(
+    expect(turnToolCalls(turns[0]!)[0]!.status).toBe("done");
+    expect(turnToolCalls(turns[0]!)[0]!.result?.content).toBe(
       "hello world",
     );
 
     processEvent(makeEvent({ type: "turn_end" }), turns);
     expect(turns[0]!.status).toBe("complete");
+  });
+
+  it("preserves text-tool-text chronology within a turn", () => {
+    const turns: Turn[] = [];
+
+    processEvent(makeEvent({ type: "user_message", content: "inspect config" }), turns);
+    processEvent(makeEvent({ type: "message_delta", delta: "I'll inspect the files." }), turns);
+    processEvent(
+      makeEvent({
+        type: "tool_start",
+        toolCallId: "tool-call_0",
+        toolName: "ls",
+        input: { path: ".claude" },
+      }),
+      turns,
+    );
+    processEvent(
+      makeEvent({
+        type: "tool_end",
+        toolCallId: "tool-call_0",
+        toolName: "ls",
+        result: { isError: false, content: "settings.json" },
+      }),
+      turns,
+    );
+    processEvent(makeEvent({ type: "message_delta", delta: "The settings are project-local." }), turns);
+
+    expect(turns[0]!.assistant.items.map((item) => item.type)).toEqual([
+      "text",
+      "tool",
+      "text",
+    ]);
+    expect(turns[0]!.assistant.items[0]).toMatchObject({
+      type: "text",
+      content: "I'll inspect the files.",
+    });
+    expect(turns[0]!.assistant.items[1]).toMatchObject({
+      type: "tool",
+      toolCall: { key: "0:0:tool-call_0", status: "done" },
+    });
+    expect(turns[0]!.assistant.items[2]).toMatchObject({
+      type: "text",
+      content: "The settings are project-local.",
+    });
   });
 
   it("deduplicates repeated tool_start events for a running tool call", () => {
@@ -179,8 +223,13 @@ describe("processEvent (full turn lifecycle)", () => {
       turns,
     );
 
-    expect(turns[0]!.assistant.toolCalls).toHaveLength(1);
-    expect(turns[0]!.assistant.toolCalls[0]!.key).toBe("0:0:tool-call_0");
+    expect(turnToolCalls(turns[0]!)).toHaveLength(1);
+    expect(turnToolCalls(turns[0]!)[0]!.key).toBe("0:0:tool-call_0");
+    expect(turns[0]!.assistant.items).toHaveLength(1);
+    expect(turns[0]!.assistant.items[0]).toMatchObject({
+      type: "tool",
+      toolCall: { key: "0:0:tool-call_0" },
+    });
 
     processEvent(
       makeEvent({
@@ -192,9 +241,9 @@ describe("processEvent (full turn lifecycle)", () => {
       turns,
     );
 
-    expect(turns[0]!.assistant.toolCalls).toHaveLength(1);
-    expect(turns[0]!.assistant.toolCalls[0]!.status).toBe("done");
-    expect(turns[0]!.assistant.toolCalls[0]!.result?.content).toBe("package.json");
+    expect(turnToolCalls(turns[0]!)).toHaveLength(1);
+    expect(turnToolCalls(turns[0]!)[0]!.status).toBe("done");
+    expect(turnToolCalls(turns[0]!)[0]!.result?.content).toBe("package.json");
   });
 
   it("keeps unique TUI keys when a provider reuses a completed tool id", () => {
@@ -229,12 +278,13 @@ describe("processEvent (full turn lifecycle)", () => {
       turns,
     );
 
-    expect(turns[0]!.assistant.toolCalls).toHaveLength(2);
-    expect(turns[0]!.assistant.toolCalls.map((tc) => tc.key)).toEqual([
+    expect(turnToolCalls(turns[0]!)).toHaveLength(2);
+    expect(turns[0]!.assistant.items.map((item) => item.type)).toEqual(["tool", "tool"]);
+    expect(turnToolCalls(turns[0]!).map((tc) => tc.key)).toEqual([
       "0:0:tool-call_0",
       "0:1:tool-call_0",
     ]);
-    expect(turns[0]!.assistant.toolCalls[1]!.status).toBe("running");
+    expect(turnToolCalls(turns[0]!)[1]!.status).toBe("running");
 
     processEvent(
       makeEvent({
@@ -246,8 +296,8 @@ describe("processEvent (full turn lifecycle)", () => {
       turns,
     );
 
-    expect(turns[0]!.assistant.toolCalls[0]!.result?.content).toBe("package.json");
-    expect(turns[0]!.assistant.toolCalls[1]!.result?.content).toBe("/workspace");
+    expect(turnToolCalls(turns[0]!)[0]!.result?.content).toBe("package.json");
+    expect(turnToolCalls(turns[0]!)[1]!.result?.content).toBe("/workspace");
   });
 
   it("renders shell prefix events as a local bash tool turn", () => {
@@ -257,7 +307,7 @@ describe("processEvent (full turn lifecycle)", () => {
 
     expect(turns).toHaveLength(1);
     expect(turns[0]!.userMessage.content).toBe("!pwd");
-    expect(turns[0]!.assistant.toolCalls[0]).toMatchObject({
+    expect(turnToolCalls(turns[0]!)[0]).toMatchObject({
       id: "shell",
       name: "bash",
       input: { command: "pwd" },
@@ -270,8 +320,8 @@ describe("processEvent (full turn lifecycle)", () => {
     );
 
     expect(turns[0]!.status).toBe("complete");
-    expect(turns[0]!.assistant.toolCalls[0]!.status).toBe("done");
-    expect(turns[0]!.assistant.toolCalls[0]!.result?.content).toBe("/workspace");
+    expect(turnToolCalls(turns[0]!)[0]!.status).toBe("done");
+    expect(turnToolCalls(turns[0]!)[0]!.result?.content).toBe("/workspace");
     expect(turns[0]!.completedAt).toBeTypeOf("number");
   });
   it("handles agent error with active turn", () => {

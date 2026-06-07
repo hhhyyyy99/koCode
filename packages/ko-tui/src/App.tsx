@@ -3,7 +3,7 @@ import { Box, Text, useInput } from "ink";
 import { AgentSession } from "@kocode/ko-agent";
 import type { AgentSessionEvent, SessionSummary } from "@kocode/ko-agent";
 import type { PermissionMode, PermissionRequestToolType } from "@kocode/ko-agent";
-import type { AssistantMessage, Message, Model } from "@kocode/ko-ai";
+import type { Message, Model, ToolResultMessage } from "@kocode/ko-ai";
 import { Header } from "./Header.js";
 import { Conversation } from "./Conversation.js";
 import { InputBox } from "./InputBox.js";
@@ -14,7 +14,7 @@ import { CommandPanel } from "./CommandPanel.js";
 import { SessionPanel } from "./SessionPanel.js";
 import { filterCommands, getCommands } from "./commands.js";
 import type { CommandDef } from "./commands.js";
-import { busySubmitMessage, moveToolIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
+import { applyCtrlOToolToggle, busySubmitMessage, isCtrlOInput, moveToolIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
 import { emptyInputBuffer, setInputText, type InputBuffer } from "./input-buffer.js";
 import { parseInputRoute } from "./input-prefix.js";
 import { useTheme, type ThemeName } from "./theme.js";
@@ -403,21 +403,16 @@ export function App({ session, onThemeChange }: AppProps) {
       return;
     }
 
-    if (key.ctrl && _input === "\u000f" && toolKeys.length > 0) {
-      if (focusMode !== "tool-output") {
-        setFocusMode("tool-output");
-        setSelectedToolIndex((prev) => Math.min(prev, toolKeys.length - 1));
-        return;
-      }
-      const toolKey = toolKeys[selectedToolIndex];
-      if (toolKey) {
-        setExpandedToolIds((prev) => {
-          const next = new Set(prev);
-          if (next.has(toolKey)) next.delete(toolKey);
-          else next.add(toolKey);
-          return next;
-        });
-      }
+    if (isCtrlOInput(_input, key) && toolKeys.length > 0) {
+      const next = applyCtrlOToolToggle({
+        focusMode,
+        selectedToolIndex,
+        toolKeys,
+        expandedToolIds,
+      });
+      setFocusMode(next.focusMode);
+      setSelectedToolIndex(next.selectedToolIndex);
+      setExpandedToolIds(next.expandedToolIds);
       return;
     }
 
@@ -558,14 +553,36 @@ function messagesToEvents(messages: Message[]): AgentSessionEvent[] {
       continue;
     }
     if (message.role === "assistant") {
-      const assistant = message as AssistantMessage;
-      const text = assistant.content
-        .filter((part) => part.type === "text")
-        .map((part: any) => part.text)
-        .join("\n");
-      if (text) events.push({ type: "message_delta", index, delta: text, partial: assistant });
+      const assistant = message;
+      for (const part of assistant.content) {
+        if (part.type === "text") {
+          events.push({ type: "message_delta", index, delta: part.text, partial: assistant });
+          continue;
+        }
+        if (part.type === "thinking") {
+          events.push({ type: "thinking_delta", index, delta: part.thinking, partial: assistant });
+          continue;
+        }
+        if (part.type === "toolCall") {
+          events.push({ type: "tool_start", toolCallId: part.id, toolName: part.name, input: part.arguments });
+          const result = findToolResult(messages, index + 1, part.id);
+          if (result) {
+            events.push({
+              type: "tool_end",
+              toolCallId: part.id,
+              toolName: part.name,
+              result: {
+                isError: result.isError,
+                content: toolResultText(result),
+              },
+            });
+          }
+        }
+      }
       events.push({ type: "message_end", index, message: assistant });
-      events.push({ type: "turn_end", usage: assistant.usage, stopReason: assistant.stopReason });
+      if (assistant.stopReason !== "toolUse") {
+        events.push({ type: "turn_end", usage: assistant.usage, stopReason: assistant.stopReason });
+      }
     }
   }
   return events;
@@ -574,7 +591,22 @@ function messagesToEvents(messages: Message[]): AgentSessionEvent[] {
 function userMessageText(content: Message["content"]): string {
   if (typeof content === "string") return content;
   if (Array.isArray(content)) {
-    return content.map((part: any) => part.type === "text" ? part.text : `[${part.type}]`).join(" ");
+    return content.map((part) => part.type === "text" ? part.text : `[${part.type}]`).join(" ");
   }
   return String(content);
+}
+
+function findToolResult(messages: Message[], startIndex: number, toolCallId: string): ToolResultMessage | undefined {
+  for (let index = startIndex; index < messages.length; index++) {
+    const message = messages[index]!;
+    if (message.role === "user" || message.role === "assistant") return undefined;
+    if (message.role === "toolResult" && message.toolCallId === toolCallId) return message;
+  }
+  return undefined;
+}
+
+function toolResultText(message: ToolResultMessage): string {
+  return message.content
+    .map((part) => part.type === "text" ? part.text : `[${part.type}]`)
+    .join("\n");
 }

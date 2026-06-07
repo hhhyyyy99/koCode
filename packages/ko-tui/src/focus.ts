@@ -38,6 +38,37 @@ export function moveToolIndex(index: number, count: number, direction: "next" | 
   return normalizeToolIndex(index + (direction === "next" ? 1 : -1), count);
 }
 
+export function isCtrlOInput(input: string, key: { ctrl?: boolean }): boolean {
+  return key.ctrl === true && (input === "o" || input === "\u000f");
+}
+
+export function toggleExpandedToolId(expanded: Set<string>, toolKey: string | undefined): Set<string> {
+  const next = new Set(expanded);
+  if (!toolKey) return next;
+  if (next.has(toolKey)) next.delete(toolKey);
+  else next.add(toolKey);
+  return next;
+}
+
+export interface CtrlOToolToggleState {
+  focusMode: FocusMode;
+  selectedToolIndex: number;
+  toolKeys: string[];
+  expandedToolIds: Set<string>;
+}
+
+export function applyCtrlOToolToggle(state: CtrlOToolToggleState): CtrlOToolToggleState {
+  if (state.toolKeys.length === 0) return state;
+  const selectedToolIndex = Math.min(state.selectedToolIndex, state.toolKeys.length - 1);
+  const toolKey = state.toolKeys[selectedToolIndex];
+  return {
+    ...state,
+    focusMode: "tool-output",
+    selectedToolIndex,
+    expandedToolIds: toggleExpandedToolId(state.expandedToolIds, toolKey),
+  };
+}
+
 export function busySubmitMessage(text: string): string {
   return text.trim()
     ? "Agent is still running; draft kept. Submit after this turn finishes."

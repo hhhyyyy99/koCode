@@ -32,10 +32,7 @@ function formatDuration(ms: number): string {
 
 export function Turn({ turn, streaming, toolFocusKey, expandedToolIds }: Props) {
   const { theme } = useTheme();
-  const hasThinking = turn.assistant.thinkingBlocks.length > 0;
-  const hasText = turn.assistant.textContent.length > 0;
-  const hasTools = turn.assistant.toolCalls.length > 0;
-  const hasAssistant = hasThinking || hasText || hasTools;
+  const hasAssistant = turn.assistant.items.length > 0;
 
   return (
     <Box flexDirection="column" paddingY={0}>
@@ -50,29 +47,31 @@ export function Turn({ turn, streaming, toolFocusKey, expandedToolIds }: Props) 
         </Box>
       )}
 
-      {hasThinking &&
-        turn.assistant.thinkingBlocks.map((tb, i) => (
-          <ThinkingBlock
-            key={`think-${turn.id}-${i}`}
-            content={tb.content}
-            focused={false}
-          />
-        ))}
-
-      {hasText && <AssistantBlock text={turn.assistant.textContent} />}
-
-      {hasTools &&
-        turn.assistant.toolCalls.map((tc) => {
-          const key = tc.key;
+      {turn.assistant.items.map((item) => {
+        if (item.type === "thinking") {
           return (
-            <ToolCallCard
-              key={key}
-              toolCall={tc}
-              focused={toolFocusKey === key}
-              expanded={expandedToolIds?.has(tc.key) ?? false}
+            <ThinkingBlock
+              key={item.key}
+              content={item.content}
+              focused={false}
             />
           );
-        })}
+        }
+
+        if (item.type === "text") {
+          return <AssistantBlock key={item.key} text={item.content} />;
+        }
+
+        const key = item.toolCall.key;
+        return (
+          <ToolCallCard
+            key={key}
+            toolCall={item.toolCall}
+            focused={toolFocusKey === key}
+            expanded={expandedToolIds?.has(key) ?? false}
+          />
+        );
+      })}
 
       {streaming && turn.status === "streaming" && (
         <Box paddingY={0}>

@@ -5,6 +5,7 @@ import { useTurns } from "./useTurns.js";
 import { Turn } from "./Turn.js";
 import { Welcome } from "./Welcome.js";
 import type { Model } from "@kocode/ko-ai";
+import { turnToolCalls } from "./types.js";
 
 interface Props {
   events: AgentSessionEvent[];
@@ -22,7 +23,7 @@ export function Conversation({ events, model, cwd, toolFocusKey, expandedToolIds
     [completedTurns, activeTurn],
   );
   const toolKeyList = useMemo(
-    () => turns.flatMap((turn) => turn.assistant.toolCalls.map((tc) => tc.key)),
+    () => turns.flatMap((turn) => turnToolCalls(turn).map((tc) => tc.key)),
     [turns],
   );
 
