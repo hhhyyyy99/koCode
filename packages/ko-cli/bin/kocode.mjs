@@ -57445,12 +57445,6 @@ function deleteBackward(buffer) {
   const nextText = buffer.text.slice(0, cursorOffset - 1) + buffer.text.slice(cursorOffset);
   return setInputText(nextText, cursorOffset - 1);
 }
-function deleteForward(buffer) {
-  const cursorOffset = clampCursorOffset(buffer.text, buffer.cursorOffset);
-  if (cursorOffset >= buffer.text.length) return setInputText(buffer.text, cursorOffset);
-  const nextText = buffer.text.slice(0, cursorOffset) + buffer.text.slice(cursorOffset + 1);
-  return setInputText(nextText, cursorOffset);
-}
 function moveCursor(buffer, direction) {
   const cursorOffset = clampCursorOffset(buffer.text, buffer.cursorOffset);
   const delta = direction === "left" ? -1 : 1;
@@ -57527,9 +57521,27 @@ function isBareEscape(input, key) {
 function printableInput(input, key) {
   if (!input || key.ctrl || key.meta || key.escape || key.return || key.backspace || key.delete) return "";
   if (key.leftArrow || key.rightArrow || key.upArrow || key.downArrow || key.tab) return "";
-  const sanitized = input.replace(/[\r\n\x07\b\x12]/g, "");
+  const sanitized = input.replace(/[\r\n\x07\b\x12\x7f]/g, "");
   if (!sanitized) return "";
   return Array.from(sanitized).every((char) => char >= " ") ? sanitized : "";
+}
+function isSlashModeInput(text) {
+  return text.startsWith("/");
+}
+function eraseInputCount(input, key) {
+  if (key.backspace || key.delete) return 1;
+  if (!input) return 0;
+  const chars = Array.from(input);
+  return chars.every((char) => char === "\x7F" || char === "\b") ? chars.length : 0;
+}
+function eraseInputBuffer(buffer, key, input = "") {
+  const count = eraseInputCount(input, key);
+  if (count === 0) return void 0;
+  let next = buffer;
+  for (let i = 0; i < count; i++) {
+    next = deleteBackward(next);
+  }
+  return next;
 }
 function InputBox({
   buffer,
@@ -57570,7 +57582,7 @@ function InputBox({
   }, [buffer.text, onSubmit, recordHistory]);
   const emitSlashMode = (0, import_react26.useCallback)((text) => {
     if (!onSlashModeChange) return;
-    if (text.startsWith("/")) {
+    if (isSlashModeInput(text)) {
       onSlashModeChange(true, text);
     } else {
       onSlashModeChange(false, text);
@@ -57608,8 +57620,9 @@ function InputBox({
         onHistorySearchModeChange?.(false);
         return;
       }
-      if (key.backspace || key.delete) {
-        setSearchTerm((prev) => prev.slice(0, -1));
+      const searchEraseCount = eraseInputCount(_input, key);
+      if (searchEraseCount > 0) {
+        setSearchTerm((prev) => prev.slice(0, Math.max(0, prev.length - searchEraseCount)));
         setSearchIndex(0);
         return;
       }
@@ -57667,12 +57680,9 @@ function InputBox({
       handleChange(moveCursor(buffer, "right"), { updateSlashMode: false });
       return;
     }
-    if (key.backspace) {
-      handleChange(deleteBackward(buffer));
-      return;
-    }
-    if (key.delete) {
-      handleChange(deleteForward(buffer));
+    const erased = eraseInputBuffer(buffer, key, _input);
+    if (erased) {
+      handleChange(erased);
       return;
     }
     const printable = printableInput(_input, key);

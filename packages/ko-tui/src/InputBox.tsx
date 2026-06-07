@@ -3,7 +3,6 @@ import { Box, Text, useInput } from "ink";
 import { addHistoryEntry, searchHistory, selectHistoryMatch } from "./input-history.js";
 import {
   deleteBackward,
-  deleteForward,
   insertText,
   moveCursor,
   setInputText,
@@ -157,9 +156,31 @@ export function printableInput(input: string, key: InputKeyInfo): string {
   if (!input || key.ctrl || key.meta || key.escape || key.return || key.backspace || key.delete) return "";
   if (key.leftArrow || key.rightArrow || key.upArrow || key.downArrow || key.tab) return "";
 
-  const sanitized = input.replace(/[\r\n\x07\b\x12]/g, "");
+  const sanitized = input.replace(/[\r\n\x07\b\x12\x7f]/g, "");
   if (!sanitized) return "";
   return Array.from(sanitized).every((char) => char >= " ") ? sanitized : "";
+}
+
+export function isSlashModeInput(text: string): boolean {
+  return text.startsWith("/");
+}
+
+export function eraseInputCount(input: string, key: InputKeyInfo): number {
+  if (key.backspace || key.delete) return 1;
+  if (!input) return 0;
+  const chars = Array.from(input);
+  return chars.every((char) => char === "\x7f" || char === "\b") ? chars.length : 0;
+}
+
+export function eraseInputBuffer(buffer: InputBuffer, key: InputKeyInfo, input = ""): InputBuffer | undefined {
+  const count = eraseInputCount(input, key);
+  if (count === 0) return undefined;
+
+  let next = buffer;
+  for (let i = 0; i < count; i++) {
+    next = deleteBackward(next);
+  }
+  return next;
 }
 
 export function InputBox({
@@ -206,7 +227,7 @@ export function InputBox({
 
   const emitSlashMode = useCallback((text: string) => {
     if (!onSlashModeChange) return;
-    if (text.startsWith("/")) {
+    if (isSlashModeInput(text)) {
       onSlashModeChange(true, text);
     } else {
       onSlashModeChange(false, text);
@@ -250,8 +271,9 @@ export function InputBox({
         return;
       }
 
-      if (key.backspace || key.delete) {
-        setSearchTerm((prev) => prev.slice(0, -1));
+      const searchEraseCount = eraseInputCount(_input, key);
+      if (searchEraseCount > 0) {
+        setSearchTerm((prev) => prev.slice(0, Math.max(0, prev.length - searchEraseCount)));
         setSearchIndex(0);
         return;
       }
@@ -318,12 +340,9 @@ export function InputBox({
       handleChange(moveCursor(buffer, "right"), { updateSlashMode: false });
       return;
     }
-    if (key.backspace) {
-      handleChange(deleteBackward(buffer));
-      return;
-    }
-    if (key.delete) {
-      handleChange(deleteForward(buffer));
+    const erased = eraseInputBuffer(buffer, key, _input);
+    if (erased) {
+      handleChange(erased);
       return;
     }
 

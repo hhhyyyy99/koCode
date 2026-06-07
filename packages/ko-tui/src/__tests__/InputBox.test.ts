@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   controlledInputDisplay,
+  eraseInputBuffer,
+  eraseInputCount,
   inputKeyAction,
   inputPlaceholder,
   inputPrompt,
+  isSlashModeInput,
   printableInput,
   sanitizeTextInputValueForControls,
 } from "../InputBox.js";
@@ -101,6 +104,49 @@ describe("InputBox helpers", () => {
     expect(printableInput("x", { upArrow: true })).toBe("");
     expect(printableInput("x", { downArrow: true })).toBe("");
     expect(printableInput("x", { ctrl: true })).toBe("");
+    expect(printableInput("\x7f", {})).toBe("");
     expect(printableInput("x", {})).toBe("x");
+  });
+
+  it("treats terminal delete key as backward deletion at end of ordinary input", () => {
+    expect(eraseInputBuffer(setInputText("abc"), { delete: true })).toEqual({
+      text: "ab",
+      cursorOffset: 2,
+    });
+  });
+
+  it("deletes backward after completed slash input", () => {
+    const next = eraseInputBuffer(setInputText("/help"), { delete: true });
+
+    expect(next).toEqual({
+      text: "/hel",
+      cursorOffset: 4,
+    });
+    expect(isSlashModeInput(next!.text)).toBe(true);
+  });
+
+  it("deletes slash input to empty so slash mode closes", () => {
+    const next = eraseInputBuffer(setInputText("/"), { delete: true });
+
+    expect(next).toEqual({
+      text: "",
+      cursorOffset: 0,
+    });
+    expect(isSlashModeInput(next!.text)).toBe(false);
+  });
+
+  it("keeps backspace as backward deletion", () => {
+    expect(eraseInputBuffer(setInputText("abc"), { backspace: true })).toEqual({
+      text: "ab",
+      cursorOffset: 2,
+    });
+  });
+
+  it("handles raw erase-byte chunks as repeated backward deletion", () => {
+    expect(eraseInputCount("\x7f\x7f", {})).toBe(2);
+    expect(eraseInputBuffer(setInputText("abc"), {}, "\x7f\x7f")).toEqual({
+      text: "a",
+      cursorOffset: 1,
+    });
   });
 });
