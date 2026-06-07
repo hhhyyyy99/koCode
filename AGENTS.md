@@ -65,7 +65,7 @@ pnpm vitest run packages/ko-tui/src/__tests__/InputBox.test.ts
 
 ## 关键约束
 
-- 开发必须先新建分支；禁止直接在 `main` 上进行代码或文档改动。
+- 开发必须先新建分支；禁止直接在 `main`、`develop`、`test` 上进行代码或文档改动。
 - 分支命名使用 `<type>/<short-description>`，例如 `feature/add-model-cache`、`fix/session-store-path`。
 - 不要反向依赖：低层包不能依赖高层包。
 - 不要绕过工具权限、会话存储和焦点路由。

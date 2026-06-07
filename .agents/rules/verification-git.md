@@ -43,7 +43,7 @@ pnpm test
 
 ## 分支规则
 
-开发必须先从 `main` 新建分支，禁止直接在 `main` 上进行代码或文档改动。
+`main`、`develop`、`test` 是受保护分支。开发必须先从当前受保护分支新建任务分支，禁止直接在这些分支上进行代码或文档改动。
 
 开始工作前：
 
@@ -52,7 +52,7 @@ git branch --show-current
 git status --short
 ```
 
-如果当前在 `main`，先创建任务分支：
+如果当前在 `main`、`develop` 或 `test`，先创建任务分支：
 
 ```bash
 git checkout -b feature/<short-description>
@@ -78,7 +78,7 @@ git checkout -b feature/<short-description>
 - 保持简短，通常 2-4 个单词。
 - 一个分支只承载一个逻辑变更。
 
-如果已经在 `main` 上产生了未提交改动，不要继续扩大改动；先创建合适分支把当前改动带过去：
+如果已经在 `main`、`develop` 或 `test` 上产生了未提交改动，不要继续扩大改动；先创建合适分支把当前改动带过去：
 
 ```bash
 git checkout -b docs/ai-rules-routing
@@ -100,7 +100,7 @@ pnpm test
 - 不提交无关格式化、缓存、临时文件。
 - 不回滚用户未要求回滚的改动。
 - 如果已有无关 dirty 文件，避开它们；必要时说明。
-- 提交必须发生在任务分支上；如果当前分支是 `main`，先停止并创建分支。
+- 提交必须发生在任务分支上；如果当前分支是 `main`、`develop` 或 `test`，先停止并创建分支。
 
 ## Commit Message
 
