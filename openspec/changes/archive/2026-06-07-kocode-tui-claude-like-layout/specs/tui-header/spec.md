@@ -1,8 +1,5 @@
-# tui-header Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-rewrite. Update Purpose after archive.
-## Requirements
 ### Requirement: App header displays branding and context
 
 The TUI SHALL render a header section containing:
@@ -25,6 +22,7 @@ The header SHALL ignore small logo/icon artwork for this layout and SHALL NOT re
 - **THEN** the header continues to display the current version, model information, and working directory without adding logo artwork
 
 ### Requirement: Header information hierarchy
+
 The system SHALL render the Header with a compact Claude-like information hierarchy in welcome mode and a compact two-line mode during active conversation.
 
 #### Scenario: Header in welcome mode
@@ -39,11 +37,3 @@ The system SHALL render the Header with a compact Claude-like information hierar
 - **THEN** the Header renders without logo artwork
 - **AND** shows koCode version + model info on one line
 - **AND** working directory on the second line
-
-### Requirement: Model and session info display
-The system SHALL display the current model, context window size, and working directory in the header.
-
-#### Scenario: Model info format
-- **WHEN** the header renders
-- **THEN** model info SHALL be formatted as `<provider>/<model-id> · <N>k context`
-- **AND** cwd is shown as the absolute path in dimmed text

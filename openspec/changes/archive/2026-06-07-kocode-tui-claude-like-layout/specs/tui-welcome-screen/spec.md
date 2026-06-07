@@ -1,8 +1,5 @@
-# tui-welcome-screen Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-full-alignment. Update Purpose after archive.
-## Requirements
 ### Requirement: Welcome screen display
 The system SHALL use the compact header as the startup identity surface when no conversation events exist, replacing the previous separate welcome body for this Claude-like layout mode.
 

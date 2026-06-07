@@ -33,6 +33,7 @@ interface Props {
   onHistorySearchModeChange?: (active: boolean) => void;
   running: boolean;
   focusActive?: boolean;
+  separator?: string;
 }
 
 export function sanitizeTextInputValueForControls(
@@ -63,6 +64,7 @@ export function InputBox({
   onHistorySearchModeChange,
   running,
   focusActive = true,
+  separator,
 }: Props) {
   const { theme } = useTheme();
   const historyRef = useRef<string[]>([]);
@@ -226,6 +228,12 @@ export function InputBox({
 
   return (
     <Box flexDirection="column" paddingX={0}>
+      {separator && (
+        <Box>
+          <Text dimColor>{separator}</Text>
+        </Box>
+      )}
+
       {searchMode && (
         <Box>
           <Text color={theme.colors.dimmed}>
@@ -253,6 +261,12 @@ export function InputBox({
       {searchMode && (
         <Box>
           <Text color={theme.colors.dimmed}>Enter to select · Esc to cancel</Text>
+        </Box>
+      )}
+
+      {separator && (
+        <Box>
+          <Text dimColor>{separator}</Text>
         </Box>
       )}
     </Box>

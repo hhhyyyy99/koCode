@@ -14,6 +14,7 @@ export interface CommandContext {
 export interface CommandDef {
   name: string;
   description: string;
+  source?: string;
   /** If true, this command takes arguments (e.g. /model <id>). If false, executes immediately on Enter. */
   takesArgs?: boolean;
   handler: (args: string, session: AgentSession, notify: (msg: string) => void, context?: CommandContext) => void;

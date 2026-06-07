@@ -1,8 +1,5 @@
-# tui-command-panel Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-rewrite. Update Purpose after archive.
-## Requirements
 ### Requirement: Slash command panel triggered by / input
 
 The TUI SHALL display an interactive unbordered command completion list when the user types `/` in the input box. The list SHALL appear below the input area separator and SHALL list available commands with aligned descriptions.
@@ -29,20 +26,6 @@ The TUI SHALL display an interactive unbordered command completion list when the
 - **WHEN** user deletes the `/` character or types text that does not start with `/`
 - **THEN** the command panel closes
 
-### Requirement: Command registration system
-
-The system SHALL provide a command registry that maps command names (e.g., `/help`, `/model`, `/clear`) to their descriptions and handler functions.
-
-#### Scenario: Command registry contains all built-in commands
-
-- **WHEN** the command registry is initialized
-- **THEN** it contains at minimum: `/help`, `/model`, `/models`, `/clear`, `/session`, `/status`, `/quit`, `/exit`
-
-#### Scenario: Command handlers are invocable
-
-- **WHEN** a registered command is selected and confirmed
-- **THEN** the corresponding handler function is called with the provided arguments
-
 ### Requirement: Command panel trigger and filter
 The system SHALL display the command panel below the input area separator when the user types `/`, filtering commands in real-time as the user continues typing.
 
@@ -58,17 +41,6 @@ The system SHALL display the command panel below the input area separator when t
 - **WHEN** the user types `/mod` in the input
 - **THEN** only commands matching "mod" in name or description are shown
 - **AND** the list updates on each keystroke
-
-### Requirement: Command panel expands to 20+ commands
-The system SHALL include at minimum 20 built-in commands organized by category, matching Claude Code's command set.
-
-#### Scenario: Categories visible
-- **WHEN** the command panel is displayed
-- **THEN** commands are grouped by category: Session, Information, Configuration, Development
-
-#### Scenario: Full command set
-- **WHEN** all commands are listed
-- **THEN** the command set SHALL include: /help, /clear, /compact, /context, /cost, /diff, /status, /model, /models, /config, /init, /permissions, /theme, /resume, /branch, /quit, /exit, /feedback, /doctor, /export, /review, /skills
 
 ### Requirement: Command keyboard navigation
 The system SHALL support up/down arrow keys to navigate the command list, Enter to select, and Escape to close.
@@ -90,6 +62,8 @@ The system SHALL support up/down arrow keys to navigate the command list, Enter 
 - **WHEN** Escape is pressed while command panel is open
 - **THEN** the command panel closes
 - **AND** the input is cleared
+
+## ADDED Requirements
 
 ### Requirement: Claude-like command row formatting
 

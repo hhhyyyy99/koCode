@@ -19,6 +19,7 @@ import { parseInputRoute } from "./input-prefix.js";
 import { useTheme, type ThemeName } from "./theme.js";
 import { ThemePanel } from "./ThemePanel.js";
 import { RewindDialog } from "./RewindDialog.js";
+import { currentTerminalWidth, horizontalSeparator } from "./layout.js";
 
 interface PendingPermission {
   requestId: string;
@@ -31,6 +32,12 @@ interface PendingPermission {
 interface AppProps {
   session: AgentSession;
   onThemeChange?: (name: ThemeName) => void;
+}
+
+export function bottomLayoutOrder(slashMode: boolean): string[] {
+  return slashMode
+    ? ["input", "command-panel", "status-bar"]
+    : ["input", "status-bar"];
 }
 
 export function App({ session, onThemeChange }: AppProps) {
@@ -425,13 +432,12 @@ export function App({ session, onThemeChange }: AppProps) {
 
   });
 
-  const sep = "─".repeat(60);
+  const terminalWidth = currentTerminalWidth();
+  const sep = horizontalSeparator(terminalWidth);
 
   return (
     <Box flexDirection="column" padding={0}>
       <Header model={model} cwd={session.getCwd()} hasContent={events.length > 0} />
-
-      <Box><Text dimColor>{sep}</Text></Box>
 
       <Conversation
         events={events}
@@ -495,8 +501,6 @@ export function App({ session, onThemeChange }: AppProps) {
         />
       )}
 
-      <Box><Text dimColor>{sep}</Text></Box>
-
       <InputBox
         value={message}
         onChange={setMessage}
@@ -506,19 +510,20 @@ export function App({ session, onThemeChange }: AppProps) {
         running={running}
         focusActive={focusMode === "input" || focusMode === "slash"}
         onHistorySearchModeChange={(active) => setFocusMode(active ? "history-search" : "input")}
+        separator={sep}
       />
-
-      <StatusBar running={running} permissionMode={permissionMode} />
 
       {slashMode && (
         <Box flexDirection="column">
-          <Box><Text dimColor>{sep}</Text></Box>
           <CommandPanel
             commands={filteredCommands}
             selectedIndex={slashIndex}
+            width={terminalWidth}
           />
         </Box>
       )}
+
+      <StatusBar running={running} permissionMode={permissionMode} width={terminalWidth} />
     </Box>
   );
 }

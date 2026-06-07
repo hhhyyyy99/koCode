@@ -17,11 +17,14 @@ const model: Model = {
 
 describe("formatHeaderLines", () => {
   it("returns the full welcome-mode information hierarchy", () => {
-    expect(formatHeaderLines(model, "/repo", "1.2.3", false)).toEqual([
+    const lines = formatHeaderLines(model, "/repo", "1.2.3", false);
+
+    expect(lines).toEqual([
       "koCode v1.2.3",
       "test/test-model · 200k context",
       "/repo",
     ]);
+    expect(lines.join("\n")).not.toContain("▐▛███▜▌");
   });
 
   it("returns compact conversation-mode header lines", () => {

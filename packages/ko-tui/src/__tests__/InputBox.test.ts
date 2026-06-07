@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inputKeyAction, inputPlaceholder, inputPrompt, sanitizeTextInputValueForControls } from "../InputBox.js";
+import { horizontalSeparator } from "../layout.js";
 
 describe("InputBox helpers", () => {
   it("uses a running prompt without replacing input state", () => {
@@ -8,6 +9,11 @@ describe("InputBox helpers", () => {
   });
 
   it("uses the idle input prompt", () => {
+    expect(inputPrompt(false)).toBe("❯ ");
+  });
+
+  it("uses separator-frame layout helpers without changing prompt text", () => {
+    expect(horizontalSeparator(8)).toBe("────────");
     expect(inputPrompt(false)).toBe("❯ ");
   });
 

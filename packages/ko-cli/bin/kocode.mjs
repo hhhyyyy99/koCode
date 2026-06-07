@@ -56210,11 +56210,11 @@ var require_react_jsx_runtime_development = __commonJS({
             return jsxWithValidation(type, props, key, false);
           }
         }
-        var jsx19 = jsxWithValidationDynamic;
-        var jsxs18 = jsxWithValidationStatic;
+        var jsx18 = jsxWithValidationDynamic;
+        var jsxs17 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
-        exports.jsx = jsx19;
-        exports.jsxs = jsxs18;
+        exports.jsx = jsx18;
+        exports.jsxs = jsxs17;
       })();
     }
   }
@@ -57335,55 +57335,14 @@ var init_Turn = __esm({
 });
 
 // packages/ko-tui/src/Welcome.tsx
-function formatWelcomeLines(model, cwd2) {
-  const modelInfo = `${model.provider}/${model.id}`;
-  const contextInfo = model.contextWindow ? ` \xB7 ${Math.round(model.contextWindow / 1e3)}k context` : "";
-  return [
-    "\u2590\u259B\u2588\u2588\u2588\u259C\u258C",
-    "\u259D\u259C\u2588\u2588\u2588\u2588\u2588\u259B\u2598",
-    "  \u2598\u2598 \u259D\u259D",
-    "Welcome to koCode!",
-    `${modelInfo}${contextInfo}`,
-    cwd2,
-    "Tips for getting started:",
-    "  /help   \u2014 Show available commands",
-    "  /model  \u2014 Switch model (/model <provider/id>)",
-    "  /clear  \u2014 Clear conversation",
-    "  !ls     \u2014 Run shell commands directly",
-    "  #note   \u2014 Save a memory to CLAUDE.md"
-  ];
-}
 function Welcome({ model, cwd: cwd2 }) {
-  const lines = formatWelcomeLines(model, cwd2);
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[0] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[1] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[2] })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { bold: true, children: lines[3] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[4] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[5] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { marginTop: 1, flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[6] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[7] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { dimColor: true, children: [
-        "  /model  \u2014 Switch model (/model ",
-        "<provider/id>",
-        ")"
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[9] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[10] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { dimColor: true, children: lines[11] })
-    ] })
-  ] });
+  void model;
+  void cwd2;
+  return null;
 }
-var import_jsx_runtime8;
 var init_Welcome = __esm({
-  async "packages/ko-tui/src/Welcome.tsx"() {
+  "packages/ko-tui/src/Welcome.tsx"() {
     "use strict";
-    await init_build2();
-    import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
@@ -57404,10 +57363,10 @@ function Conversation({ events, model, cwd: cwd2, toolFocusKey, expandedToolIds,
   }, [onToolKeysChange, toolKeyList]);
   const hasContent = completedTurns.length > 0 || activeTurn !== null;
   if (!hasContent) {
-    return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Welcome, { model, cwd: cwd2 });
+    return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Welcome, { model, cwd: cwd2 });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { flexDirection: "column", paddingY: 0, children: [
-    completedTurns.map((turn) => /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", paddingY: 0, children: [
+    completedTurns.map((turn) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
       Turn,
       {
         turn,
@@ -57416,7 +57375,7 @@ function Conversation({ events, model, cwd: cwd2, toolFocusKey, expandedToolIds,
       },
       turn.id
     )),
-    activeTurn && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+    activeTurn && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
       Turn,
       {
         turn: activeTurn,
@@ -57427,7 +57386,7 @@ function Conversation({ events, model, cwd: cwd2, toolFocusKey, expandedToolIds,
     )
   ] });
 }
-var import_react25, import_jsx_runtime9;
+var import_react25, import_jsx_runtime8;
 var init_Conversation = __esm({
   async "packages/ko-tui/src/Conversation.tsx"() {
     "use strict";
@@ -57435,8 +57394,8 @@ var init_Conversation = __esm({
     await init_build2();
     init_useTurns();
     await init_Turn();
-    await init_Welcome();
-    import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+    init_Welcome();
+    import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
@@ -57587,7 +57546,8 @@ function InputBox({
   onSlashModeChange,
   onHistorySearchModeChange,
   running,
-  focusActive = true
+  focusActive = true,
+  separator
 }) {
   const { theme } = useTheme();
   const historyRef = (0, import_react27.useRef)([]);
@@ -57728,15 +57688,16 @@ function InputBox({
     }
   });
   const matches = searchMode ? searchHistory(historyRef.current, searchTerm) : [];
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { flexDirection: "column", paddingX: 0, children: [
-    searchMode && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Text, { color: theme.colors.dimmed, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { flexDirection: "column", paddingX: 0, children: [
+    separator && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { dimColor: true, children: separator }) }),
+    searchMode && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Text, { color: theme.colors.dimmed, children: [
       "(reverse-i-search): ",
       searchTerm,
       matches.length > 0 ? ` \u2014 ${matches[searchIndex % matches.length].slice(0, 60)}` : " \u2014 no matches"
     ] }) }),
-    !searchMode && /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { bold: true, color: running ? theme.colors.warning : theme.colors.success, children: inputPrompt(running) }),
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+    !searchMode && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { bold: true, color: running ? theme.colors.warning : theme.colors.success, children: inputPrompt(running) }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
         build_default,
         {
           value,
@@ -57747,7 +57708,8 @@ function InputBox({
         }
       )
     ] }),
-    searchMode && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: "Enter to select \xB7 Esc to cancel" }) })
+    searchMode && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { color: theme.colors.dimmed, children: "Enter to select \xB7 Esc to cancel" }) }),
+    separator && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { dimColor: true, children: separator }) })
   ] });
 }
 async function launchEditor(text) {
@@ -57780,7 +57742,7 @@ async function launchEditor(text) {
     });
   });
 }
-var import_react27, import_jsx_runtime10;
+var import_react27, import_jsx_runtime9;
 var init_InputBox = __esm({
   async "packages/ko-tui/src/InputBox.tsx"() {
     "use strict";
@@ -57789,7 +57751,7 @@ var init_InputBox = __esm({
     await init_build3();
     init_input_history();
     init_theme();
-    import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
@@ -57799,19 +57761,19 @@ function StatusBar({ running, permissionMode, width = 60 }) {
   const left = "  ? for shortcuts";
   const right = running ? "\u25CF Running..." : MODE_LABELS[permissionMode] ?? "\u25C9 Default";
   const padding = Math.max(1, width - left.length - right.length);
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Box_default, { paddingX: 0, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.colors.dimmed, children: left }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { children: " ".repeat(padding) }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: running ? theme.colors.warning : theme.colors.primary, children: right })
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { paddingX: 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: left }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { children: " ".repeat(padding) }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: running ? theme.colors.warning : theme.colors.primary, children: right })
   ] });
 }
-var import_jsx_runtime11, MODE_LABELS;
+var import_jsx_runtime10, MODE_LABELS;
 var init_StatusBar = __esm({
   async "packages/ko-tui/src/StatusBar.tsx"() {
     "use strict";
     await init_build2();
     init_theme();
-    import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
     MODE_LABELS = {
       default: "\u25C9 Default",
       accept_edits: "\u25C9 Accept Edits",
@@ -57828,7 +57790,7 @@ function splitDisplayLines2(text) {
 function renderLinesWithNumbers2(text) {
   const lines = splitDisplayLines2(text);
   const width = Math.max(2, String(lines.length).length);
-  return lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+  return lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { children: [
     String(i + 1).padStart(width),
     " ",
     line
@@ -57910,33 +57872,33 @@ function PermissionDialog({ session, requestId, toolType, toolName, params, desc
   const title = permissionDialogTitle(toolType);
   const dir = filePath ? filePath.split("/").slice(0, -1).join("/") || "/" : "";
   const options = permissionDialogOptions(toolType, command, dir, toolName);
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { bold: true, children: title }) }),
-    filePath && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: filePath }) }),
-    command && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { paddingLeft: 2, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: command }) }),
-    (toolType === "write" || toolType === "edit") && permissionPreviewLines(toolType, params).length > 0 && /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: SEP2 }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { flexDirection: "column", paddingLeft: 1, children: renderLinesWithNumbers2(permissionPreviewLines(toolType, params).join("\n")) })
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { bold: true, children: title }) }),
+    filePath && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: filePath }) }),
+    command && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { paddingLeft: 2, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { children: command }) }),
+    (toolType === "write" || toolType === "edit") && permissionPreviewLines(toolType, params).length > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: SEP2 }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { flexDirection: "column", paddingLeft: 1, children: renderLinesWithNumbers2(permissionPreviewLines(toolType, params).join("\n")) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: SEP2 }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: toolType === "write" && filePath ? `Do you want to create ${filePath.replace(/^.*\//, "")}?` : "Do you want to proceed?" }) }),
-    options.map((opt, i) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: selected === i ? "cyan" : void 0, bold: selected === i, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: SEP2 }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { children: toolType === "write" && filePath ? `Do you want to create ${filePath.replace(/^.*\//, "")}?` : "Do you want to proceed?" }) }),
+    options.map((opt, i) => /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { color: selected === i ? "cyan" : void 0, bold: selected === i, children: [
       selected === i ? "\u276F" : " ",
       " ",
       i + 1,
       ". ",
       opt
     ] }) }, i)),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: "Esc to cancel \xB7 Enter to confirm" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react28, import_jsx_runtime12, SEP2;
+var import_react28, import_jsx_runtime11, SEP2;
 var init_PermissionDialog = __esm({
   async "packages/ko-tui/src/PermissionDialog.tsx"() {
     "use strict";
     import_react28 = __toESM(require_react(), 1);
     await init_build2();
-    import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
     SEP2 = "\u254C".repeat(60);
   }
 });
@@ -58270,67 +58232,67 @@ function StatusPanel({ session, onClose, active = true }) {
       onClose();
     }
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: t === tab2, color: t === tab2 ? theme.colors.secondary : theme.colors.primary, children: ` ${t} ` }, t)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(50) }) }),
-    tab2 === "Settings" && /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Auto-compact:            true" }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { bold: t === tab2, color: t === tab2 ? theme.colors.secondary : theme.colors.primary, children: ` ${t} ` }, t)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(50) }) }),
+    tab2 === "Settings" && /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Auto-compact:            true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Thinking mode:           ",
         session.getThinkingLevel() !== "off" ? "true" : "false"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Fast mode:               false" }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Fast mode:               false" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Default permission mode: ",
         session.getPermissionMode()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Theme:                   dark" })
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Theme:                   dark" })
     ] }),
-    tab2 === "Status" && /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Version:         koCode v0.1.0" }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+    tab2 === "Status" && /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Version:         koCode v0.1.0" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Session name:    ",
         session.getSessionId().slice(0, 8)
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Session ID:      ",
         session.getSessionId()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "cwd:             ",
         session.getCwd()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Model:           ",
         m.provider,
         "/",
         m.id
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "API base URL:    ",
         m.baseUrl ?? "N/A"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Context window:  ",
         m.contextWindow ? `${Math.round(m.contextWindow / 1e3)}k` : "N/A"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Permission:      ",
         session.getPermissionMode()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
         "Running:         ",
         session.isRunning() ? "Yes" : "No"
       ] })
     ] }),
-    tab2 === "Usage" && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { flexDirection: "column", children: usageLines.map((line, index) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: line }, index)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.colors.dimmed, children: [
+    tab2 === "Usage" && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { flexDirection: "column", children: usageLines.map((line, index) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: line }, index)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.colors.dimmed, children: [
       "\u2190/\u2192",
       " to switch tabs \xB7 Esc to close"
     ] }) })
   ] });
 }
-var import_react29, import_jsx_runtime13, TABS;
+var import_react29, import_jsx_runtime12, TABS;
 var init_StatusPanel = __esm({
   async "packages/ko-tui/src/StatusPanel.tsx"() {
     "use strict";
@@ -58338,16 +58300,63 @@ var init_StatusPanel = __esm({
     await init_build2();
     init_theme();
     init_commands();
-    import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
     TABS = ["Settings", "Status", "Usage"];
   }
 });
 
 // packages/ko-tui/src/CommandPanel.tsx
-function CommandPanel({ commands, selectedIndex }) {
+function wrapText2(text, width) {
+  if (width <= 0 || text.length <= width) return [text];
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = "";
+  for (const word of words) {
+    if (word.length > width) {
+      if (current) {
+        lines.push(current);
+        current = "";
+      }
+      for (let i = 0; i < word.length; i += width) {
+        lines.push(word.slice(i, i + width));
+      }
+      continue;
+    }
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > width) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+  if (current) lines.push(current);
+  return lines.length > 0 ? lines : [""];
+}
+function formatCommandRows(commands, selectedIndex, width = 80) {
+  const descriptionWidth = Math.max(20, width - PREFIX_WIDTH - COMMAND_COLUMN_WIDTH);
+  return commands.map((cmd, index) => {
+    const selected = index === selectedIndex;
+    const prefix = selected ? "\u276F " : "  ";
+    const command = cmd.name.padEnd(COMMAND_COLUMN_WIDTH);
+    const descriptionLines = wrapText2(cmd.description, descriptionWidth);
+    const continuationPrefix = " ".repeat(PREFIX_WIDTH + COMMAND_COLUMN_WIDTH);
+    const commandLine = [
+      `${prefix}${command}${descriptionLines[0] ?? ""}`,
+      ...descriptionLines.slice(1).map((line) => `${continuationPrefix}${line}`)
+    ].join("\n");
+    return {
+      key: cmd.name,
+      selected,
+      commandLine,
+      metadataLine: cmd.source ? `${continuationPrefix}(${cmd.source})` : void 0
+    };
+  });
+}
+function CommandPanel({ commands, selectedIndex, width = 80 }) {
   const { theme } = useTheme();
   if (commands.length === 0) {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { borderStyle: "round", paddingX: 1, children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: "No matching commands" }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.dimmed, children: "No matching commands" }) });
   }
   const total = commands.length;
   let start = Math.max(0, selectedIndex - Math.floor(WINDOW_SIZE / 2));
@@ -58358,27 +58367,21 @@ function CommandPanel({ commands, selectedIndex }) {
   const visible = commands.slice(start, end);
   const showUp = start > 0;
   const showDown = end < total;
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, children: [
-    showUp && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: theme.colors.dimmed, children: [
+  const rows = formatCommandRows(visible, selectedIndex - start, width);
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
+    showUp && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.colors.dimmed, children: [
       "  \u2191",
       " ",
       start,
       " more above"
     ] }) }),
-    visible.map((cmd, i) => {
-      const absoluteIndex = start + i;
-      const isSelected = absoluteIndex === selectedIndex;
-      return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: isSelected ? /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: theme.colors.secondary, bold: true, children: [
-        "\u276F ",
-        cmd.name.padEnd(26),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: cmd.description })
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { children: [
-        "  ",
-        cmd.name.padEnd(26),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: cmd.description })
-      ] }) }, cmd.name);
+    rows.map((row) => {
+      return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
+        row.selected ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.secondary, bold: true, children: row.commandLine }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: row.commandLine }),
+        row.metadataLine && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.dimmed, children: row.metadataLine })
+      ] }, row.key);
     }),
-    showDown && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: theme.colors.dimmed, children: [
+    showDown && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.colors.dimmed, children: [
       "  \u2193",
       " ",
       total - end,
@@ -58386,14 +58389,16 @@ function CommandPanel({ commands, selectedIndex }) {
     ] }) })
   ] });
 }
-var import_jsx_runtime14, WINDOW_SIZE;
+var import_jsx_runtime13, WINDOW_SIZE, COMMAND_COLUMN_WIDTH, PREFIX_WIDTH;
 var init_CommandPanel = __esm({
   async "packages/ko-tui/src/CommandPanel.tsx"() {
     "use strict";
     await init_build2();
     init_theme();
-    import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
     WINDOW_SIZE = 6;
+    COMMAND_COLUMN_WIDTH = 30;
+    PREFIX_WIDTH = 2;
   }
 });
 
@@ -58426,14 +58431,14 @@ function SessionPanel(props) {
     const start = Math.max(0, Math.min(selected - Math.floor(WINDOW_SIZE2 / 2), Math.max(0, items.length - WINDOW_SIZE2)));
     return { start, visible: items.slice(start, start + WINDOW_SIZE2) };
   }, [items, selected]);
-  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { bold: true, color: theme.colors.primary, children: title }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "Current branch is marked with *" : "\u2191/\u2193 select \xB7 Enter resume \xB7 Esc close" }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(56) }) }),
-    items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "No branches" : "No saved sessions" }) : windowed.visible.map((item, offset) => {
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { bold: true, color: theme.colors.primary, children: title }),
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "Current branch is marked with *" : "\u2191/\u2193 select \xB7 Enter resume \xB7 Esc close" }),
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(56) }) }),
+    items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "No branches" : "No saved sessions" }) : windowed.visible.map((item, offset) => {
       const absoluteIndex = windowed.start + offset;
       const active = absoluteIndex === selected;
-      return props.mode === "branch" ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(BranchRow, { branch: item, active }, `${item.sessionId}-${absoluteIndex}`) : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(SessionRow, { session: item, active }, item.id);
+      return props.mode === "branch" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(BranchRow, { branch: item, active }, `${item.sessionId}-${absoluteIndex}`) : /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(SessionRow, { session: item, active }, item.id);
     })
   ] });
 }
@@ -58441,7 +58446,7 @@ function BranchRow({ branch, active }) {
   const { theme } = useTheme();
   const marker = active ? "\u276F" : " ";
   const current = branch.current ? "*" : " ";
-  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
     marker,
     " ",
     current,
@@ -58455,7 +58460,7 @@ function SessionRow({ session, active }) {
   const { theme } = useTheme();
   const marker = active ? "\u276F" : " ";
   const date = new Date(session.lastAccessTime).toLocaleString();
-  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
     marker,
     " ",
     session.name.padEnd(14),
@@ -58467,14 +58472,14 @@ function SessionRow({ session, active }) {
     date
   ] });
 }
-var import_react30, import_jsx_runtime15, WINDOW_SIZE2;
+var import_react30, import_jsx_runtime14, WINDOW_SIZE2;
 var init_SessionPanel = __esm({
   async "packages/ko-tui/src/SessionPanel.tsx"() {
     "use strict";
     import_react30 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
-    import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
     WINDOW_SIZE2 = 8;
   }
 });
@@ -58561,14 +58566,14 @@ function ThemePanel({ active, onClose, onSelect }) {
       onSelect(OPTIONS[selected].name);
     }
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { borderStyle: "round", paddingX: 1, flexDirection: "column", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Theme" }),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "\u2191/\u2193 select \xB7 Enter apply \xB7 Esc close" }),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(48) }) }),
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { borderStyle: "round", paddingX: 1, flexDirection: "column", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Theme" }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "\u2191/\u2193 select \xB7 Enter apply \xB7 Esc close" }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(48) }) }),
     OPTIONS.map((option, index) => {
       const isSelected = index === selected;
       const isCurrent = option.name === theme.name;
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: isSelected ? theme.colors.secondary : theme.colors.primary, bold: isSelected, children: [
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: isSelected ? theme.colors.secondary : theme.colors.primary, bold: isSelected, children: [
         isSelected ? "\u276F" : " ",
         " ",
         isCurrent ? "\u2714" : " ",
@@ -58576,32 +58581,32 @@ function ThemePanel({ active, onClose, onSelect }) {
         option.label
       ] }, option.name);
     }),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { marginTop: 1, flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "Preview" }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: previewTheme.colors.secondary, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { marginTop: 1, flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "Preview" }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: previewTheme.colors.secondary, children: [
         "function greet(name: string) ",
         "{"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.dimmed, children: "  // selected theme preview" }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.dimmed, children: "  // selected theme preview" }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { children: [
         "  return ",
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.success, children: "`hello ${name}`" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.success, children: "`hello ${name}`" }),
         ";"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.secondary, children: "}" }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.warning, children: "\u25CF Running tool" }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.error, children: "\u2717 Error state" })
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.secondary, children: "}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.warning, children: "\u25CF Running tool" }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.error, children: "\u2717 Error state" })
     ] })
   ] });
 }
-var import_react31, import_jsx_runtime16, OPTIONS;
+var import_react31, import_jsx_runtime15, OPTIONS;
 var init_ThemePanel = __esm({
   async "packages/ko-tui/src/ThemePanel.tsx"() {
     "use strict";
     import_react31 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
-    import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
     OPTIONS = [
       { name: "auto", label: "Auto (match terminal)" },
       { name: "dark", label: "Dark mode" },
@@ -58643,27 +58648,48 @@ function RewindDialog({ active = true, onConfirm, onCancel }) {
     }
     if (key.escape) onCancel();
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Rewind checkpoint" }),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { children: "Rewind to before the last change?" }) }),
-    options.map((option, index) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: selected === index ? theme.colors.secondary : theme.colors.primary, bold: selected === index, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Rewind checkpoint" }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { children: "Rewind to before the last change?" }) }),
+    options.map((option, index) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: selected === index ? theme.colors.secondary : theme.colors.primary, bold: selected === index, children: [
       selected === index ? "\u276F" : " ",
       " ",
       index + 1,
       ". ",
       option
     ] }, option)),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.colors.dimmed, children: "Esc to cancel \xB7 Enter to confirm" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react32, import_jsx_runtime17;
+var import_react32, import_jsx_runtime16;
 var init_RewindDialog = __esm({
   async "packages/ko-tui/src/RewindDialog.tsx"() {
     "use strict";
     import_react32 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
-    import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  }
+});
+
+// packages/ko-tui/src/layout.ts
+function resolveTerminalWidth(width, fallback = FALLBACK_TERMINAL_WIDTH) {
+  if (typeof width === "number" && Number.isFinite(width) && width > 0) {
+    return Math.floor(width);
+  }
+  return fallback;
+}
+function currentTerminalWidth(fallback = FALLBACK_TERMINAL_WIDTH) {
+  return resolveTerminalWidth(process.stdout.columns, fallback);
+}
+function horizontalSeparator(width, char = "\u2500") {
+  return char.repeat(resolveTerminalWidth(width));
+}
+var FALLBACK_TERMINAL_WIDTH;
+var init_layout = __esm({
+  "packages/ko-tui/src/layout.ts"() {
+    "use strict";
+    FALLBACK_TERMINAL_WIDTH = 80;
   }
 });
 
@@ -59032,11 +59058,11 @@ function App2({ session, onThemeChange }) {
       return;
     }
   });
-  const sep = "\u2500".repeat(60);
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", padding: 0, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Header, { model, cwd: session.getCwd(), hasContent: events.length > 0 }),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { dimColor: true, children: sep }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+  const terminalWidth = currentTerminalWidth();
+  const sep = horizontalSeparator(terminalWidth);
+  return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", padding: 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Header, { model, cwd: session.getCwd(), hasContent: events.length > 0 }),
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
       Conversation,
       {
         events,
@@ -59047,8 +59073,8 @@ function App2({ session, onThemeChange }) {
         onToolKeysChange: handleToolKeysChange
       }
     ),
-    notifications.map((n, i) => /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "yellow", children: n }) }, i)),
-    pendingPermission && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    notifications.map((n, i) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: "yellow", children: n }) }, i)),
+    pendingPermission && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
       PermissionDialog,
       {
         session,
@@ -59061,16 +59087,16 @@ function App2({ session, onThemeChange }) {
         onResolve: resolvePermissionFocus
       }
     ),
-    modal === "status" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(StatusPanel, { session, onClose: closeModal, active: focusMode === "status-modal" }),
-    modal === "model" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { borderStyle: "round", paddingX: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { dimColor: true, children: [
+    modal === "status" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(StatusPanel, { session, onClose: closeModal, active: focusMode === "status-modal" }),
+    modal === "model" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { borderStyle: "round", paddingX: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { dimColor: true, children: [
       "Use /model ",
       "<provider/id>",
       " to switch. Use /models to list available models."
     ] }) }),
-    modal === "theme" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(ThemePanel, { active: focusMode === "theme-modal", onClose: closeModal, onSelect: applyTheme }),
-    modal === "rewind" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(RewindDialog, { active: focusMode === "rewind-confirm", onConfirm: confirmRewind, onCancel: closeRewindDialog }),
-    modal === "branch" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(SessionPanel, { mode: "branch", branches: session.listBranches(), active: focusMode === "session-modal", onClose: closeModal }),
-    modal === "resume" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    modal === "theme" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ThemePanel, { active: focusMode === "theme-modal", onClose: closeModal, onSelect: applyTheme }),
+    modal === "rewind" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(RewindDialog, { active: focusMode === "rewind-confirm", onConfirm: confirmRewind, onCancel: closeRewindDialog }),
+    modal === "branch" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(SessionPanel, { mode: "branch", branches: session.listBranches(), active: focusMode === "session-modal", onClose: closeModal }),
+    modal === "resume" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
       SessionPanel,
       {
         mode: "resume",
@@ -59084,8 +59110,7 @@ function App2({ session, onThemeChange }) {
         }
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { dimColor: true, children: sep }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
       InputBox,
       {
         value: message,
@@ -59095,20 +59120,19 @@ function App2({ session, onThemeChange }) {
         onSlashModeChange: handleSlashModeChange,
         running,
         focusActive: focusMode === "input" || focusMode === "slash",
-        onHistorySearchModeChange: (active) => setFocusMode(active ? "history-search" : "input")
+        onHistorySearchModeChange: (active) => setFocusMode(active ? "history-search" : "input"),
+        separator: sep
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(StatusBar, { running, permissionMode }),
-    slashMode && /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { dimColor: true, children: sep }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
-        CommandPanel,
-        {
-          commands: filteredCommands,
-          selectedIndex: slashIndex
-        }
-      )
-    ] })
+    slashMode && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { flexDirection: "column", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      CommandPanel,
+      {
+        commands: filteredCommands,
+        selectedIndex: slashIndex,
+        width: terminalWidth
+      }
+    ) }),
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(StatusBar, { running, permissionMode, width: terminalWidth })
   ] });
 }
 function messagesToEvents(messages) {
@@ -59137,7 +59161,7 @@ function userMessageText(content) {
   }
   return String(content);
 }
-var import_react33, import_jsx_runtime18;
+var import_react33, import_jsx_runtime17;
 var init_App2 = __esm({
   async "packages/ko-tui/src/App.tsx"() {
     "use strict";
@@ -59158,7 +59182,8 @@ var init_App2 = __esm({
     init_theme();
     await init_ThemePanel();
     await init_RewindDialog();
-    import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+    init_layout();
+    import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
