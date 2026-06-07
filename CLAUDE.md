@@ -1,179 +1,73 @@
 # CLAUDE.md
 
-Terminal-based AI coding assistant with multi-provider LLM support (Anthropic, OpenAI, Google, DeepSeek + OpenAI-compatible providers). Ink/React TUI, JSONL sessions with branching/rewind.
+koCode 是一个终端 AI 编码助手：TypeScript + pnpm monorepo，支持多 Provider LLM、Ink/React TUI、JSONL 会话、权限、分支和回退。
 
-## Development Guidelines
+这个文件只做入口路由。不要把所有规则都塞进这里；按任务类型渐进读取 `.agents/rules/` 下的细则。
 
-> Derived from Andrej Karpathy's observations on LLM coding pitfalls ([source](https://github.com/multica-ai/andrej-karpathy-skills)). These bias toward caution over speed — use judgment for trivial tasks.
+## 先读什么
 
-### Think Before Coding
+每次开始工作先读：
 
-Don't assume. Don't hide confusion. Surface tradeoffs.
+- `.agents/rules/workflow.md`：通用工作方式、改动边界、何时询问
+- 本文件的“项目地图”和“常用命令”
 
-- State assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them — don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+然后按任务继续读取：
 
-### Simplicity First
+| 任务类型 | 继续读取 |
+| --- | --- |
+| 新功能、行为变更、需求不明确 | `.agents/rules/openspec.md` |
+| 触碰包边界、公共 API、架构依赖 | `.agents/rules/packages.md` |
+| 修改终端 UI、输入、焦点、命令面板、模态框 | `.agents/rules/tui.md` |
+| 修改 Agent 循环、工具、权限、会话、用量、回退 | `.agents/rules/agent-tools.md` |
+| 修改 CLI、配置、打包产物、测试或提交 | `.agents/rules/verification-git.md` |
 
-Minimum code that solves the problem. Nothing speculative.
+## 项目地图
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If 200 lines could be 50, rewrite it.
-- Ask: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+依赖方向固定：
 
-### Surgical Changes
+```text
+ko-ai -> ko-agent -> ko-tui -> ko-cli
+```
 
-Touch only what you must. Clean up only your own mess.
+- `packages/ko-ai`：Provider 抽象、流式事件、模型目录、OpenAI/Anthropic/Google/兼容 Provider 适配
+- `packages/ko-agent`：AgentSession、工具执行、权限、会话持久化、checkpoint/rewind、usage/cost
+- `packages/ko-tui`：Ink/React TUI、输入路由、焦点模式、slash commands、turn 渲染、主题
+- `packages/ko-cli`：CLI 入口、参数解析、配置命令、会话和模型子命令
+- `openspec/`：正式规格、变更提案、设计、任务和归档
+- `packages/ko-cli/bin/kocode.mjs`：打包后的 CLI 产物；源码相关变更影响 CLI 时需要重新生成
 
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- Notice unrelated dead code → mention it, don't delete it.
-- Your changes created orphan imports/vars/functions → remove them.
-- Pre-existing dead code → leave it alone unless asked.
-- Every changed line should trace directly to the user's request.
-
-### Goal-Driven Execution
-
-Define success criteria. Loop until verified.
-
-- "Add validation" → write tests for invalid inputs, then make them pass.
-- "Fix the bug" → write a test that reproduces it, then make it pass.
-- "Refactor X" → ensure tests pass before and after.
-- Multi-step tasks → state a brief plan with verifiable checks.
-
-## Commands
+## 常用命令
 
 ```bash
-pnpm install              # install deps
-pnpm build                # tsc -b (project references)
-pnpm typecheck            # tsc -b --pretty
-pnpm test                 # vitest run --config vitest.config.ts
-pnpm vitest run packages/ko-ai/src/__tests__/stream.test.ts  # single test
-pnpm dev                  # tsx packages/ko-cli/src/index.ts
-pnpm bundle               # node scripts/bundle.mjs -> packages/ko-cli/bin/kocode.mjs
-pnpm clean                # rm dist + tsbuildinfo across all packages
+pnpm install
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm dev
+pnpm bundle
+openspec status
+openspec validate --all --strict
 ```
 
-Per-package: `pnpm --filter @kocode/ko-ai test` (build, typecheck, test).
-
-## Architecture
-
-```
-ko-ai   (provider abstraction, streaming, model catalogue)
-  ↑
-ko-agent (agent loop, session persistence, tools, permissions)
-  ↑
-ko-tui   (Ink/React TUI, 18 components, 25 slash commands)
-  ↑
-ko-cli   (CLI entry, config, arg parsing)
-```
-
-Build order follows this graph via TypeScript project references.
-
-### `@kocode/ko-ai`
-
-3 provider adapters (`providers/anthropic.ts`, `openai.ts`, `google.ts`). DeepSeek and other OpenAI-compatible providers (Groq, Together, OpenRouter, Qwen) share the OpenAI adapter via `compat.ts` (`OpenAICompletionsCompat`/`AnthropicMessagesCompat` flags).
-
-- `top-level.ts` — public API: `stream()`, `complete()`, `streamSimple()`, `completeSimple()` (tool-free)
-- `stream.ts` — `AssistantMessageEventStream` (push + AsyncIterable). Event contract: start → text/thinking/toolcall deltas → done|error (12 event types in `events.ts`)
-- `provider-registry.ts` — global `ApiType` → `ApiProvider` registry with lazy loading
-- `models.generated.ts` — model catalogue (8 models: anthropic×3, openai×2, google×2, deepseek×1)
-- `env-api-keys.ts` — 9 provider env vars (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.) + KOCODE_API_KEY fallback
-
-### `@kocode/ko-agent`
-
-- `agent-session.ts` — `AgentSession`: prompt → stream → tool execute → repeat. Checkpoint/rewind, auto-compaction at 80% context window, tool deduplication, usage tracking
-- `session-store.ts` — JSONL in `~/.kocode/sessions/` (create/load/list/branch/delete/rename)
-- `system-prompt.ts` — builds system prompt from tool defs + `.kocode/` + `context.md` + `CLAUDE.md`
-- `tool-permissions.ts` — modes: `default`, `accept_edits`, `auto`. Categories: read, write, edit, bash, unknown
-- `events.ts` — `AgentSessionEvent` (21 variants), `ThinkingLevel`, `CompactionResult`
-- `tools/index.ts` — 7 tools: read, edit, write, bash, grep, find, ls. Path sandboxing, bash policy (allow/deny), JSON Schema validation
-
-### `@kocode/ko-tui`
-
-18 components, 7 support modules.
-
-- `App.tsx` — main: event handling, focus, modals, input routing
-- `useTurns.ts` — `AgentSessionEvent[]` → `Turn[]` conversation state
-- `commands.ts` — 25 slash commands (/help, /clear, /compact, /resume, /branch, /model, /models, /config, /init, /permissions, /theme, /diff, /rewind, /status, /session, /context, /cost, /review, /doctor, /export, /skills, /feedback, /quit, /exit)
-- `focus.ts` — 10 modes: input, slash, status-modal, model-modal, theme-modal, session-modal, permission, rewind-confirm, tool-output, history-search
-- `input-prefix.ts` — `!` shell, `#` memory, `/` commands, `@` file references
-- `theme.ts` — 8 themes: auto, dark, light, dark-colorblind, light-colorblind, ansi-dark, ansi-light, ansi
-- `syntaxHighlight.ts` — tokenizer for Python, TypeScript, JavaScript, Go, Rust, Bash
-- `input-history.ts` — history with search (100-entry limit)
-
-### `@kocode/ko-cli`
-
-2 files. Entry point + config command.
-
-- `index.ts` — arg parsing (`--provider`, `--model`, `--session`, `--print`), stdin pipe input, `sessions` subcommand (list/delete/rename), `models` subcommand. Model resolution: custom config → built-in by provider → search all providers
-- `config-command.ts` — YAML config (`~/.kocode/config.yaml` or `.kocode/config.yaml`). Subcommands: show, get, set, unset, open, path, init
-
-## Git Workflow
-
-### Branch Strategy
-
-**NEVER commit directly to `main`.** Always create a feature branch before making changes.
-
-Branch naming convention — use `<type>/<short-description>`:
-
-| Type | Usage |
-|------|-------|
-| `feat/` | New feature (e.g. `feat/add-vim-mode`) |
-| `fix/` or `bugfix/` | Bug fix (e.g. `fix/session-crash-on-branch`) |
-| `refactor/` | Code refactoring with no behavior change |
-| `docs/` | Documentation only |
-| `chore/` | Tooling, deps, config, CI |
-| `test/` | Adding or fixing tests |
-| `perf/` | Performance improvement |
-
-Rules:
-- Description uses lowercase kebab-case, no spaces, no underscores
-- Keep branch names concise (2–4 words)
-- One branch per logical change; don't bundle unrelated work
-
-### Commit Messages
-
-Follow Conventional Commits:
-
-```
-type(scope): short description
-```
-
-- **type:** `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `perf`, `style`
-- **scope:** package name (`ko-ai`, `ko-agent`, `ko-tui`, `ko-cli`) or omit for cross-cutting changes
-- Description: imperative mood, lowercase, no period at end, under 72 chars
-
-Examples:
-```
-feat(ko-agent): add tool call deduplication
-fix(ko-tui): handle empty input on rewind dialog
-refactor(ko-ai): extract compat flags into shared types
-chore: bump pnpm to 11.5.0
-```
-
-### Typical Workflow
+单包测试示例：
 
 ```bash
-git checkout -b feat/my-feature        # 1. create branch from main
-# ... make changes ...
-pnpm typecheck && pnpm test            # 2. verify before commit
-git add <files>                        # 3. stage specific files
-git commit -m "feat(scope): message"   # 4. commit
-git push -u origin feat/my-feature     # 5. push (when ready)
+pnpm --filter @kocode/ko-agent test
+pnpm vitest run packages/ko-tui/src/__tests__/InputBox.test.ts
 ```
 
-## Technical Details
+## 默认验证
 
-- **Module:** ESM (`"type": "module"`), NodeNext resolution, ES2022 target, strict mode
-- **Path aliases:** `@kocode/ko-ai`, `@kocode/ko-agent`, `@kocode/ko-tui` → package source (in `tsconfig.base.json`)
-- **Tests:** Vitest 3.1.4, tests in `src/__tests__/**/*.test.ts`. ko-tui/ko-cli use custom `resolveTsPlugin` (root `vitest-plugin.ts`) mapping `.js` → `.ts`. Workspace config in `vitest.workspace.ts`
-- **Package manager:** pnpm 11.4.0, Node >= 20
-- **Config:** `config.example.yaml` at project root documents all options (providers, custom models, custom headers)
-- **Design docs:** `openspec/` — specs, archived change sets with proposals/designs/tasks
+- 普通代码改动：`pnpm typecheck && pnpm test`
+- 影响编译/包引用：再跑 `pnpm build`
+- 影响 CLI 运行或打包源码：再跑 `pnpm bundle`
+- 影响 OpenSpec 或公开行为：再跑 `openspec validate --all --strict`
+
+## 关键约束
+
+- 开发必须先新建分支；禁止直接在 `main` 上进行代码或文档改动。
+- 分支命名使用 `<type>/<short-description>`，例如 `feature/add-model-cache`、`fix/session-store-path`。
+- 不要反向依赖：低层包不能依赖高层包。
+- 不要绕过工具权限、会话存储和焦点路由。
+- 测试不得依赖真实用户目录；会话测试使用 `KOCODE_SESSIONS_DIR` 或临时目录。
+- 不要提交无关改动；提交前确认 `git status --short`。
