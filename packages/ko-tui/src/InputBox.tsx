@@ -1,7 +1,14 @@
 import React, { useCallback, useRef, useState } from "react";
 import { Box, Text, useInput } from "ink";
-import TextInput from "ink-text-input";
 import { addHistoryEntry, searchHistory, selectHistoryMatch } from "./input-history.js";
+import {
+  deleteBackward,
+  deleteForward,
+  insertText,
+  moveCursor,
+  setInputText,
+  type InputBuffer,
+} from "./input-buffer.js";
 import { useTheme } from "./theme.js";
 
 export function inputPrompt(running: boolean): string {
@@ -16,6 +23,15 @@ export interface InputKeyInfo {
   return?: boolean;
   meta?: boolean;
   ctrl?: boolean;
+  escape?: boolean;
+  backspace?: boolean;
+  delete?: boolean;
+  leftArrow?: boolean;
+  rightArrow?: boolean;
+  upArrow?: boolean;
+  downArrow?: boolean;
+  tab?: boolean;
+  shift?: boolean;
 }
 
 export function inputKeyAction(input: string, key: InputKeyInfo): "submit" | "newline" | "none" {
@@ -25,14 +41,15 @@ export function inputKeyAction(input: string, key: InputKeyInfo): "submit" | "ne
 }
 
 interface Props {
-  value: string;
-  onChange: (value: string) => void;
+  buffer: InputBuffer;
+  onChange: (buffer: InputBuffer) => void;
   onSubmit: (submittedValue?: string) => void;
   onBareEscape?: () => void;
   onSlashModeChange?: (inSlashMode: boolean, filterText: string) => void;
   onHistorySearchModeChange?: (active: boolean) => void;
   running: boolean;
   focusActive?: boolean;
+  submitActive?: boolean;
   separator?: string;
 }
 
@@ -55,8 +72,98 @@ export function sanitizeTextInputValueForControls(
   };
 }
 
+export interface ControlledInputDisplay {
+  before: string;
+  cursor: string;
+  after: string;
+  placeholder: boolean;
+}
+
+export function controlledInputDisplay(
+  text: string,
+  cursorOffset: number,
+  placeholder: string,
+  focused: boolean,
+): ControlledInputDisplay {
+  if (text.length === 0 && placeholder) {
+    return {
+      before: "",
+      cursor: focused ? placeholder[0] ?? " " : "",
+      after: focused ? placeholder.slice(1) : placeholder,
+      placeholder: true,
+    };
+  }
+
+  const buffer = setInputText(text, cursorOffset);
+  if (!focused) {
+    return { before: buffer.text, cursor: "", after: "", placeholder: false };
+  }
+  if (buffer.cursorOffset === buffer.text.length) {
+    return { before: buffer.text, cursor: " ", after: "", placeholder: false };
+  }
+
+  const cursorChar = buffer.text[buffer.cursorOffset]!;
+  const cursor = cursorChar === "\n" ? " " : cursorChar;
+  const after = cursorChar === "\n"
+    ? buffer.text.slice(buffer.cursorOffset)
+    : buffer.text.slice(buffer.cursorOffset + 1);
+
+  return {
+    before: buffer.text.slice(0, buffer.cursorOffset),
+    cursor,
+    after,
+    placeholder: false,
+  };
+}
+
+function ControlledTextInput({
+  buffer,
+  placeholder,
+  focus,
+}: {
+  buffer: InputBuffer;
+  placeholder: string;
+  focus: boolean;
+}) {
+  const { theme } = useTheme();
+  const display = controlledInputDisplay(buffer.text, buffer.cursorOffset, placeholder, focus);
+
+  if (display.placeholder) {
+    if (!focus) return <Text color={theme.colors.dimmed}>{display.after}</Text>;
+    return (
+      <>
+        <Text inverse>{display.cursor}</Text>
+        <Text color={theme.colors.dimmed}>{display.after}</Text>
+      </>
+    );
+  }
+
+  if (!focus) return <Text>{display.before}</Text>;
+
+  return (
+    <>
+      <Text>{display.before}</Text>
+      <Text inverse>{display.cursor}</Text>
+      <Text>{display.after}</Text>
+    </>
+  );
+}
+
+function isBareEscape(input: string, key: InputKeyInfo): boolean {
+  return key.escape === true || (input.length > 0 && input.split("").every((char) => char === "\x1b"));
+}
+
+export function printableInput(input: string, key: InputKeyInfo): string {
+  if (!input || key.ctrl || key.meta || key.escape || key.return || key.backspace || key.delete) return "";
+  if (key.leftArrow || key.rightArrow || key.upArrow || key.downArrow || key.tab) return "";
+
+  const sanitized = input.replace(/[\r\n\x07\b\x12]/g, "");
+  if (!sanitized) return "";
+  return Array.from(sanitized).every((char) => char >= " ") ? sanitized : "";
+}
+
 export function InputBox({
-  value,
+  buffer,
   onChange,
   onSubmit,
   onBareEscape,
@@ -64,6 +171,7 @@ export function InputBox({
   onHistorySearchModeChange,
   running,
   focusActive = true,
+  submitActive = true,
   separator,
 }: Props) {
   const { theme } = useTheme();
@@ -71,14 +179,20 @@ export function InputBox({
   const [searchMode, setSearchMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchIndex, setSearchIndex] = useState(0);
-  const savedValueRef = useRef("");
+  const savedBufferRef = useRef<InputBuffer>(setInputText(""));
   const controlEchoRef = useRef<"r" | "g" | null>(null);
-  const submitEchoRef = useRef(false);
   const lastSubmitRef = useRef<{ value: string; at: number } | null>(null);
+
+  const recordHistory = useCallback((submittedValue: string) => {
+    const trimmed = submittedValue.trim();
+    if (trimmed) {
+      historyRef.current = addHistoryEntry(historyRef.current, trimmed);
+    }
+  }, []);
 
   // Wrapped submit: record to history
   const wrappedSubmit = useCallback((overrideValue?: string) => {
-    const submittedValue = overrideValue ?? value;
+    const submittedValue = overrideValue ?? buffer.text;
     const now = Date.now();
     const last = lastSubmitRef.current;
     if (last && last.value === submittedValue && now - last.at < 100) {
@@ -86,59 +200,71 @@ export function InputBox({
     }
     lastSubmitRef.current = { value: submittedValue, at: now };
 
-    const trimmed = submittedValue.trim();
-    if (trimmed) {
-      historyRef.current = addHistoryEntry(historyRef.current, trimmed);
-    }
+    recordHistory(submittedValue);
     onSubmit(submittedValue);
-  }, [value, onSubmit]);
+  }, [buffer.text, onSubmit, recordHistory]);
+
+  const emitSlashMode = useCallback((text: string) => {
+    if (!onSlashModeChange) return;
+    if (text.startsWith("/")) {
+      onSlashModeChange(true, text);
+    } else {
+      onSlashModeChange(false, text);
+    }
+  }, [onSlashModeChange]);
 
   const handleChange = useCallback(
-    (val: string) => {
+    (nextBuffer: InputBuffer, options: { updateSlashMode?: boolean } = {}) => {
       if (!focusActive) return;
-      if (/[\r\n]$/.test(val)) {
-        const nextValue = val.replace(/[\r\n]+$/g, "");
-        if (nextValue !== value) onChange(nextValue);
-        submitEchoRef.current = true;
-        wrappedSubmit(nextValue);
-        return;
+      if (nextBuffer.text !== buffer.text || nextBuffer.cursorOffset !== buffer.cursorOffset) {
+        onChange(nextBuffer);
       }
-      if (submitEchoRef.current && val.replace(/[\r\n]+$/g, "") === value) {
-        submitEchoRef.current = false;
-        return;
-      }
-      const escaped = sanitizeTextInputValueForControls(value, val);
-      if (escaped.bareEscapeCount > 0 || escaped.value !== val) {
-        for (let i = 0; i < escaped.bareEscapeCount; i++) onBareEscape?.();
-        if (escaped.value !== value) onChange(escaped.value);
-        return;
-      }
-      const sanitized = val.replace(/[\x07\x12]/g, "");
-      if (sanitized !== val) {
-        if (sanitized !== value) onChange(sanitized);
-        return;
-      }
-      const controlEcho = controlEchoRef.current;
-      if (controlEcho && (val === value + controlEcho || val === controlEcho)) {
-        controlEchoRef.current = null;
-        return;
-      }
-      onChange(val);
-      if (onSlashModeChange) {
-        if (val.startsWith("/")) {
-          onSlashModeChange(true, val);
-        } else {
-          onSlashModeChange(false, val);
-        }
-      }
+      if (options.updateSlashMode ?? true) emitSlashMode(nextBuffer.text);
     },
-    [focusActive, onBareEscape, onChange, onSlashModeChange, value, wrappedSubmit],
+    [buffer.cursorOffset, buffer.text, emitSlashMode, focusActive, onChange],
   );
 
   useInput((_input, key) => {
     if (!focusActive && !searchMode) return;
 
-    if (!searchMode && (key.escape || _input.split("").every((char) => char === "\x1b") && _input.length > 0)) {
+    if (searchMode) {
+      if (isBareEscape(_input, key)) {
+        setSearchMode(false);
+        onHistorySearchModeChange?.(false);
+        onChange(savedBufferRef.current);
+        return;
+      }
+
+      if (key.ctrl && (_input.includes("\x12") || _input.toLowerCase() === "r")) {
+        controlEchoRef.current = "r";
+        setSearchIndex((prev) => prev + 1);
+        return;
+      }
+
+      if (key.return || /[\r\n]/.test(_input)) {
+        const matches = searchHistory(historyRef.current, searchTerm);
+        const selected = selectHistoryMatch(matches, searchIndex);
+        if (selected) onChange(setInputText(selected));
+        setSearchMode(false);
+        onHistorySearchModeChange?.(false);
+        return;
+      }
+
+      if (key.backspace || key.delete) {
+        setSearchTerm((prev) => prev.slice(0, -1));
+        setSearchIndex(0);
+        return;
+      }
+
+      const printable = printableInput(_input, key);
+      if (printable) {
+        setSearchTerm((prev) => prev + printable);
+        setSearchIndex(0);
+      }
+      return;
+    }
+
+    if (isBareEscape(_input, key)) {
       const escapeCount = _input.length > 0 ? _input.length : 1;
       for (let i = 0; i < escapeCount; i++) onBareEscape?.();
       return;
@@ -146,12 +272,15 @@ export function InputBox({
 
     const keyAction = inputKeyAction(_input, key);
     if (keyAction === "newline") {
-      onChange(value + "\n");
+      handleChange(insertText(buffer, "\n"));
       return;
     }
     if (keyAction === "submit") {
-      submitEchoRef.current = true;
-      wrappedSubmit();
+      if (submitActive) {
+        wrappedSubmit();
+      } else {
+        recordHistory(buffer.text);
+      }
       return;
     }
 
@@ -160,7 +289,7 @@ export function InputBox({
     if (key.ctrl && (_input.includes("\x12") || _input.toLowerCase() === "r")) {
       controlEchoRef.current = "r";
       if (!searchMode) {
-        savedValueRef.current = value;
+        savedBufferRef.current = buffer;
         setSearchMode(true);
         onHistorySearchModeChange?.(true);
         setSearchTerm("");
@@ -175,50 +304,37 @@ export function InputBox({
     // Ctrl+G: external editor
     if (key.ctrl && (_input.includes("\x07") || _input.toLowerCase() === "g")) {
       controlEchoRef.current = "g";
-      launchEditor(value).then((edited) => {
-        if (edited !== undefined) onChange(edited);
+      launchEditor(buffer.text).then((edited) => {
+        if (edited !== undefined) onChange(setInputText(edited));
       }).catch(() => {});
       return;
     }
 
-    // In search mode
-    if (searchMode && !key.ctrl && !key.meta && _input && !key.escape) {
-      if (key.backspace || key.delete) {
-        setSearchTerm((prev) => prev.slice(0, -1));
-        setSearchIndex(0);
+    if (key.leftArrow) {
+      handleChange(moveCursor(buffer, "left"), { updateSlashMode: false });
+      return;
+    }
+    if (key.rightArrow) {
+      handleChange(moveCursor(buffer, "right"), { updateSlashMode: false });
+      return;
+    }
+    if (key.backspace) {
+      handleChange(deleteBackward(buffer));
+      return;
+    }
+    if (key.delete) {
+      handleChange(deleteForward(buffer));
+      return;
+    }
+
+    const printable = printableInput(_input, key);
+    if (printable) {
+      const controlEcho = controlEchoRef.current;
+      if (controlEcho && (printable === controlEcho)) {
+        controlEchoRef.current = null;
         return;
       }
-
-      const printable = _input.replace(/[\r\n]/g, "");
-      const nextTerm = printable >= " " ? searchTerm + printable : searchTerm;
-      if (printable >= " ") {
-        setSearchTerm(nextTerm);
-        setSearchIndex(0);
-      }
-
-      if (key.return || /[\r\n]/.test(_input)) {
-        const matches = searchHistory(historyRef.current, nextTerm);
-        const selected = selectHistoryMatch(matches, printable >= " " ? 0 : searchIndex);
-        if (selected) onChange(selected);
-        setSearchMode(false);
-        onHistorySearchModeChange?.(false);
-      }
-      return;
-    }
-
-    if (searchMode && key.escape) {
-      setSearchMode(false);
-      onHistorySearchModeChange?.(false);
-      onChange(savedValueRef.current);
-      return;
-    }
-
-    if (searchMode && key.return) {
-      const matches = searchHistory(historyRef.current, searchTerm);
-      const selected = selectHistoryMatch(matches, searchIndex);
-      if (selected) onChange(selected);
-      setSearchMode(false);
-      onHistorySearchModeChange?.(false);
+      handleChange(insertText(buffer, printable));
       return;
     }
   });
@@ -248,10 +364,8 @@ export function InputBox({
       {!searchMode && (
         <Box>
           <Text bold color={running ? theme.colors.warning : theme.colors.success}>{inputPrompt(running)}</Text>
-          <TextInput
-            value={value}
-            onChange={handleChange}
-            onSubmit={wrappedSubmit}
+          <ControlledTextInput
+            buffer={buffer}
             placeholder={inputPlaceholder(running)}
             focus={focusActive}
           />

@@ -15,6 +15,7 @@ import { SessionPanel } from "./SessionPanel.js";
 import { filterCommands, getCommands } from "./commands.js";
 import type { CommandDef } from "./commands.js";
 import { busySubmitMessage, moveToolIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
+import { emptyInputBuffer, setInputText, type InputBuffer } from "./input-buffer.js";
 import { parseInputRoute } from "./input-prefix.js";
 import { useTheme, type ThemeName } from "./theme.js";
 import { ThemePanel } from "./ThemePanel.js";
@@ -40,10 +41,14 @@ export function bottomLayoutOrder(slashMode: boolean): string[] {
     : ["input", "status-bar"];
 }
 
+export function commandInputText(cmd: CommandDef): string {
+  return cmd.takesArgs ? `${cmd.name} ` : cmd.name;
+}
+
 export function App({ session, onThemeChange }: AppProps) {
   const { theme, setTheme } = useTheme();
   const [events, setEvents] = useState<AgentSessionEvent[]>([]);
-  const [message, setMessage] = useState("");
+  const [input, setInput] = useState<InputBuffer>(() => emptyInputBuffer());
   const [running, setRunning] = useState(false);
   const [model, setModel] = useState<Model>(session.getModel());
   const [permissionMode, setPermissionMode] = useState<PermissionMode>(session.getPermissionMode());
@@ -163,6 +168,10 @@ export function App({ session, onThemeChange }: AppProps) {
     setFocusMode("input");
   }, []);
 
+  const clearInput = useCallback(() => {
+    setInput(emptyInputBuffer());
+  }, []);
+
   const handleSlashModeChange = useCallback(
     (active: boolean, filterText: string) => {
       if (focusMode === "permission" || focusMode === "status-modal" || focusMode === "model-modal") return;
@@ -181,11 +190,11 @@ export function App({ session, onThemeChange }: AppProps) {
     (cmd: CommandDef) => {
       if (cmd.takesArgs) {
         // Commands that need arguments: fill input, let user type args
-        setMessage(cmd.name + " ");
+        setInput(setInputText(commandInputText(cmd)));
         closeSlashMode();
       } else {
         // No-arg commands: execute immediately
-        setMessage("");
+        clearInput();
         closeSlashMode();
         if (cmd.name === "/status") {
           previousFocusRef.current = "input";
@@ -197,11 +206,11 @@ export function App({ session, onThemeChange }: AppProps) {
         if (cmd.name === "/clear") setEvents([]);
       }
     },
-    [closeSlashMode, session, notify, commandContext],
+    [clearInput, closeSlashMode, session, notify, commandContext],
   );
 
   const handleSubmit = useCallback((submittedValue?: string) => {
-    const text = (submittedValue ?? message).trim();
+    const text = (submittedValue ?? input.text).trim();
     if (!text) return;
 
     if (running) {
@@ -215,7 +224,7 @@ export function App({ session, onThemeChange }: AppProps) {
     if (slashMode && exactSlashRoute.type === "slash") {
       const exactCommand = getCommands().find((c) => c.name === exactSlashRoute.command);
       if (exactCommand) {
-        setMessage("");
+        clearInput();
         closeSlashMode();
         if (exactSlashRoute.command === "/status") {
           previousFocusRef.current = focusMode;
@@ -243,7 +252,7 @@ export function App({ session, onThemeChange }: AppProps) {
       }
     }
 
-    setMessage("");
+    clearInput();
 
     const route = exactSlashRoute;
 
@@ -293,8 +302,8 @@ export function App({ session, onThemeChange }: AppProps) {
       });
     }
   }, [
-    message, session, notify, running, focusMode,
-    slashMode, slashIndex, filteredCommands, handleCommandSelect, closeSlashMode, commandContext,
+    input.text, session, notify, running, focusMode,
+    slashMode, slashIndex, filteredCommands, handleCommandSelect, clearInput, closeSlashMode, commandContext,
   ]);
 
   const handleToolKeysChange = useCallback((keys: string[]) => {
@@ -366,14 +375,19 @@ export function App({ session, onThemeChange }: AppProps) {
       }
       if (key.escape) {
         closeSlashMode();
-        setMessage("");
+        clearInput();
+        return;
+      }
+      if (key.return || _input === "\r" || _input === "\n") {
+        handleSubmit(input.text);
         return;
       }
       if (key.tab) {
         if (filteredCommands.length > 0) {
           const cmd = filteredCommands[0]!;
-          setMessage(cmd.takesArgs ? cmd.name + " " : cmd.name);
-          updateSlashFilter(cmd.takesArgs ? cmd.name + " " : cmd.name);
+          const completed = commandInputText(cmd);
+          setInput(setInputText(completed));
+          updateSlashFilter(completed);
           return;
         }
       }
@@ -502,13 +516,14 @@ export function App({ session, onThemeChange }: AppProps) {
       )}
 
       <InputBox
-        value={message}
-        onChange={setMessage}
+        buffer={input}
+        onChange={setInput}
         onSubmit={handleSubmit}
         onBareEscape={handleInputEscape}
         onSlashModeChange={handleSlashModeChange}
         running={running}
         focusActive={focusMode === "input" || focusMode === "slash"}
+        submitActive={focusMode === "input"}
         onHistorySearchModeChange={(active) => setFocusMode(active ? "history-search" : "input")}
         separator={sep}
       />

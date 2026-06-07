@@ -23206,7 +23206,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context);
         }
-        function useState13(initialState) {
+        function useState12(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -23218,7 +23218,7 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useRef(initialValue);
         }
-        function useEffect7(create2, deps) {
+        function useEffect6(create2, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useEffect(create2, deps);
         }
@@ -24000,7 +24000,7 @@ var require_react_development = __commonJS({
         exports.useContext = useContext8;
         exports.useDebugValue = useDebugValue;
         exports.useDeferredValue = useDeferredValue;
-        exports.useEffect = useEffect7;
+        exports.useEffect = useEffect6;
         exports.useId = useId;
         exports.useImperativeHandle = useImperativeHandle;
         exports.useInsertionEffect = useInsertionEffect;
@@ -24008,7 +24008,7 @@ var require_react_development = __commonJS({
         exports.useMemo = useMemo7;
         exports.useReducer = useReducer;
         exports.useRef = useRef4;
-        exports.useState = useState13;
+        exports.useState = useState12;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -31704,9 +31704,9 @@ var require_react_reconciler_development = __commonJS({
       module.exports = function $$$reconciler($$$hostConfig) {
         var exports2 = {};
         "use strict";
-        var React22 = require_react();
+        var React21 = require_react();
         var Scheduler = require_scheduler();
-        var ReactSharedInternals = React22.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React21.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         var suppressWarning = false;
         function setSuppressWarning(newSuppressWarning) {
           {
@@ -31770,7 +31770,7 @@ var require_react_reconciler_development = __commonJS({
         var HostPortal = 4;
         var HostComponent = 5;
         var HostText = 6;
-        var Fragment2 = 7;
+        var Fragment3 = 7;
         var Mode = 8;
         var ContextConsumer = 9;
         var ContextProvider = 10;
@@ -31910,7 +31910,7 @@ var require_react_reconciler_development = __commonJS({
               return "DehydratedFragment";
             case ForwardRef:
               return getWrappedName$1(type, type.render, "ForwardRef");
-            case Fragment2:
+            case Fragment3:
               return "Fragment";
             case HostComponent:
               return type;
@@ -35502,7 +35502,7 @@ var require_react_reconciler_development = __commonJS({
           }
         }
         var fakeInternalInstance = {};
-        var emptyRefsObject = new React22.Component().refs;
+        var emptyRefsObject = new React21.Component().refs;
         var didWarnAboutStateAssignmentForComponent;
         var didWarnAboutUninitializedState;
         var didWarnAboutGetSnapshotBeforeUpdateWithoutDidUpdate;
@@ -36326,7 +36326,7 @@ var require_react_reconciler_development = __commonJS({
             }
           }
           function updateFragment2(returnFiber, current2, fragment, lanes, key) {
-            if (current2 === null || current2.tag !== Fragment2) {
+            if (current2 === null || current2.tag !== Fragment3) {
               var created = createFiberFromFragment(fragment, returnFiber.mode, lanes, key);
               created.return = returnFiber;
               return created;
@@ -36729,7 +36729,7 @@ var require_react_reconciler_development = __commonJS({
               if (child.key === key) {
                 var elementType = element.type;
                 if (elementType === REACT_FRAGMENT_TYPE) {
-                  if (child.tag === Fragment2) {
+                  if (child.tag === Fragment3) {
                     deleteRemainingChildren(returnFiber, child.sibling);
                     var existing = useFiber(child, element.props.children);
                     existing.return = returnFiber;
@@ -40906,7 +40906,7 @@ var require_react_reconciler_development = __commonJS({
               var _resolvedProps2 = workInProgress2.elementType === type ? _unresolvedProps2 : resolveDefaultProps(type, _unresolvedProps2);
               return updateForwardRef(current2, workInProgress2, type, _resolvedProps2, renderLanes2);
             }
-            case Fragment2:
+            case Fragment3:
               return updateFragment(current2, workInProgress2, renderLanes2);
             case Mode:
               return updateMode(current2, workInProgress2, renderLanes2);
@@ -41343,7 +41343,7 @@ var require_react_reconciler_development = __commonJS({
             case SimpleMemoComponent:
             case FunctionComponent:
             case ForwardRef:
-            case Fragment2:
+            case Fragment3:
             case Mode:
             case Profiler:
             case ContextConsumer:
@@ -46111,7 +46111,7 @@ var require_react_reconciler_development = __commonJS({
           return fiber;
         }
         function createFiberFromFragment(elements, mode, lanes, key) {
-          var fiber = createFiber(Fragment2, elements, key, mode);
+          var fiber = createFiber(Fragment3, elements, key, mode);
           fiber.lanes = lanes;
           return fiber;
         }
@@ -55349,7 +55349,7 @@ var require_react_jsx_runtime_development = __commonJS({
     if (process.env.NODE_ENV !== "production") {
       (function() {
         "use strict";
-        var React22 = require_react();
+        var React21 = require_react();
         var REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element");
         var REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal");
         var REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment");
@@ -55375,7 +55375,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var ReactSharedInternals = React22.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React21.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         function error(format) {
           {
             {
@@ -57399,103 +57399,6 @@ var init_Conversation = __esm({
   }
 });
 
-// node_modules/.pnpm/ink-text-input@6.0.0_ink@5.2.1_@types+react@18.3.29_react@18.2.0__react@18.2.0/node_modules/ink-text-input/build/index.js
-function TextInput({ value: originalValue, placeholder = "", focus = true, mask, highlightPastedText = false, showCursor = true, onChange, onSubmit }) {
-  const [state, setState] = (0, import_react26.useState)({
-    cursorOffset: (originalValue || "").length,
-    cursorWidth: 0
-  });
-  const { cursorOffset, cursorWidth } = state;
-  (0, import_react26.useEffect)(() => {
-    setState((previousState) => {
-      if (!focus || !showCursor) {
-        return previousState;
-      }
-      const newValue = originalValue || "";
-      if (previousState.cursorOffset > newValue.length - 1) {
-        return {
-          cursorOffset: newValue.length,
-          cursorWidth: 0
-        };
-      }
-      return previousState;
-    });
-  }, [originalValue, focus, showCursor]);
-  const cursorActualWidth = highlightPastedText ? cursorWidth : 0;
-  const value = mask ? mask.repeat(originalValue.length) : originalValue;
-  let renderedValue = value;
-  let renderedPlaceholder = placeholder ? source_default.grey(placeholder) : void 0;
-  if (showCursor && focus) {
-    renderedPlaceholder = placeholder.length > 0 ? source_default.inverse(placeholder[0]) + source_default.grey(placeholder.slice(1)) : source_default.inverse(" ");
-    renderedValue = value.length > 0 ? "" : source_default.inverse(" ");
-    let i = 0;
-    for (const char of value) {
-      renderedValue += i >= cursorOffset - cursorActualWidth && i <= cursorOffset ? source_default.inverse(char) : char;
-      i++;
-    }
-    if (value.length > 0 && cursorOffset === value.length) {
-      renderedValue += source_default.inverse(" ");
-    }
-  }
-  use_input_default((input, key) => {
-    if (key.upArrow || key.downArrow || key.ctrl && input === "c" || key.tab || key.shift && key.tab) {
-      return;
-    }
-    if (key.return) {
-      if (onSubmit) {
-        onSubmit(originalValue);
-      }
-      return;
-    }
-    let nextCursorOffset = cursorOffset;
-    let nextValue = originalValue;
-    let nextCursorWidth = 0;
-    if (key.leftArrow) {
-      if (showCursor) {
-        nextCursorOffset--;
-      }
-    } else if (key.rightArrow) {
-      if (showCursor) {
-        nextCursorOffset++;
-      }
-    } else if (key.backspace || key.delete) {
-      if (cursorOffset > 0) {
-        nextValue = originalValue.slice(0, cursorOffset - 1) + originalValue.slice(cursorOffset, originalValue.length);
-        nextCursorOffset--;
-      }
-    } else {
-      nextValue = originalValue.slice(0, cursorOffset) + input + originalValue.slice(cursorOffset, originalValue.length);
-      nextCursorOffset += input.length;
-      if (input.length > 1) {
-        nextCursorWidth = input.length;
-      }
-    }
-    if (cursorOffset < 0) {
-      nextCursorOffset = 0;
-    }
-    if (cursorOffset > originalValue.length) {
-      nextCursorOffset = originalValue.length;
-    }
-    setState({
-      cursorOffset: nextCursorOffset,
-      cursorWidth: nextCursorWidth
-    });
-    if (nextValue !== originalValue) {
-      onChange(nextValue);
-    }
-  }, { isActive: focus });
-  return import_react26.default.createElement(Text, null, placeholder ? value.length > 0 ? renderedValue : renderedPlaceholder : renderedValue);
-}
-var import_react26, build_default;
-var init_build3 = __esm({
-  async "node_modules/.pnpm/ink-text-input@6.0.0_ink@5.2.1_@types+react@18.3.29_react@18.2.0__react@18.2.0/node_modules/ink-text-input/build/index.js"() {
-    import_react26 = __toESM(require_react(), 1);
-    await init_build2();
-    init_source();
-    build_default = TextInput;
-  }
-});
-
 // packages/ko-tui/src/input-history.ts
 function addHistoryEntry(history, value, limit2 = 100) {
   const trimmed = value.trim();
@@ -57517,6 +57420,48 @@ var init_input_history = __esm({
   }
 });
 
+// packages/ko-tui/src/input-buffer.ts
+function clampCursorOffset(text, cursorOffset) {
+  if (!Number.isFinite(cursorOffset)) return text.length;
+  return Math.max(0, Math.min(text.length, Math.trunc(cursorOffset)));
+}
+function setInputText(text, cursorOffset = text.length) {
+  return {
+    text,
+    cursorOffset: clampCursorOffset(text, cursorOffset)
+  };
+}
+function emptyInputBuffer() {
+  return setInputText("");
+}
+function insertText(buffer, text) {
+  const cursorOffset = clampCursorOffset(buffer.text, buffer.cursorOffset);
+  const nextText = buffer.text.slice(0, cursorOffset) + text + buffer.text.slice(cursorOffset);
+  return setInputText(nextText, cursorOffset + text.length);
+}
+function deleteBackward(buffer) {
+  const cursorOffset = clampCursorOffset(buffer.text, buffer.cursorOffset);
+  if (cursorOffset === 0) return setInputText(buffer.text, 0);
+  const nextText = buffer.text.slice(0, cursorOffset - 1) + buffer.text.slice(cursorOffset);
+  return setInputText(nextText, cursorOffset - 1);
+}
+function deleteForward(buffer) {
+  const cursorOffset = clampCursorOffset(buffer.text, buffer.cursorOffset);
+  if (cursorOffset >= buffer.text.length) return setInputText(buffer.text, cursorOffset);
+  const nextText = buffer.text.slice(0, cursorOffset) + buffer.text.slice(cursorOffset + 1);
+  return setInputText(nextText, cursorOffset);
+}
+function moveCursor(buffer, direction) {
+  const cursorOffset = clampCursorOffset(buffer.text, buffer.cursorOffset);
+  const delta = direction === "left" ? -1 : 1;
+  return setInputText(buffer.text, cursorOffset + delta);
+}
+var init_input_buffer = __esm({
+  "packages/ko-tui/src/input-buffer.ts"() {
+    "use strict";
+  }
+});
+
 // packages/ko-tui/src/InputBox.tsx
 function inputPrompt(running) {
   return running ? "\u25CF " : "\u276F ";
@@ -57529,17 +57474,65 @@ function inputKeyAction(input, key) {
   if (key.return || input === "\r") return "submit";
   return "none";
 }
-function sanitizeTextInputValueForControls(currentValue, nextValue) {
-  if (!nextValue.includes("\x1B")) return { value: nextValue, bareEscapeCount: 0 };
-  const inserted = nextValue.startsWith(currentValue) ? nextValue.slice(currentValue.length) : nextValue;
-  const bareEscapeCount = inserted.length > 0 && inserted.split("").every((char) => char === "\x1B") ? inserted.length : 0;
+function controlledInputDisplay(text, cursorOffset, placeholder, focused) {
+  if (text.length === 0 && placeholder) {
+    return {
+      before: "",
+      cursor: focused ? placeholder[0] ?? " " : "",
+      after: focused ? placeholder.slice(1) : placeholder,
+      placeholder: true
+    };
+  }
+  const buffer = setInputText(text, cursorOffset);
+  if (!focused) {
+    return { before: buffer.text, cursor: "", after: "", placeholder: false };
+  }
+  if (buffer.cursorOffset === buffer.text.length) {
+    return { before: buffer.text, cursor: " ", after: "", placeholder: false };
+  }
+  const cursorChar = buffer.text[buffer.cursorOffset];
+  const cursor = cursorChar === "\n" ? " " : cursorChar;
+  const after = cursorChar === "\n" ? buffer.text.slice(buffer.cursorOffset) : buffer.text.slice(buffer.cursorOffset + 1);
   return {
-    value: nextValue.replace(/\x1b(?:\[[0-?]*[ -/]*[@-~])?/g, ""),
-    bareEscapeCount
+    before: buffer.text.slice(0, buffer.cursorOffset),
+    cursor,
+    after,
+    placeholder: false
   };
 }
+function ControlledTextInput({
+  buffer,
+  placeholder,
+  focus
+}) {
+  const { theme } = useTheme();
+  const display = controlledInputDisplay(buffer.text, buffer.cursorOffset, placeholder, focus);
+  if (display.placeholder) {
+    if (!focus) return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { color: theme.colors.dimmed, children: display.after });
+    return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { inverse: true, children: display.cursor }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { color: theme.colors.dimmed, children: display.after })
+    ] });
+  }
+  if (!focus) return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { children: display.before });
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { children: display.before }),
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { inverse: true, children: display.cursor }),
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { children: display.after })
+  ] });
+}
+function isBareEscape(input, key) {
+  return key.escape === true || input.length > 0 && input.split("").every((char) => char === "\x1B");
+}
+function printableInput(input, key) {
+  if (!input || key.ctrl || key.meta || key.escape || key.return || key.backspace || key.delete) return "";
+  if (key.leftArrow || key.rightArrow || key.upArrow || key.downArrow || key.tab) return "";
+  const sanitized = input.replace(/[\r\n\x07\b\x12]/g, "");
+  if (!sanitized) return "";
+  return Array.from(sanitized).every((char) => char >= " ") ? sanitized : "";
+}
 function InputBox({
-  value,
+  buffer,
   onChange,
   onSubmit,
   onBareEscape,
@@ -57547,93 +57540,108 @@ function InputBox({
   onHistorySearchModeChange,
   running,
   focusActive = true,
+  submitActive = true,
   separator
 }) {
   const { theme } = useTheme();
-  const historyRef = (0, import_react27.useRef)([]);
-  const [searchMode, setSearchMode] = (0, import_react27.useState)(false);
-  const [searchTerm, setSearchTerm] = (0, import_react27.useState)("");
-  const [searchIndex, setSearchIndex] = (0, import_react27.useState)(0);
-  const savedValueRef = (0, import_react27.useRef)("");
-  const controlEchoRef = (0, import_react27.useRef)(null);
-  const submitEchoRef = (0, import_react27.useRef)(false);
-  const lastSubmitRef = (0, import_react27.useRef)(null);
-  const wrappedSubmit = (0, import_react27.useCallback)((overrideValue) => {
-    const submittedValue = overrideValue ?? value;
+  const historyRef = (0, import_react26.useRef)([]);
+  const [searchMode, setSearchMode] = (0, import_react26.useState)(false);
+  const [searchTerm, setSearchTerm] = (0, import_react26.useState)("");
+  const [searchIndex, setSearchIndex] = (0, import_react26.useState)(0);
+  const savedBufferRef = (0, import_react26.useRef)(setInputText(""));
+  const controlEchoRef = (0, import_react26.useRef)(null);
+  const lastSubmitRef = (0, import_react26.useRef)(null);
+  const recordHistory = (0, import_react26.useCallback)((submittedValue) => {
+    const trimmed = submittedValue.trim();
+    if (trimmed) {
+      historyRef.current = addHistoryEntry(historyRef.current, trimmed);
+    }
+  }, []);
+  const wrappedSubmit = (0, import_react26.useCallback)((overrideValue) => {
+    const submittedValue = overrideValue ?? buffer.text;
     const now = Date.now();
     const last = lastSubmitRef.current;
     if (last && last.value === submittedValue && now - last.at < 100) {
       return;
     }
     lastSubmitRef.current = { value: submittedValue, at: now };
-    const trimmed = submittedValue.trim();
-    if (trimmed) {
-      historyRef.current = addHistoryEntry(historyRef.current, trimmed);
-    }
+    recordHistory(submittedValue);
     onSubmit(submittedValue);
-  }, [value, onSubmit]);
-  const handleChange = (0, import_react27.useCallback)(
-    (val) => {
+  }, [buffer.text, onSubmit, recordHistory]);
+  const emitSlashMode = (0, import_react26.useCallback)((text) => {
+    if (!onSlashModeChange) return;
+    if (text.startsWith("/")) {
+      onSlashModeChange(true, text);
+    } else {
+      onSlashModeChange(false, text);
+    }
+  }, [onSlashModeChange]);
+  const handleChange = (0, import_react26.useCallback)(
+    (nextBuffer, options = {}) => {
       if (!focusActive) return;
-      if (/[\r\n]$/.test(val)) {
-        const nextValue = val.replace(/[\r\n]+$/g, "");
-        if (nextValue !== value) onChange(nextValue);
-        submitEchoRef.current = true;
-        wrappedSubmit(nextValue);
-        return;
+      if (nextBuffer.text !== buffer.text || nextBuffer.cursorOffset !== buffer.cursorOffset) {
+        onChange(nextBuffer);
       }
-      if (submitEchoRef.current && val.replace(/[\r\n]+$/g, "") === value) {
-        submitEchoRef.current = false;
-        return;
-      }
-      const escaped = sanitizeTextInputValueForControls(value, val);
-      if (escaped.bareEscapeCount > 0 || escaped.value !== val) {
-        for (let i = 0; i < escaped.bareEscapeCount; i++) onBareEscape?.();
-        if (escaped.value !== value) onChange(escaped.value);
-        return;
-      }
-      const sanitized = val.replace(/[\x07\x12]/g, "");
-      if (sanitized !== val) {
-        if (sanitized !== value) onChange(sanitized);
-        return;
-      }
-      const controlEcho = controlEchoRef.current;
-      if (controlEcho && (val === value + controlEcho || val === controlEcho)) {
-        controlEchoRef.current = null;
-        return;
-      }
-      onChange(val);
-      if (onSlashModeChange) {
-        if (val.startsWith("/")) {
-          onSlashModeChange(true, val);
-        } else {
-          onSlashModeChange(false, val);
-        }
-      }
+      if (options.updateSlashMode ?? true) emitSlashMode(nextBuffer.text);
     },
-    [focusActive, onBareEscape, onChange, onSlashModeChange, value, wrappedSubmit]
+    [buffer.cursorOffset, buffer.text, emitSlashMode, focusActive, onChange]
   );
   use_input_default((_input, key) => {
     if (!focusActive && !searchMode) return;
-    if (!searchMode && (key.escape || _input.split("").every((char) => char === "\x1B") && _input.length > 0)) {
+    if (searchMode) {
+      if (isBareEscape(_input, key)) {
+        setSearchMode(false);
+        onHistorySearchModeChange?.(false);
+        onChange(savedBufferRef.current);
+        return;
+      }
+      if (key.ctrl && (_input.includes("") || _input.toLowerCase() === "r")) {
+        controlEchoRef.current = "r";
+        setSearchIndex((prev) => prev + 1);
+        return;
+      }
+      if (key.return || /[\r\n]/.test(_input)) {
+        const matches2 = searchHistory(historyRef.current, searchTerm);
+        const selected = selectHistoryMatch(matches2, searchIndex);
+        if (selected) onChange(setInputText(selected));
+        setSearchMode(false);
+        onHistorySearchModeChange?.(false);
+        return;
+      }
+      if (key.backspace || key.delete) {
+        setSearchTerm((prev) => prev.slice(0, -1));
+        setSearchIndex(0);
+        return;
+      }
+      const printable2 = printableInput(_input, key);
+      if (printable2) {
+        setSearchTerm((prev) => prev + printable2);
+        setSearchIndex(0);
+      }
+      return;
+    }
+    if (isBareEscape(_input, key)) {
       const escapeCount = _input.length > 0 ? _input.length : 1;
       for (let i = 0; i < escapeCount; i++) onBareEscape?.();
       return;
     }
     const keyAction = inputKeyAction(_input, key);
     if (keyAction === "newline") {
-      onChange(value + "\n");
+      handleChange(insertText(buffer, "\n"));
       return;
     }
     if (keyAction === "submit") {
-      submitEchoRef.current = true;
-      wrappedSubmit();
+      if (submitActive) {
+        wrappedSubmit();
+      } else {
+        recordHistory(buffer.text);
+      }
       return;
     }
     if (key.ctrl && (_input.includes("") || _input.toLowerCase() === "r")) {
       controlEchoRef.current = "r";
       if (!searchMode) {
-        savedValueRef.current = value;
+        savedBufferRef.current = buffer;
         setSearchMode(true);
         onHistorySearchModeChange?.(true);
         setSearchTerm("");
@@ -57645,45 +57653,36 @@ function InputBox({
     }
     if (key.ctrl && (_input.includes("\x07") || _input.toLowerCase() === "g")) {
       controlEchoRef.current = "g";
-      launchEditor(value).then((edited) => {
-        if (edited !== void 0) onChange(edited);
+      launchEditor(buffer.text).then((edited) => {
+        if (edited !== void 0) onChange(setInputText(edited));
       }).catch(() => {
       });
       return;
     }
-    if (searchMode && !key.ctrl && !key.meta && _input && !key.escape) {
-      if (key.backspace || key.delete) {
-        setSearchTerm((prev) => prev.slice(0, -1));
-        setSearchIndex(0);
+    if (key.leftArrow) {
+      handleChange(moveCursor(buffer, "left"), { updateSlashMode: false });
+      return;
+    }
+    if (key.rightArrow) {
+      handleChange(moveCursor(buffer, "right"), { updateSlashMode: false });
+      return;
+    }
+    if (key.backspace) {
+      handleChange(deleteBackward(buffer));
+      return;
+    }
+    if (key.delete) {
+      handleChange(deleteForward(buffer));
+      return;
+    }
+    const printable = printableInput(_input, key);
+    if (printable) {
+      const controlEcho = controlEchoRef.current;
+      if (controlEcho && printable === controlEcho) {
+        controlEchoRef.current = null;
         return;
       }
-      const printable = _input.replace(/[\r\n]/g, "");
-      const nextTerm = printable >= " " ? searchTerm + printable : searchTerm;
-      if (printable >= " ") {
-        setSearchTerm(nextTerm);
-        setSearchIndex(0);
-      }
-      if (key.return || /[\r\n]/.test(_input)) {
-        const matches2 = searchHistory(historyRef.current, nextTerm);
-        const selected = selectHistoryMatch(matches2, printable >= " " ? 0 : searchIndex);
-        if (selected) onChange(selected);
-        setSearchMode(false);
-        onHistorySearchModeChange?.(false);
-      }
-      return;
-    }
-    if (searchMode && key.escape) {
-      setSearchMode(false);
-      onHistorySearchModeChange?.(false);
-      onChange(savedValueRef.current);
-      return;
-    }
-    if (searchMode && key.return) {
-      const matches2 = searchHistory(historyRef.current, searchTerm);
-      const selected = selectHistoryMatch(matches2, searchIndex);
-      if (selected) onChange(selected);
-      setSearchMode(false);
-      onHistorySearchModeChange?.(false);
+      handleChange(insertText(buffer, printable));
       return;
     }
   });
@@ -57698,11 +57697,9 @@ function InputBox({
     !searchMode && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { bold: true, color: running ? theme.colors.warning : theme.colors.success, children: inputPrompt(running) }),
       /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
-        build_default,
+        ControlledTextInput,
         {
-          value,
-          onChange: handleChange,
-          onSubmit: wrappedSubmit,
+          buffer,
           placeholder: inputPlaceholder(running),
           focus: focusActive
         }
@@ -57742,14 +57739,14 @@ async function launchEditor(text) {
     });
   });
 }
-var import_react27, import_jsx_runtime9;
+var import_react26, import_jsx_runtime9;
 var init_InputBox = __esm({
   async "packages/ko-tui/src/InputBox.tsx"() {
     "use strict";
-    import_react27 = __toESM(require_react(), 1);
+    import_react26 = __toESM(require_react(), 1);
     await init_build2();
-    await init_build3();
     init_input_history();
+    init_input_buffer();
     init_theme();
     import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
   }
@@ -57833,7 +57830,7 @@ function permissionPreviewLines(toolType, params) {
   return [];
 }
 function PermissionDialog({ session, requestId, toolType, toolName, params, description, active = true, onResolve }) {
-  const [selected, setSelected] = (0, import_react28.useState)(0);
+  const [selected, setSelected] = (0, import_react27.useState)(0);
   const filePath = params?.file_path;
   const command = params?.command;
   use_input_default((_input, key) => {
@@ -57892,11 +57889,11 @@ function PermissionDialog({ session, requestId, toolType, toolName, params, desc
     /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react28, import_jsx_runtime11, SEP2;
+var import_react27, import_jsx_runtime11, SEP2;
 var init_PermissionDialog = __esm({
   async "packages/ko-tui/src/PermissionDialog.tsx"() {
     "use strict";
-    import_react28 = __toESM(require_react(), 1);
+    import_react27 = __toESM(require_react(), 1);
     await init_build2();
     import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
     SEP2 = "\u254C".repeat(60);
@@ -58219,7 +58216,7 @@ var init_commands = __esm({
 // packages/ko-tui/src/StatusPanel.tsx
 function StatusPanel({ session, onClose, active = true }) {
   const { theme } = useTheme();
-  const [tab2, setTab] = (0, import_react29.useState)("Settings");
+  const [tab2, setTab] = (0, import_react28.useState)("Settings");
   const m = session.getModel();
   const usageLines = formatUsageReport(session).split("\n");
   use_input_default((_input, key) => {
@@ -58292,11 +58289,11 @@ function StatusPanel({ session, onClose, active = true }) {
     ] }) })
   ] });
 }
-var import_react29, import_jsx_runtime12, TABS;
+var import_react28, import_jsx_runtime12, TABS;
 var init_StatusPanel = __esm({
   async "packages/ko-tui/src/StatusPanel.tsx"() {
     "use strict";
-    import_react29 = __toESM(require_react(), 1);
+    import_react28 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     init_commands();
@@ -58405,7 +58402,7 @@ var init_CommandPanel = __esm({
 // packages/ko-tui/src/SessionPanel.tsx
 function SessionPanel(props) {
   const { theme } = useTheme();
-  const [selected, setSelected] = (0, import_react30.useState)(0);
+  const [selected, setSelected] = (0, import_react29.useState)(0);
   const items = props.mode === "branch" ? props.branches : props.sessions;
   const title = props.mode === "branch" ? "Branches" : "Resume Session";
   use_input_default((_input, key) => {
@@ -58427,7 +58424,7 @@ function SessionPanel(props) {
       props.onSelect(props.sessions[selected]);
     }
   });
-  const windowed = (0, import_react30.useMemo)(() => {
+  const windowed = (0, import_react29.useMemo)(() => {
     const start = Math.max(0, Math.min(selected - Math.floor(WINDOW_SIZE2 / 2), Math.max(0, items.length - WINDOW_SIZE2)));
     return { start, visible: items.slice(start, start + WINDOW_SIZE2) };
   }, [items, selected]);
@@ -58472,11 +58469,11 @@ function SessionRow({ session, active }) {
     date
   ] });
 }
-var import_react30, import_jsx_runtime14, WINDOW_SIZE2;
+var import_react29, import_jsx_runtime14, WINDOW_SIZE2;
 var init_SessionPanel = __esm({
   async "packages/ko-tui/src/SessionPanel.tsx"() {
     "use strict";
-    import_react30 = __toESM(require_react(), 1);
+    import_react29 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
@@ -58546,8 +58543,8 @@ var init_input_prefix = __esm({
 function ThemePanel({ active, onClose, onSelect }) {
   const { theme } = useTheme();
   const initialIndex = Math.max(0, OPTIONS.findIndex((option) => option.name === theme.name));
-  const [selected, setSelected] = (0, import_react31.useState)(initialIndex);
-  const previewTheme = (0, import_react31.useMemo)(() => getTheme(OPTIONS[selected]?.name ?? theme.name) ?? theme, [selected, theme]);
+  const [selected, setSelected] = (0, import_react30.useState)(initialIndex);
+  const previewTheme = (0, import_react30.useMemo)(() => getTheme(OPTIONS[selected]?.name ?? theme.name) ?? theme, [selected, theme]);
   use_input_default((_input, key) => {
     if (!active) return;
     if (key.escape) {
@@ -58599,11 +58596,11 @@ function ThemePanel({ active, onClose, onSelect }) {
     ] })
   ] });
 }
-var import_react31, import_jsx_runtime15, OPTIONS;
+var import_react30, import_jsx_runtime15, OPTIONS;
 var init_ThemePanel = __esm({
   async "packages/ko-tui/src/ThemePanel.tsx"() {
     "use strict";
-    import_react31 = __toESM(require_react(), 1);
+    import_react30 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
@@ -58625,7 +58622,7 @@ function rewindDialogOptions() {
 }
 function RewindDialog({ active = true, onConfirm, onCancel }) {
   const { theme } = useTheme();
-  const [selected, setSelected] = (0, import_react32.useState)(0);
+  const [selected, setSelected] = (0, import_react31.useState)(0);
   const options = rewindDialogOptions();
   use_input_default((_input, key) => {
     if (!active) return;
@@ -58661,11 +58658,11 @@ function RewindDialog({ active = true, onConfirm, onCancel }) {
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react32, import_jsx_runtime16;
+var import_react31, import_jsx_runtime16;
 var init_RewindDialog = __esm({
   async "packages/ko-tui/src/RewindDialog.tsx"() {
     "use strict";
-    import_react32 = __toESM(require_react(), 1);
+    import_react31 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
@@ -58694,47 +58691,50 @@ var init_layout = __esm({
 });
 
 // packages/ko-tui/src/App.tsx
+function commandInputText(cmd) {
+  return cmd.takesArgs ? `${cmd.name} ` : cmd.name;
+}
 function App2({ session, onThemeChange }) {
   const { theme, setTheme } = useTheme();
-  const [events, setEvents] = (0, import_react33.useState)([]);
-  const [message, setMessage] = (0, import_react33.useState)("");
-  const [running, setRunning] = (0, import_react33.useState)(false);
-  const [model, setModel] = (0, import_react33.useState)(session.getModel());
-  const [permissionMode, setPermissionMode] = (0, import_react33.useState)(session.getPermissionMode());
-  const [pendingPermission, setPendingPermission] = (0, import_react33.useState)(null);
-  const [modal, setModal] = (0, import_react33.useState)(null);
-  const [notifications, setNotifications] = (0, import_react33.useState)([]);
-  const [focusMode, setFocusMode] = (0, import_react33.useState)("input");
-  const previousFocusRef = (0, import_react33.useRef)("input");
-  const lastEscRef = (0, import_react33.useRef)(0);
-  const focusModeRef = (0, import_react33.useRef)("input");
-  const [toolKeys, setToolKeys] = (0, import_react33.useState)([]);
-  const [selectedToolIndex, setSelectedToolIndex] = (0, import_react33.useState)(0);
-  const [expandedToolIds, setExpandedToolIds] = (0, import_react33.useState)(() => /* @__PURE__ */ new Set());
-  const notify = (0, import_react33.useCallback)((msg) => {
+  const [events, setEvents] = (0, import_react32.useState)([]);
+  const [input, setInput] = (0, import_react32.useState)(() => emptyInputBuffer());
+  const [running, setRunning] = (0, import_react32.useState)(false);
+  const [model, setModel] = (0, import_react32.useState)(session.getModel());
+  const [permissionMode, setPermissionMode] = (0, import_react32.useState)(session.getPermissionMode());
+  const [pendingPermission, setPendingPermission] = (0, import_react32.useState)(null);
+  const [modal, setModal] = (0, import_react32.useState)(null);
+  const [notifications, setNotifications] = (0, import_react32.useState)([]);
+  const [focusMode, setFocusMode] = (0, import_react32.useState)("input");
+  const previousFocusRef = (0, import_react32.useRef)("input");
+  const lastEscRef = (0, import_react32.useRef)(0);
+  const focusModeRef = (0, import_react32.useRef)("input");
+  const [toolKeys, setToolKeys] = (0, import_react32.useState)([]);
+  const [selectedToolIndex, setSelectedToolIndex] = (0, import_react32.useState)(0);
+  const [expandedToolIds, setExpandedToolIds] = (0, import_react32.useState)(() => /* @__PURE__ */ new Set());
+  const notify = (0, import_react32.useCallback)((msg) => {
     setNotifications((prev) => [...prev, msg]);
     setTimeout(() => setNotifications((prev) => prev.filter((m) => m !== msg)), 6e3);
   }, []);
-  const closeModal = (0, import_react33.useCallback)(() => {
+  const closeModal = (0, import_react32.useCallback)(() => {
     setModal(null);
     setFocusMode(restoreFocusAfterBlockingMode(previousFocusRef.current));
   }, []);
-  const openBranchPanel = (0, import_react33.useCallback)(() => {
+  const openBranchPanel = (0, import_react32.useCallback)(() => {
     previousFocusRef.current = focusMode;
     setModal("branch");
     setFocusMode("session-modal");
   }, [focusMode]);
-  const openResumePanel = (0, import_react33.useCallback)(() => {
+  const openResumePanel = (0, import_react32.useCallback)(() => {
     previousFocusRef.current = focusMode;
     setModal("resume");
     setFocusMode("session-modal");
   }, [focusMode]);
-  const openThemePanel = (0, import_react33.useCallback)(() => {
+  const openThemePanel = (0, import_react32.useCallback)(() => {
     previousFocusRef.current = focusMode;
     setModal("theme");
     setFocusMode("theme-modal");
   }, [focusMode]);
-  const applyTheme = (0, import_react33.useCallback)((name) => {
+  const applyTheme = (0, import_react32.useCallback)((name) => {
     if (!setTheme(name)) {
       notify(`Unknown theme: ${name}`);
       return;
@@ -58743,17 +58743,17 @@ function App2({ session, onThemeChange }) {
     notify(`Theme switched to ${name}`);
     closeModal();
   }, [setTheme, onThemeChange, notify, closeModal]);
-  (0, import_react33.useEffect)(() => {
+  (0, import_react32.useEffect)(() => {
     focusModeRef.current = focusMode;
   }, [focusMode]);
-  const commandContext = (0, import_react33.useMemo)(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
-  const [slashMode, setSlashMode] = (0, import_react33.useState)(false);
-  const [slashFilter, setSlashFilter] = (0, import_react33.useState)("");
-  const [slashIndex, setSlashIndex] = (0, import_react33.useState)(0);
-  const [filteredCommands, setFilteredCommands] = (0, import_react33.useState)(
+  const commandContext = (0, import_react32.useMemo)(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
+  const [slashMode, setSlashMode] = (0, import_react32.useState)(false);
+  const [slashFilter, setSlashFilter] = (0, import_react32.useState)("");
+  const [slashIndex, setSlashIndex] = (0, import_react32.useState)(0);
+  const [filteredCommands, setFilteredCommands] = (0, import_react32.useState)(
     getCommands()
   );
-  (0, import_react33.useEffect)(() => {
+  (0, import_react32.useEffect)(() => {
     const listener = (event) => {
       setEvents((prev) => [...prev, event]);
       switch (event.type) {
@@ -58791,21 +58791,24 @@ function App2({ session, onThemeChange }) {
     session.addEventListener(listener);
     return () => session.removeEventListener(listener);
   }, [session, focusMode]);
-  const updateSlashFilter = (0, import_react33.useCallback)((filter) => {
+  const updateSlashFilter = (0, import_react32.useCallback)((filter) => {
     const query = filter.replace(/^\//, "");
     const results = filterCommands(query);
     setSlashFilter(filter);
     setFilteredCommands(results);
     setSlashIndex(0);
   }, []);
-  const closeSlashMode = (0, import_react33.useCallback)(() => {
+  const closeSlashMode = (0, import_react32.useCallback)(() => {
     setSlashMode(false);
     setSlashFilter("");
     setSlashIndex(0);
     setFilteredCommands(getCommands());
     setFocusMode("input");
   }, []);
-  const handleSlashModeChange = (0, import_react33.useCallback)(
+  const clearInput = (0, import_react32.useCallback)(() => {
+    setInput(emptyInputBuffer());
+  }, []);
+  const handleSlashModeChange = (0, import_react32.useCallback)(
     (active, filterText) => {
       if (focusMode === "permission" || focusMode === "status-modal" || focusMode === "model-modal") return;
       if (active) {
@@ -58818,13 +58821,13 @@ function App2({ session, onThemeChange }) {
     },
     [updateSlashFilter, closeSlashMode, focusMode]
   );
-  const handleCommandSelect = (0, import_react33.useCallback)(
+  const handleCommandSelect = (0, import_react32.useCallback)(
     (cmd) => {
       if (cmd.takesArgs) {
-        setMessage(cmd.name + " ");
+        setInput(setInputText(commandInputText(cmd)));
         closeSlashMode();
       } else {
-        setMessage("");
+        clearInput();
         closeSlashMode();
         if (cmd.name === "/status") {
           previousFocusRef.current = "input";
@@ -58836,10 +58839,10 @@ function App2({ session, onThemeChange }) {
         if (cmd.name === "/clear") setEvents([]);
       }
     },
-    [closeSlashMode, session, notify, commandContext]
+    [clearInput, closeSlashMode, session, notify, commandContext]
   );
-  const handleSubmit = (0, import_react33.useCallback)((submittedValue) => {
-    const text = (submittedValue ?? message).trim();
+  const handleSubmit = (0, import_react32.useCallback)((submittedValue) => {
+    const text = (submittedValue ?? input.text).trim();
     if (!text) return;
     if (running) {
       notify(busySubmitMessage(text));
@@ -58850,7 +58853,7 @@ function App2({ session, onThemeChange }) {
     if (slashMode && exactSlashRoute.type === "slash") {
       const exactCommand = getCommands().find((c) => c.name === exactSlashRoute.command);
       if (exactCommand) {
-        setMessage("");
+        clearInput();
         closeSlashMode();
         if (exactSlashRoute.command === "/status") {
           previousFocusRef.current = focusMode;
@@ -58876,7 +58879,7 @@ function App2({ session, onThemeChange }) {
         return;
       }
     }
-    setMessage("");
+    clearInput();
     const route = exactSlashRoute;
     if (route.type === "shell") {
       if (route.command) {
@@ -58927,7 +58930,7 @@ function App2({ session, onThemeChange }) {
       });
     }
   }, [
-    message,
+    input.text,
     session,
     notify,
     running,
@@ -58936,10 +58939,11 @@ function App2({ session, onThemeChange }) {
     slashIndex,
     filteredCommands,
     handleCommandSelect,
+    clearInput,
     closeSlashMode,
     commandContext
   ]);
-  const handleToolKeysChange = (0, import_react33.useCallback)((keys) => {
+  const handleToolKeysChange = (0, import_react32.useCallback)((keys) => {
     setToolKeys((prev) => {
       if (prev.length === keys.length && prev.every((key, index) => key === keys[index])) {
         return prev;
@@ -58948,7 +58952,7 @@ function App2({ session, onThemeChange }) {
     });
     setSelectedToolIndex((prev) => keys.length === 0 ? 0 : Math.min(prev, keys.length - 1));
   }, []);
-  const runRewind = (0, import_react33.useCallback)(() => {
+  const runRewind = (0, import_react32.useCallback)(() => {
     session.rewindLastTurn().then((files) => {
       if (files.length > 0) {
         notify(`Rewound: restored ${files.join(", ")}`);
@@ -58957,20 +58961,20 @@ function App2({ session, onThemeChange }) {
       }
     }).catch((err) => notify(`Rewind error: ${err.message}`));
   }, [session, notify]);
-  const openRewindDialog = (0, import_react33.useCallback)(() => {
+  const openRewindDialog = (0, import_react32.useCallback)(() => {
     previousFocusRef.current = focusModeRef.current;
     setModal("rewind");
     setFocusMode("rewind-confirm");
   }, []);
-  const closeRewindDialog = (0, import_react33.useCallback)(() => {
+  const closeRewindDialog = (0, import_react32.useCallback)(() => {
     setModal(null);
     setFocusMode(restoreFocusAfterBlockingMode(previousFocusRef.current));
   }, []);
-  const confirmRewind = (0, import_react33.useCallback)(() => {
+  const confirmRewind = (0, import_react32.useCallback)(() => {
     closeRewindDialog();
     runRewind();
   }, [closeRewindDialog, runRewind]);
-  const handleInputEscape = (0, import_react33.useCallback)(() => {
+  const handleInputEscape = (0, import_react32.useCallback)(() => {
     const now = Date.now();
     const lastEsc = lastEscRef.current;
     lastEscRef.current = now;
@@ -58979,7 +58983,7 @@ function App2({ session, onThemeChange }) {
       lastEscRef.current = 0;
     }
   }, [openRewindDialog]);
-  const resolvePermissionFocus = (0, import_react33.useCallback)(() => {
+  const resolvePermissionFocus = (0, import_react32.useCallback)(() => {
     setPendingPermission(null);
     setFocusMode(restoreFocusAfterBlockingMode(previousFocusRef.current));
   }, []);
@@ -59000,14 +59004,19 @@ function App2({ session, onThemeChange }) {
       }
       if (key.escape) {
         closeSlashMode();
-        setMessage("");
+        clearInput();
+        return;
+      }
+      if (key.return || _input === "\r" || _input === "\n") {
+        handleSubmit(input.text);
         return;
       }
       if (key.tab) {
         if (filteredCommands.length > 0) {
           const cmd = filteredCommands[0];
-          setMessage(cmd.takesArgs ? cmd.name + " " : cmd.name);
-          updateSlashFilter(cmd.takesArgs ? cmd.name + " " : cmd.name);
+          const completed = commandInputText(cmd);
+          setInput(setInputText(completed));
+          updateSlashFilter(completed);
           return;
         }
       }
@@ -59113,13 +59122,14 @@ function App2({ session, onThemeChange }) {
     /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
       InputBox,
       {
-        value: message,
-        onChange: setMessage,
+        buffer: input,
+        onChange: setInput,
         onSubmit: handleSubmit,
         onBareEscape: handleInputEscape,
         onSlashModeChange: handleSlashModeChange,
         running,
         focusActive: focusMode === "input" || focusMode === "slash",
+        submitActive: focusMode === "input",
         onHistorySearchModeChange: (active) => setFocusMode(active ? "history-search" : "input"),
         separator: sep
       }
@@ -59161,11 +59171,11 @@ function userMessageText(content) {
   }
   return String(content);
 }
-var import_react33, import_jsx_runtime17;
+var import_react32, import_jsx_runtime17;
 var init_App2 = __esm({
   async "packages/ko-tui/src/App.tsx"() {
     "use strict";
-    import_react33 = __toESM(require_react(), 1);
+    import_react32 = __toESM(require_react(), 1);
     await init_build2();
     init_src2();
     await init_Header();
@@ -59178,6 +59188,7 @@ var init_App2 = __esm({
     await init_SessionPanel();
     init_commands();
     init_focus();
+    init_input_buffer();
     init_input_prefix();
     init_theme();
     await init_ThemePanel();
@@ -59191,10 +59202,10 @@ var init_App2 = __esm({
 function run(session, config) {
   const theme = config?.theme ?? "dark";
   render_default(
-    import_react34.default.createElement(
+    import_react33.default.createElement(
       ThemeProvider,
       { initialTheme: theme },
-      import_react34.default.createElement(App2, { session, onThemeChange: config?.onThemeChange })
+      import_react33.default.createElement(App2, { session, onThemeChange: config?.onThemeChange })
     ),
     {
       exitOnCtrlC: true,
@@ -59202,12 +59213,12 @@ function run(session, config) {
     }
   );
 }
-var import_react34;
+var import_react33;
 var init_run = __esm({
   async "packages/ko-tui/src/run.ts"() {
     "use strict";
     await init_build2();
-    import_react34 = __toESM(require_react(), 1);
+    import_react33 = __toESM(require_react(), 1);
     await init_App2();
     init_theme();
   }

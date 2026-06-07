@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { inputKeyAction, inputPlaceholder, inputPrompt, sanitizeTextInputValueForControls } from "../InputBox.js";
+import {
+  controlledInputDisplay,
+  inputKeyAction,
+  inputPlaceholder,
+  inputPrompt,
+  printableInput,
+  sanitizeTextInputValueForControls,
+} from "../InputBox.js";
+import { insertText, setInputText } from "../input-buffer.js";
 import { horizontalSeparator } from "../layout.js";
 
 describe("InputBox helpers", () => {
@@ -47,5 +55,52 @@ describe("InputBox helpers", () => {
       value: "draft",
       bareEscapeCount: 0,
     });
+  });
+
+  it("formats controlled cursor display for focused input", () => {
+    expect(controlledInputDisplay("/help", 5, "placeholder", true)).toEqual({
+      before: "/help",
+      cursor: " ",
+      after: "",
+      placeholder: false,
+    });
+    expect(controlledInputDisplay("/help", 1, "placeholder", true)).toEqual({
+      before: "/",
+      cursor: "h",
+      after: "elp",
+      placeholder: false,
+    });
+  });
+
+  it("formats controlled placeholder display", () => {
+    expect(controlledInputDisplay("", 0, "输入消息", true)).toEqual({
+      before: "",
+      cursor: "输",
+      after: "入消息",
+      placeholder: true,
+    });
+    expect(controlledInputDisplay("", 0, "输入消息", false)).toEqual({
+      before: "",
+      cursor: "",
+      after: "输入消息",
+      placeholder: true,
+    });
+  });
+
+  it("inserts explicit multiline shortcuts at the cursor position", () => {
+    const buffer = setInputText("abcd", 2);
+
+    expect(insertText(buffer, "\n")).toEqual({
+      text: "ab\ncd",
+      cursorOffset: 3,
+    });
+  });
+
+  it("does not treat slash navigation keys as printable input", () => {
+    expect(printableInput("x", { tab: true })).toBe("");
+    expect(printableInput("x", { upArrow: true })).toBe("");
+    expect(printableInput("x", { downArrow: true })).toBe("");
+    expect(printableInput("x", { ctrl: true })).toBe("");
+    expect(printableInput("x", {})).toBe("x");
   });
 });

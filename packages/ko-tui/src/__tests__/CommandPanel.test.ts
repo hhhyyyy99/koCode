@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { formatCommandRows, wrapText } from "../CommandPanel.js";
 import type { CommandDef } from "../commands.js";
-import { bottomLayoutOrder } from "../App.js";
+import { bottomLayoutOrder, commandInputText } from "../App.js";
+import { insertText, setInputText } from "../input-buffer.js";
 
 const noop: CommandDef["handler"] = () => {};
 
-function command(name: string, description: string, source?: string): CommandDef {
-  return { name, description, source, handler: noop };
+function command(name: string, description: string, source?: string, takesArgs = false): CommandDef {
+  return { name, description, source, takesArgs, handler: noop };
 }
 
 describe("CommandPanel formatting", () => {
@@ -46,5 +47,24 @@ describe("CommandPanel formatting", () => {
   it("keeps command completions adjacent to the input before the status bar", () => {
     expect(bottomLayoutOrder(true)).toEqual(["input", "command-panel", "status-bar"]);
     expect(bottomLayoutOrder(false)).toEqual(["input", "status-bar"]);
+  });
+
+  it("places continued typing after a completed slash command", () => {
+    const completed = commandInputText(command("/help", "Show help"));
+
+    expect(insertText(setInputText(completed), "x")).toEqual({
+      text: "/helpx",
+      cursorOffset: 6,
+    });
+  });
+
+  it("places argument typing after the trailing space for argument commands", () => {
+    const completed = commandInputText(command("/model", "Switch model", undefined, true));
+
+    expect(completed).toBe("/model ");
+    expect(insertText(setInputText(completed), "openai/gpt-4.1")).toEqual({
+      text: "/model openai/gpt-4.1",
+      cursorOffset: 21,
+    });
   });
 });
