@@ -15,6 +15,7 @@ The system SHALL support Ctrl+R to search through input history and recall previ
 - **WHEN** a matching history entry is found
 - **THEN** pressing Enter restores that entry to the current input
 - **AND** the search prompt closes
+- **AND** the cursor is placed at the end of the restored input
 
 #### Scenario: No matching history
 - **WHEN** no previous inputs match the search term
@@ -28,4 +29,3 @@ The system SHALL store the last 100 user inputs in memory for history search.
 - **THEN** each message is appended to the history list
 - **AND** the history is available for Ctrl+R search
 - **AND** history is limited to 100 entries (oldest discarded)
-
