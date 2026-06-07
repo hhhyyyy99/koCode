@@ -283,11 +283,45 @@ export function getCommands(): CommandDef[] {
   ];
 }
 
+export function normalizeCommandQuery(query: string): string {
+  return query.trim().replace(/^\//, "").toLowerCase();
+}
+
+function commandNameMatchRank(command: CommandDef, query: string): number | null {
+  if (!query) return 0;
+
+  const name = command.name.toLowerCase();
+  const bareName = name.startsWith("/") ? name.slice(1) : name;
+
+  if (query === name || query === bareName) return 1;
+  if (name.startsWith(query) || bareName.startsWith(query)) return 2;
+  if (name.includes(query) || bareName.includes(query)) return 3;
+  return null;
+}
+
+function commandDescriptionMatchRank(command: CommandDef, query: string): number | null {
+  if (!query) return 0;
+  return command.description.toLowerCase().includes(query) ? 4 : null;
+}
+
 export function filterCommands(query: string): CommandDef[] {
-  const q = query.toLowerCase();
-  return getCommands().filter(
-    (c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q),
-  );
+  const q = normalizeCommandQuery(query);
+  const commands = getCommands();
+  const nameMatches = rankedCommandMatches(commands, q, commandNameMatchRank);
+  if (nameMatches.length > 0) return nameMatches;
+  return rankedCommandMatches(commands, q, commandDescriptionMatchRank);
+}
+
+function rankedCommandMatches(
+  commands: CommandDef[],
+  query: string,
+  rankCommand: (command: CommandDef, query: string) => number | null,
+): CommandDef[] {
+  return commands
+    .map((command, index) => ({ command, index, rank: rankCommand(command, query) }))
+    .filter((item): item is { command: CommandDef; index: number; rank: number } => item.rank !== null)
+    .sort((a, b) => a.rank - b.rank || a.index - b.index)
+    .map((item) => item.command);
 }
 
 

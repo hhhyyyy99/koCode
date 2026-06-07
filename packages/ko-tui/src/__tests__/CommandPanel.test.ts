@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { formatCommandRows, wrapText } from "../CommandPanel.js";
 import type { CommandDef } from "../commands.js";
-import { bottomLayoutOrder, commandInputText } from "../App.js";
+import { bottomLayoutOrder, commandInputText, slashCompletionInputText } from "../App.js";
 import { insertText, setInputText } from "../input-buffer.js";
 
 const noop: CommandDef["handler"] = () => {};
@@ -66,5 +66,28 @@ describe("CommandPanel formatting", () => {
       text: "/model openai/gpt-4.1",
       cursorOffset: 21,
     });
+  });
+
+  it("completes the highlighted command instead of the first command", () => {
+    const commands = [
+      command("/help", "Show help"),
+      command("/clear", "Clear conversation history"),
+      command("/compact", "Compact conversation context"),
+    ];
+
+    expect(slashCompletionInputText(commands, 2)).toBe("/compact");
+  });
+
+  it("completes highlighted argument commands with a trailing space", () => {
+    const commands = [
+      command("/help", "Show help"),
+      command("/model", "Switch model", undefined, true),
+    ];
+
+    expect(slashCompletionInputText(commands, 1)).toBe("/model ");
+  });
+
+  it("does not complete when no command is selected", () => {
+    expect(slashCompletionInputText([], 0)).toBeUndefined();
   });
 });

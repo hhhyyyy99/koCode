@@ -45,6 +45,11 @@ export function commandInputText(cmd: CommandDef): string {
   return cmd.takesArgs ? `${cmd.name} ` : cmd.name;
 }
 
+export function slashCompletionInputText(commands: CommandDef[], selectedIndex: number): string | undefined {
+  const cmd = commands[selectedIndex];
+  return cmd ? commandInputText(cmd) : undefined;
+}
+
 export function App({ session, onThemeChange }: AppProps) {
   const { theme, setTheme } = useTheme();
   const [events, setEvents] = useState<AgentSessionEvent[]>([]);
@@ -383,9 +388,8 @@ export function App({ session, onThemeChange }: AppProps) {
         return;
       }
       if (key.tab) {
-        if (filteredCommands.length > 0) {
-          const cmd = filteredCommands[0]!;
-          const completed = commandInputText(cmd);
+        const completed = slashCompletionInputText(filteredCommands, slashIndex);
+        if (completed !== undefined) {
           setInput(setInputText(completed));
           updateSlashFilter(completed);
           return;

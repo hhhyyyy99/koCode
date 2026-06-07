@@ -58171,11 +58171,31 @@ Path: ${session.sessionPath}`);
     }
   ];
 }
+function normalizeCommandQuery(query) {
+  return query.trim().replace(/^\//, "").toLowerCase();
+}
+function commandNameMatchRank(command, query) {
+  if (!query) return 0;
+  const name = command.name.toLowerCase();
+  const bareName = name.startsWith("/") ? name.slice(1) : name;
+  if (query === name || query === bareName) return 1;
+  if (name.startsWith(query) || bareName.startsWith(query)) return 2;
+  if (name.includes(query) || bareName.includes(query)) return 3;
+  return null;
+}
+function commandDescriptionMatchRank(command, query) {
+  if (!query) return 0;
+  return command.description.toLowerCase().includes(query) ? 4 : null;
+}
 function filterCommands(query) {
-  const q = query.toLowerCase();
-  return getCommands().filter(
-    (c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
-  );
+  const q = normalizeCommandQuery(query);
+  const commands = getCommands();
+  const nameMatches = rankedCommandMatches(commands, q, commandNameMatchRank);
+  if (nameMatches.length > 0) return nameMatches;
+  return rankedCommandMatches(commands, q, commandDescriptionMatchRank);
+}
+function rankedCommandMatches(commands, query, rankCommand) {
+  return commands.map((command, index) => ({ command, index, rank: rankCommand(command, query) })).filter((item) => item.rank !== null).sort((a, b) => a.rank - b.rank || a.index - b.index).map((item) => item.command);
 }
 function formatContextBreakdown(session) {
   const breakdown = session.getContextBreakdown();
@@ -58704,6 +58724,10 @@ var init_layout = __esm({
 function commandInputText(cmd) {
   return cmd.takesArgs ? `${cmd.name} ` : cmd.name;
 }
+function slashCompletionInputText(commands, selectedIndex) {
+  const cmd = commands[selectedIndex];
+  return cmd ? commandInputText(cmd) : void 0;
+}
 function App2({ session, onThemeChange }) {
   const { theme, setTheme } = useTheme();
   const [events, setEvents] = (0, import_react32.useState)([]);
@@ -59022,9 +59046,8 @@ function App2({ session, onThemeChange }) {
         return;
       }
       if (key.tab) {
-        if (filteredCommands.length > 0) {
-          const cmd = filteredCommands[0];
-          const completed = commandInputText(cmd);
+        const completed = slashCompletionInputText(filteredCommands, slashIndex);
+        if (completed !== void 0) {
           setInput(setInputText(completed));
           updateSlashFilter(completed);
           return;

@@ -52,9 +52,48 @@ describe("command formatters", () => {
     ]));
   });
 
-  it("filters commands by name or description", () => {
+  it("filters commands by name or fallback description", () => {
     expect(filterCommands("mod").map((command) => command.name)).toContain("/model");
     expect(filterCommands("token").map((command) => command.name)).toContain("/context");
+  });
+
+  it("uses command-name matches before description-only matches", () => {
+    const names = filterCommands("/exit").map((command) => command.name);
+
+    expect(names[0]).toBe("/exit");
+    expect(names).not.toContain("/quit");
+  });
+
+  it("does not include description-only matches when an exact command name matches", () => {
+    const names = filterCommands("/context").map((command) => command.name);
+
+    expect(names).toContain("/context");
+    expect(names).not.toContain("/compact");
+  });
+
+  it("does not include description-only matches when a command-name prefix matches", () => {
+    const names = filterCommands("/con").map((command) => command.name);
+
+    expect(names).toContain("/context");
+    expect(names).toContain("/config");
+    expect(names).not.toContain("/compact");
+  });
+
+  it("falls back to description matches when no command names match", () => {
+    const names = filterCommands("token").map((command) => command.name);
+
+    expect(names).toContain("/context");
+  });
+
+  it("preserves registry order for empty slash queries", () => {
+    const defaultOrder = getCommands().map((command) => command.name);
+
+    expect(filterCommands("").map((command) => command.name)).toEqual(defaultOrder);
+    expect(filterCommands("/").map((command) => command.name)).toEqual(defaultOrder);
+  });
+
+  it("normalizes trailing whitespace after completed commands", () => {
+    expect(filterCommands("/branch ")[0]?.name).toBe("/branch");
   });
 
   it("formats /context as a tree with health", () => {
