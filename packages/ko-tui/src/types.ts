@@ -30,6 +30,14 @@ export interface ToolAssistantItem {
 
 export type AssistantItem = TextAssistantItem | ThinkingAssistantItem | ToolAssistantItem;
 
+export type ExpandableTranscriptBlockKind = "thinking" | "tool";
+
+export interface ExpandableTranscriptBlock {
+  key: string;
+  itemKey: string;
+  kind: ExpandableTranscriptBlockKind;
+}
+
 export interface Turn {
   id: number;
   userMessage: { content: string; images?: { data: string; mimeType: string }[] };
@@ -57,6 +65,22 @@ export function turnToolCalls(turn: Turn): ToolCallState[] {
   return turn.assistant.items
     .filter((item): item is ToolAssistantItem => item.type === "tool")
     .map((item) => item.toolCall);
+}
+
+export function turnExpandableBlocks(turn: Turn): ExpandableTranscriptBlock[] {
+  return turn.assistant.items.flatMap((item): ExpandableTranscriptBlock[] => {
+    if (item.type === "thinking") {
+      return [{ key: item.key, itemKey: item.key, kind: "thinking" }];
+    }
+    if (item.type === "tool") {
+      return [{ key: item.toolCall.key, itemKey: item.key, kind: "tool" }];
+    }
+    return [];
+  });
+}
+
+export function turnExpandableBlockKeys(turn: Turn): string[] {
+  return turnExpandableBlocks(turn).map((block) => block.key);
 }
 
 export function createTurn(id: number, event: AgentSessionEvent & { type: "user_message" }): Turn {

@@ -8,6 +8,7 @@ export type FocusMode =
   | "permission"
   | "rewind-confirm"
   | "tool-output"
+  | "transcript-block"
   | "history-search";
 
 export function isModalFocus(mode: FocusMode): boolean {
@@ -19,7 +20,7 @@ export function isTextInputFocus(mode: FocusMode): boolean {
 }
 
 export function canUseGlobalShortcut(mode: FocusMode): boolean {
-  return mode === "input" || mode === "tool-output";
+  return mode === "input" || mode === "transcript-block" || mode === "tool-output";
 }
 
 export function restoreFocusAfterBlockingMode(previous: FocusMode | null | undefined): FocusMode {
@@ -28,14 +29,22 @@ export function restoreFocusAfterBlockingMode(previous: FocusMode | null | undef
 }
 
 export function normalizeToolIndex(index: number, count: number): number {
+  return normalizeBlockIndex(index, count);
+}
+
+export function moveToolIndex(index: number, count: number, direction: "next" | "previous"): number {
+  return moveBlockIndex(index, count, direction);
+}
+
+export function normalizeBlockIndex(index: number, count: number): number {
   if (count <= 0) return 0;
   if (index < 0) return count - 1;
   if (index >= count) return 0;
   return index;
 }
 
-export function moveToolIndex(index: number, count: number, direction: "next" | "previous"): number {
-  return normalizeToolIndex(index + (direction === "next" ? 1 : -1), count);
+export function moveBlockIndex(index: number, count: number, direction: "next" | "previous"): number {
+  return normalizeBlockIndex(index + (direction === "next" ? 1 : -1), count);
 }
 
 export function isCtrlOInput(input: string, key: { ctrl?: boolean }): boolean {
@@ -43,11 +52,34 @@ export function isCtrlOInput(input: string, key: { ctrl?: boolean }): boolean {
 }
 
 export function toggleExpandedToolId(expanded: Set<string>, toolKey: string | undefined): Set<string> {
+  return toggleExpandedBlockId(expanded, toolKey);
+}
+
+export function toggleExpandedBlockId(expanded: Set<string>, blockKey: string | undefined): Set<string> {
   const next = new Set(expanded);
-  if (!toolKey) return next;
-  if (next.has(toolKey)) next.delete(toolKey);
-  else next.add(toolKey);
+  if (!blockKey) return next;
+  if (next.has(blockKey)) next.delete(blockKey);
+  else next.add(blockKey);
   return next;
+}
+
+export interface CtrlOBlockToggleState {
+  focusMode: FocusMode;
+  selectedBlockIndex: number;
+  blockKeys: string[];
+  expandedBlockIds: Set<string>;
+}
+
+export function applyCtrlOBlockToggle(state: CtrlOBlockToggleState): CtrlOBlockToggleState {
+  if (state.blockKeys.length === 0) return state;
+  const selectedBlockIndex = Math.min(state.selectedBlockIndex, state.blockKeys.length - 1);
+  const blockKey = state.blockKeys[selectedBlockIndex];
+  return {
+    ...state,
+    focusMode: "transcript-block",
+    selectedBlockIndex,
+    expandedBlockIds: toggleExpandedBlockId(state.expandedBlockIds, blockKey),
+  };
 }
 
 export interface CtrlOToolToggleState {
@@ -58,14 +90,17 @@ export interface CtrlOToolToggleState {
 }
 
 export function applyCtrlOToolToggle(state: CtrlOToolToggleState): CtrlOToolToggleState {
-  if (state.toolKeys.length === 0) return state;
-  const selectedToolIndex = Math.min(state.selectedToolIndex, state.toolKeys.length - 1);
-  const toolKey = state.toolKeys[selectedToolIndex];
+  const next = applyCtrlOBlockToggle({
+    focusMode: state.focusMode,
+    selectedBlockIndex: state.selectedToolIndex,
+    blockKeys: state.toolKeys,
+    expandedBlockIds: state.expandedToolIds,
+  });
   return {
-    ...state,
-    focusMode: "tool-output",
-    selectedToolIndex,
-    expandedToolIds: toggleExpandedToolId(state.expandedToolIds, toolKey),
+    focusMode: next.focusMode,
+    selectedToolIndex: next.selectedBlockIndex,
+    toolKeys: state.toolKeys,
+    expandedToolIds: next.expandedBlockIds,
   };
 }
 

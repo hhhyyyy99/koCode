@@ -58,6 +58,10 @@ export function mergeDelta(cur: string, delta: string): string {
   return cur + delta;
 }
 
+function nextAssistantItemKey(turn: Turn, kind: "text" | "thinking"): string {
+  return `${turn.id}:${turn.assistant.items.length}:${kind}`;
+}
+
 export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
   switch (event.type) {
     case "user_message": {
@@ -83,7 +87,7 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
         } else {
           last.assistant.items.push({
             type: "text",
-            key: `${last.id}:${last.assistant.items.length}:text`,
+            key: nextAssistantItemKey(last, "text"),
             content: event.delta,
           });
         }
@@ -151,7 +155,7 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
         } else {
           last.assistant.items.push({
             type: "thinking",
-            key: `${last.id}:${last.assistant.items.length}:thinking`,
+            key: nextAssistantItemKey(last, "thinking"),
             content: event.delta,
             collapsed: true,
           });

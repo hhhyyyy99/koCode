@@ -5,32 +5,32 @@ import { useTurns } from "./useTurns.js";
 import { Turn } from "./Turn.js";
 import { Welcome } from "./Welcome.js";
 import type { Model } from "@kocode/ko-ai";
-import { turnToolCalls } from "./types.js";
+import { turnExpandableBlockKeys } from "./types.js";
 
 interface Props {
   events: AgentSessionEvent[];
   model: Model;
   cwd: string;
-  toolFocusKey?: string | null;
-  expandedToolIds?: Set<string>;
-  onToolKeysChange?: (keys: string[]) => void;
+  focusedBlockKey?: string | null;
+  expandedBlockIds?: Set<string>;
+  onExpandableBlockKeysChange?: (keys: string[]) => void;
 }
 
-export function Conversation({ events, model, cwd, toolFocusKey, expandedToolIds, onToolKeysChange }: Props) {
+export function Conversation({ events, model, cwd, focusedBlockKey, expandedBlockIds, onExpandableBlockKeysChange }: Props) {
   const { completedTurns, activeTurn } = useTurns(events);
   const turns = useMemo(
     () => (activeTurn ? [...completedTurns, activeTurn] : completedTurns),
     [completedTurns, activeTurn],
   );
-  const toolKeyList = useMemo(
-    () => turns.flatMap((turn) => turnToolCalls(turn).map((tc) => tc.key)),
+  const expandableBlockKeys = useMemo(
+    () => turns.flatMap((turn) => turnExpandableBlockKeys(turn)),
     [turns],
   );
 
   useEffect(() => {
-    if (!onToolKeysChange) return;
-    onToolKeysChange(toolKeyList);
-  }, [onToolKeysChange, toolKeyList]);
+    if (!onExpandableBlockKeysChange) return;
+    onExpandableBlockKeysChange(expandableBlockKeys);
+  }, [onExpandableBlockKeysChange, expandableBlockKeys]);
 
   const hasContent = completedTurns.length > 0 || activeTurn !== null;
 
@@ -44,16 +44,16 @@ export function Conversation({ events, model, cwd, toolFocusKey, expandedToolIds
         <Turn
           key={turn.id}
           turn={turn}
-          toolFocusKey={toolFocusKey}
-          expandedToolIds={expandedToolIds}
+          focusedBlockKey={focusedBlockKey}
+          expandedBlockIds={expandedBlockIds}
         />
       ))}
       {activeTurn && (
         <Turn
           turn={activeTurn}
           streaming
-          toolFocusKey={toolFocusKey}
-          expandedToolIds={expandedToolIds}
+          focusedBlockKey={focusedBlockKey}
+          expandedBlockIds={expandedBlockIds}
         />
       )}
     </Box>

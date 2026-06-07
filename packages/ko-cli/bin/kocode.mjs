@@ -23206,7 +23206,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context);
         }
-        function useState12(initialState) {
+        function useState11(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -24008,7 +24008,7 @@ var require_react_development = __commonJS({
         exports.useMemo = useMemo7;
         exports.useReducer = useReducer;
         exports.useRef = useRef4;
-        exports.useState = useState12;
+        exports.useState = useState11;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -31704,9 +31704,9 @@ var require_react_reconciler_development = __commonJS({
       module.exports = function $$$reconciler($$$hostConfig) {
         var exports2 = {};
         "use strict";
-        var React21 = require_react();
+        var React20 = require_react();
         var Scheduler = require_scheduler();
-        var ReactSharedInternals = React21.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React20.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         var suppressWarning = false;
         function setSuppressWarning(newSuppressWarning) {
           {
@@ -35502,7 +35502,7 @@ var require_react_reconciler_development = __commonJS({
           }
         }
         var fakeInternalInstance = {};
-        var emptyRefsObject = new React21.Component().refs;
+        var emptyRefsObject = new React20.Component().refs;
         var didWarnAboutStateAssignmentForComponent;
         var didWarnAboutUninitializedState;
         var didWarnAboutGetSnapshotBeforeUpdateWithoutDidUpdate;
@@ -55349,7 +55349,7 @@ var require_react_jsx_runtime_development = __commonJS({
     if (process.env.NODE_ENV !== "production") {
       (function() {
         "use strict";
-        var React21 = require_react();
+        var React20 = require_react();
         var REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element");
         var REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal");
         var REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment");
@@ -55375,7 +55375,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var ReactSharedInternals = React21.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React20.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         function error(format) {
           {
             {
@@ -56284,6 +56284,20 @@ var init_Header = __esm({
 function turnToolCalls(turn) {
   return turn.assistant.items.filter((item) => item.type === "tool").map((item) => item.toolCall);
 }
+function turnExpandableBlocks(turn) {
+  return turn.assistant.items.flatMap((item) => {
+    if (item.type === "thinking") {
+      return [{ key: item.key, itemKey: item.key, kind: "thinking" }];
+    }
+    if (item.type === "tool") {
+      return [{ key: item.toolCall.key, itemKey: item.key, kind: "tool" }];
+    }
+    return [];
+  });
+}
+function turnExpandableBlockKeys(turn) {
+  return turnExpandableBlocks(turn).map((block) => block.key);
+}
 function createTurn(id, event) {
   return {
     id,
@@ -56343,6 +56357,9 @@ function mergeDelta(cur, delta) {
   }
   return cur + delta;
 }
+function nextAssistantItemKey(turn, kind) {
+  return `${turn.id}:${turn.assistant.items.length}:${kind}`;
+}
 function processEvent(event, turns) {
   switch (event.type) {
     case "user_message": {
@@ -56366,7 +56383,7 @@ function processEvent(event, turns) {
         } else {
           last.assistant.items.push({
             type: "text",
-            key: `${last.id}:${last.assistant.items.length}:text`,
+            key: nextAssistantItemKey(last, "text"),
             content: event.delta
           });
         }
@@ -56430,7 +56447,7 @@ function processEvent(event, turns) {
         } else {
           last.assistant.items.push({
             type: "thinking",
-            key: `${last.id}:${last.assistant.items.length}:thinking`,
+            key: nextAssistantItemKey(last, "thinking"),
             content: event.delta,
             collapsed: true
           });
@@ -57257,30 +57274,39 @@ var init_ToolCallCard = __esm({
 });
 
 // packages/ko-tui/src/ThinkingBlock.tsx
-function ThinkingBlock({ content, focused }) {
-  const [expanded, setExpanded] = (0, import_react24.useState)(false);
-  use_input_default((_input, key) => {
-    if (focused && key.return) {
-      setExpanded((prev) => !prev);
-    }
-  });
-  if (!content) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", paddingX: 2, children: expanded ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { dimColor: true, children: "\u{1F4AD} Thinking:" }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { dimColor: true, children: content.slice(0, 1e3) })
-  ] }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { dimColor: true, children: [
-    "\u{1F4AD} ",
-    content.slice(0, 80).replace(/\n/g, " "),
-    "..."
-  ] }) });
+function thinkingToggleHint(expanded) {
+  return `ctrl+o to ${expanded ? "collapse" : "expand"}`;
 }
-var import_react24, import_jsx_runtime6;
+function formatThinkingPreview(content) {
+  const normalized = content.replace(/\s+/g, " ").trim();
+  if (normalized.length <= THINKING_PREVIEW_LENGTH) return normalized;
+  return `${normalized.slice(0, THINKING_PREVIEW_LENGTH - 3)}...`;
+}
+function thinkingCollapsedLine(content, focused) {
+  const prefix = focused ? "\u276F" : "\u{1F4AD}";
+  return `${prefix} ${formatThinkingPreview(content)} (${thinkingToggleHint(false)})`;
+}
+function thinkingExpandedHeader(focused) {
+  const prefix = focused ? "\u276F" : "\u{1F4AD}";
+  return `${prefix} Thinking (${thinkingToggleHint(true)})`;
+}
+function ThinkingBlock({ content, focused, expanded }) {
+  const { theme } = useTheme();
+  if (!content) return null;
+  const headerColor = focused ? theme.colors.secondary : theme.colors.dimmed;
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", paddingX: 2, children: expanded ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: headerColor, bold: focused, children: thinkingExpandedHeader(focused) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.colors.dimmed, children: content })
+  ] }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: headerColor, bold: focused, children: thinkingCollapsedLine(content, focused) }) });
+}
+var import_jsx_runtime6, THINKING_PREVIEW_LENGTH;
 var init_ThinkingBlock = __esm({
   async "packages/ko-tui/src/ThinkingBlock.tsx"() {
     "use strict";
-    import_react24 = __toESM(require_react(), 1);
     await init_build2();
+    init_theme();
     import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+    THINKING_PREVIEW_LENGTH = 80;
   }
 });
 
@@ -57299,7 +57325,7 @@ function formatDuration(ms) {
   const rs = s % 60;
   return rs > 0 ? `${m}m ${rs}s` : `${m}m`;
 }
-function Turn({ turn, streaming, toolFocusKey, expandedToolIds }) {
+function Turn({ turn, streaming, focusedBlockKey, expandedBlockIds }) {
   const { theme } = useTheme();
   const hasAssistant = turn.assistant.items.length > 0;
   return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Box_default, { flexDirection: "column", paddingY: 0, children: [
@@ -57317,7 +57343,8 @@ function Turn({ turn, streaming, toolFocusKey, expandedToolIds }) {
           ThinkingBlock,
           {
             content: item.content,
-            focused: false
+            focused: focusedBlockKey === item.key,
+            expanded: expandedBlockIds?.has(item.key) ?? false
           },
           item.key
         );
@@ -57330,8 +57357,8 @@ function Turn({ turn, streaming, toolFocusKey, expandedToolIds }) {
         ToolCallCard,
         {
           toolCall: item.toolCall,
-          focused: toolFocusKey === key,
-          expanded: expandedToolIds?.has(key) ?? false
+          focused: focusedBlockKey === key,
+          expanded: expandedBlockIds?.has(key) ?? false
         },
         key
       );
@@ -57377,20 +57404,20 @@ var init_Welcome = __esm({
 });
 
 // packages/ko-tui/src/Conversation.tsx
-function Conversation({ events, model, cwd: cwd2, toolFocusKey, expandedToolIds, onToolKeysChange }) {
+function Conversation({ events, model, cwd: cwd2, focusedBlockKey, expandedBlockIds, onExpandableBlockKeysChange }) {
   const { completedTurns, activeTurn } = useTurns(events);
-  const turns = (0, import_react25.useMemo)(
+  const turns = (0, import_react24.useMemo)(
     () => activeTurn ? [...completedTurns, activeTurn] : completedTurns,
     [completedTurns, activeTurn]
   );
-  const toolKeyList = (0, import_react25.useMemo)(
-    () => turns.flatMap((turn) => turnToolCalls(turn).map((tc) => tc.key)),
+  const expandableBlockKeys = (0, import_react24.useMemo)(
+    () => turns.flatMap((turn) => turnExpandableBlockKeys(turn)),
     [turns]
   );
-  (0, import_react25.useEffect)(() => {
-    if (!onToolKeysChange) return;
-    onToolKeysChange(toolKeyList);
-  }, [onToolKeysChange, toolKeyList]);
+  (0, import_react24.useEffect)(() => {
+    if (!onExpandableBlockKeysChange) return;
+    onExpandableBlockKeysChange(expandableBlockKeys);
+  }, [onExpandableBlockKeysChange, expandableBlockKeys]);
   const hasContent = completedTurns.length > 0 || activeTurn !== null;
   if (!hasContent) {
     return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Welcome, { model, cwd: cwd2 });
@@ -57400,8 +57427,8 @@ function Conversation({ events, model, cwd: cwd2, toolFocusKey, expandedToolIds,
       Turn,
       {
         turn,
-        toolFocusKey,
-        expandedToolIds
+        focusedBlockKey,
+        expandedBlockIds
       },
       turn.id
     )),
@@ -57410,17 +57437,17 @@ function Conversation({ events, model, cwd: cwd2, toolFocusKey, expandedToolIds,
       {
         turn: activeTurn,
         streaming: true,
-        toolFocusKey,
-        expandedToolIds
+        focusedBlockKey,
+        expandedBlockIds
       }
     )
   ] });
 }
-var import_react25, import_jsx_runtime8;
+var import_react24, import_jsx_runtime8;
 var init_Conversation = __esm({
   async "packages/ko-tui/src/Conversation.tsx"() {
     "use strict";
-    import_react25 = __toESM(require_react(), 1);
+    import_react24 = __toESM(require_react(), 1);
     await init_build2();
     init_useTurns();
     await init_Turn();
@@ -57587,20 +57614,20 @@ function InputBox({
   separator
 }) {
   const { theme } = useTheme();
-  const historyRef = (0, import_react26.useRef)([]);
-  const [searchMode, setSearchMode] = (0, import_react26.useState)(false);
-  const [searchTerm, setSearchTerm] = (0, import_react26.useState)("");
-  const [searchIndex, setSearchIndex] = (0, import_react26.useState)(0);
-  const savedBufferRef = (0, import_react26.useRef)(setInputText(""));
-  const controlEchoRef = (0, import_react26.useRef)(null);
-  const lastSubmitRef = (0, import_react26.useRef)(null);
-  const recordHistory = (0, import_react26.useCallback)((submittedValue) => {
+  const historyRef = (0, import_react25.useRef)([]);
+  const [searchMode, setSearchMode] = (0, import_react25.useState)(false);
+  const [searchTerm, setSearchTerm] = (0, import_react25.useState)("");
+  const [searchIndex, setSearchIndex] = (0, import_react25.useState)(0);
+  const savedBufferRef = (0, import_react25.useRef)(setInputText(""));
+  const controlEchoRef = (0, import_react25.useRef)(null);
+  const lastSubmitRef = (0, import_react25.useRef)(null);
+  const recordHistory = (0, import_react25.useCallback)((submittedValue) => {
     const trimmed = submittedValue.trim();
     if (trimmed) {
       historyRef.current = addHistoryEntry(historyRef.current, trimmed);
     }
   }, []);
-  const wrappedSubmit = (0, import_react26.useCallback)((overrideValue) => {
+  const wrappedSubmit = (0, import_react25.useCallback)((overrideValue) => {
     const submittedValue = overrideValue ?? buffer.text;
     const now = Date.now();
     const last = lastSubmitRef.current;
@@ -57611,7 +57638,7 @@ function InputBox({
     recordHistory(submittedValue);
     onSubmit(submittedValue);
   }, [buffer.text, onSubmit, recordHistory]);
-  const emitSlashMode = (0, import_react26.useCallback)((text) => {
+  const emitSlashMode = (0, import_react25.useCallback)((text) => {
     if (!onSlashModeChange) return;
     if (isSlashModeInput(text)) {
       onSlashModeChange(true, text);
@@ -57619,7 +57646,7 @@ function InputBox({
       onSlashModeChange(false, text);
     }
   }, [onSlashModeChange]);
-  const handleChange = (0, import_react26.useCallback)(
+  const handleChange = (0, import_react25.useCallback)(
     (nextBuffer, options = {}) => {
       if (!focusActive) return;
       if (nextBuffer.text !== buffer.text || nextBuffer.cursorOffset !== buffer.cursorOffset) {
@@ -57780,11 +57807,11 @@ async function launchEditor(text) {
     });
   });
 }
-var import_react26, import_jsx_runtime9;
+var import_react25, import_jsx_runtime9;
 var init_InputBox = __esm({
   async "packages/ko-tui/src/InputBox.tsx"() {
     "use strict";
-    import_react26 = __toESM(require_react(), 1);
+    import_react25 = __toESM(require_react(), 1);
     await init_build2();
     init_input_history();
     init_input_buffer();
@@ -57871,7 +57898,7 @@ function permissionPreviewLines(toolType, params) {
   return [];
 }
 function PermissionDialog({ session, requestId, toolType, toolName, params, description, active = true, onResolve }) {
-  const [selected, setSelected] = (0, import_react27.useState)(0);
+  const [selected, setSelected] = (0, import_react26.useState)(0);
   const filePath = params?.file_path;
   const command = params?.command;
   use_input_default((_input, key) => {
@@ -57930,11 +57957,11 @@ function PermissionDialog({ session, requestId, toolType, toolName, params, desc
     /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react27, import_jsx_runtime11, SEP2;
+var import_react26, import_jsx_runtime11, SEP2;
 var init_PermissionDialog = __esm({
   async "packages/ko-tui/src/PermissionDialog.tsx"() {
     "use strict";
-    import_react27 = __toESM(require_react(), 1);
+    import_react26 = __toESM(require_react(), 1);
     await init_build2();
     import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
     SEP2 = "\u254C".repeat(60);
@@ -58277,7 +58304,7 @@ var init_commands = __esm({
 // packages/ko-tui/src/StatusPanel.tsx
 function StatusPanel({ session, onClose, active = true }) {
   const { theme } = useTheme();
-  const [tab2, setTab] = (0, import_react28.useState)("Settings");
+  const [tab2, setTab] = (0, import_react27.useState)("Settings");
   const m = session.getModel();
   const usageLines = formatUsageReport(session).split("\n");
   use_input_default((_input, key) => {
@@ -58350,11 +58377,11 @@ function StatusPanel({ session, onClose, active = true }) {
     ] }) })
   ] });
 }
-var import_react28, import_jsx_runtime12, TABS;
+var import_react27, import_jsx_runtime12, TABS;
 var init_StatusPanel = __esm({
   async "packages/ko-tui/src/StatusPanel.tsx"() {
     "use strict";
-    import_react28 = __toESM(require_react(), 1);
+    import_react27 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     init_commands();
@@ -58463,7 +58490,7 @@ var init_CommandPanel = __esm({
 // packages/ko-tui/src/SessionPanel.tsx
 function SessionPanel(props) {
   const { theme } = useTheme();
-  const [selected, setSelected] = (0, import_react29.useState)(0);
+  const [selected, setSelected] = (0, import_react28.useState)(0);
   const items = props.mode === "branch" ? props.branches : props.sessions;
   const title = props.mode === "branch" ? "Branches" : "Resume Session";
   use_input_default((_input, key) => {
@@ -58485,7 +58512,7 @@ function SessionPanel(props) {
       props.onSelect(props.sessions[selected]);
     }
   });
-  const windowed = (0, import_react29.useMemo)(() => {
+  const windowed = (0, import_react28.useMemo)(() => {
     const start = Math.max(0, Math.min(selected - Math.floor(WINDOW_SIZE2 / 2), Math.max(0, items.length - WINDOW_SIZE2)));
     return { start, visible: items.slice(start, start + WINDOW_SIZE2) };
   }, [items, selected]);
@@ -58530,11 +58557,11 @@ function SessionRow({ session, active }) {
     date
   ] });
 }
-var import_react29, import_jsx_runtime14, WINDOW_SIZE2;
+var import_react28, import_jsx_runtime14, WINDOW_SIZE2;
 var init_SessionPanel = __esm({
   async "packages/ko-tui/src/SessionPanel.tsx"() {
     "use strict";
-    import_react29 = __toESM(require_react(), 1);
+    import_react28 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
@@ -58546,38 +58573,41 @@ var init_SessionPanel = __esm({
 function isModalFocus(mode) {
   return mode === "status-modal" || mode === "model-modal" || mode === "theme-modal" || mode === "session-modal" || mode === "permission" || mode === "rewind-confirm";
 }
+function canUseGlobalShortcut(mode) {
+  return mode === "input" || mode === "transcript-block" || mode === "tool-output";
+}
 function restoreFocusAfterBlockingMode(previous) {
   if (!previous || isModalFocus(previous) || previous === "history-search") return "input";
   return previous;
 }
-function normalizeToolIndex(index, count) {
+function normalizeBlockIndex(index, count) {
   if (count <= 0) return 0;
   if (index < 0) return count - 1;
   if (index >= count) return 0;
   return index;
 }
-function moveToolIndex(index, count, direction) {
-  return normalizeToolIndex(index + (direction === "next" ? 1 : -1), count);
+function moveBlockIndex(index, count, direction) {
+  return normalizeBlockIndex(index + (direction === "next" ? 1 : -1), count);
 }
 function isCtrlOInput(input, key) {
   return key.ctrl === true && (input === "o" || input === "");
 }
-function toggleExpandedToolId(expanded, toolKey) {
+function toggleExpandedBlockId(expanded, blockKey) {
   const next = new Set(expanded);
-  if (!toolKey) return next;
-  if (next.has(toolKey)) next.delete(toolKey);
-  else next.add(toolKey);
+  if (!blockKey) return next;
+  if (next.has(blockKey)) next.delete(blockKey);
+  else next.add(blockKey);
   return next;
 }
-function applyCtrlOToolToggle(state) {
-  if (state.toolKeys.length === 0) return state;
-  const selectedToolIndex = Math.min(state.selectedToolIndex, state.toolKeys.length - 1);
-  const toolKey = state.toolKeys[selectedToolIndex];
+function applyCtrlOBlockToggle(state) {
+  if (state.blockKeys.length === 0) return state;
+  const selectedBlockIndex = Math.min(state.selectedBlockIndex, state.blockKeys.length - 1);
+  const blockKey = state.blockKeys[selectedBlockIndex];
   return {
     ...state,
-    focusMode: "tool-output",
-    selectedToolIndex,
-    expandedToolIds: toggleExpandedToolId(state.expandedToolIds, toolKey)
+    focusMode: "transcript-block",
+    selectedBlockIndex,
+    expandedBlockIds: toggleExpandedBlockId(state.expandedBlockIds, blockKey)
   };
 }
 function busySubmitMessage(text) {
@@ -58625,8 +58655,8 @@ var init_input_prefix = __esm({
 function ThemePanel({ active, onClose, onSelect }) {
   const { theme } = useTheme();
   const initialIndex = Math.max(0, OPTIONS.findIndex((option) => option.name === theme.name));
-  const [selected, setSelected] = (0, import_react30.useState)(initialIndex);
-  const previewTheme = (0, import_react30.useMemo)(() => getTheme(OPTIONS[selected]?.name ?? theme.name) ?? theme, [selected, theme]);
+  const [selected, setSelected] = (0, import_react29.useState)(initialIndex);
+  const previewTheme = (0, import_react29.useMemo)(() => getTheme(OPTIONS[selected]?.name ?? theme.name) ?? theme, [selected, theme]);
   use_input_default((_input, key) => {
     if (!active) return;
     if (key.escape) {
@@ -58678,11 +58708,11 @@ function ThemePanel({ active, onClose, onSelect }) {
     ] })
   ] });
 }
-var import_react30, import_jsx_runtime15, OPTIONS;
+var import_react29, import_jsx_runtime15, OPTIONS;
 var init_ThemePanel = __esm({
   async "packages/ko-tui/src/ThemePanel.tsx"() {
     "use strict";
-    import_react30 = __toESM(require_react(), 1);
+    import_react29 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
@@ -58704,7 +58734,7 @@ function rewindDialogOptions() {
 }
 function RewindDialog({ active = true, onConfirm, onCancel }) {
   const { theme } = useTheme();
-  const [selected, setSelected] = (0, import_react31.useState)(0);
+  const [selected, setSelected] = (0, import_react30.useState)(0);
   const options = rewindDialogOptions();
   use_input_default((_input, key) => {
     if (!active) return;
@@ -58740,11 +58770,11 @@ function RewindDialog({ active = true, onConfirm, onCancel }) {
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react31, import_jsx_runtime16;
+var import_react30, import_jsx_runtime16;
 var init_RewindDialog = __esm({
   async "packages/ko-tui/src/RewindDialog.tsx"() {
     "use strict";
-    import_react31 = __toESM(require_react(), 1);
+    import_react30 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
     import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
@@ -58782,45 +58812,45 @@ function slashCompletionInputText(commands, selectedIndex) {
 }
 function App2({ session, onThemeChange }) {
   const { theme, setTheme } = useTheme();
-  const [events, setEvents] = (0, import_react32.useState)([]);
-  const [input, setInput] = (0, import_react32.useState)(() => emptyInputBuffer());
-  const [running, setRunning] = (0, import_react32.useState)(false);
-  const [model, setModel] = (0, import_react32.useState)(session.getModel());
-  const [permissionMode, setPermissionMode] = (0, import_react32.useState)(session.getPermissionMode());
-  const [pendingPermission, setPendingPermission] = (0, import_react32.useState)(null);
-  const [modal, setModal] = (0, import_react32.useState)(null);
-  const [notifications, setNotifications] = (0, import_react32.useState)([]);
-  const [focusMode, setFocusMode] = (0, import_react32.useState)("input");
-  const previousFocusRef = (0, import_react32.useRef)("input");
-  const lastEscRef = (0, import_react32.useRef)(0);
-  const focusModeRef = (0, import_react32.useRef)("input");
-  const [toolKeys, setToolKeys] = (0, import_react32.useState)([]);
-  const [selectedToolIndex, setSelectedToolIndex] = (0, import_react32.useState)(0);
-  const [expandedToolIds, setExpandedToolIds] = (0, import_react32.useState)(() => /* @__PURE__ */ new Set());
-  const notify = (0, import_react32.useCallback)((msg) => {
+  const [events, setEvents] = (0, import_react31.useState)([]);
+  const [input, setInput] = (0, import_react31.useState)(() => emptyInputBuffer());
+  const [running, setRunning] = (0, import_react31.useState)(false);
+  const [model, setModel] = (0, import_react31.useState)(session.getModel());
+  const [permissionMode, setPermissionMode] = (0, import_react31.useState)(session.getPermissionMode());
+  const [pendingPermission, setPendingPermission] = (0, import_react31.useState)(null);
+  const [modal, setModal] = (0, import_react31.useState)(null);
+  const [notifications, setNotifications] = (0, import_react31.useState)([]);
+  const [focusMode, setFocusMode] = (0, import_react31.useState)("input");
+  const previousFocusRef = (0, import_react31.useRef)("input");
+  const lastEscRef = (0, import_react31.useRef)(0);
+  const focusModeRef = (0, import_react31.useRef)("input");
+  const [expandableBlockKeys, setExpandableBlockKeys] = (0, import_react31.useState)([]);
+  const [selectedBlockIndex, setSelectedBlockIndex] = (0, import_react31.useState)(0);
+  const [expandedBlockIds, setExpandedBlockIds] = (0, import_react31.useState)(() => /* @__PURE__ */ new Set());
+  const notify = (0, import_react31.useCallback)((msg) => {
     setNotifications((prev) => [...prev, msg]);
     setTimeout(() => setNotifications((prev) => prev.filter((m) => m !== msg)), 6e3);
   }, []);
-  const closeModal = (0, import_react32.useCallback)(() => {
+  const closeModal = (0, import_react31.useCallback)(() => {
     setModal(null);
     setFocusMode(restoreFocusAfterBlockingMode(previousFocusRef.current));
   }, []);
-  const openBranchPanel = (0, import_react32.useCallback)(() => {
+  const openBranchPanel = (0, import_react31.useCallback)(() => {
     previousFocusRef.current = focusMode;
     setModal("branch");
     setFocusMode("session-modal");
   }, [focusMode]);
-  const openResumePanel = (0, import_react32.useCallback)(() => {
+  const openResumePanel = (0, import_react31.useCallback)(() => {
     previousFocusRef.current = focusMode;
     setModal("resume");
     setFocusMode("session-modal");
   }, [focusMode]);
-  const openThemePanel = (0, import_react32.useCallback)(() => {
+  const openThemePanel = (0, import_react31.useCallback)(() => {
     previousFocusRef.current = focusMode;
     setModal("theme");
     setFocusMode("theme-modal");
   }, [focusMode]);
-  const applyTheme = (0, import_react32.useCallback)((name) => {
+  const applyTheme = (0, import_react31.useCallback)((name) => {
     if (!setTheme(name)) {
       notify(`Unknown theme: ${name}`);
       return;
@@ -58829,17 +58859,17 @@ function App2({ session, onThemeChange }) {
     notify(`Theme switched to ${name}`);
     closeModal();
   }, [setTheme, onThemeChange, notify, closeModal]);
-  (0, import_react32.useEffect)(() => {
+  (0, import_react31.useEffect)(() => {
     focusModeRef.current = focusMode;
   }, [focusMode]);
-  const commandContext = (0, import_react32.useMemo)(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
-  const [slashMode, setSlashMode] = (0, import_react32.useState)(false);
-  const [slashFilter, setSlashFilter] = (0, import_react32.useState)("");
-  const [slashIndex, setSlashIndex] = (0, import_react32.useState)(0);
-  const [filteredCommands, setFilteredCommands] = (0, import_react32.useState)(
+  const commandContext = (0, import_react31.useMemo)(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
+  const [slashMode, setSlashMode] = (0, import_react31.useState)(false);
+  const [slashFilter, setSlashFilter] = (0, import_react31.useState)("");
+  const [slashIndex, setSlashIndex] = (0, import_react31.useState)(0);
+  const [filteredCommands, setFilteredCommands] = (0, import_react31.useState)(
     getCommands()
   );
-  (0, import_react32.useEffect)(() => {
+  (0, import_react31.useEffect)(() => {
     const listener = (event) => {
       setEvents((prev) => [...prev, event]);
       switch (event.type) {
@@ -58877,24 +58907,24 @@ function App2({ session, onThemeChange }) {
     session.addEventListener(listener);
     return () => session.removeEventListener(listener);
   }, [session, focusMode]);
-  const updateSlashFilter = (0, import_react32.useCallback)((filter) => {
+  const updateSlashFilter = (0, import_react31.useCallback)((filter) => {
     const query = filter.replace(/^\//, "");
     const results = filterCommands(query);
     setSlashFilter(filter);
     setFilteredCommands(results);
     setSlashIndex(0);
   }, []);
-  const closeSlashMode = (0, import_react32.useCallback)(() => {
+  const closeSlashMode = (0, import_react31.useCallback)(() => {
     setSlashMode(false);
     setSlashFilter("");
     setSlashIndex(0);
     setFilteredCommands(getCommands());
     setFocusMode("input");
   }, []);
-  const clearInput = (0, import_react32.useCallback)(() => {
+  const clearInput = (0, import_react31.useCallback)(() => {
     setInput(emptyInputBuffer());
   }, []);
-  const handleSlashModeChange = (0, import_react32.useCallback)(
+  const handleSlashModeChange = (0, import_react31.useCallback)(
     (active, filterText) => {
       if (focusMode === "permission" || focusMode === "status-modal" || focusMode === "model-modal") return;
       if (active) {
@@ -58907,7 +58937,7 @@ function App2({ session, onThemeChange }) {
     },
     [updateSlashFilter, closeSlashMode, focusMode]
   );
-  const handleCommandSelect = (0, import_react32.useCallback)(
+  const handleCommandSelect = (0, import_react31.useCallback)(
     (cmd) => {
       if (cmd.takesArgs) {
         setInput(setInputText(commandInputText(cmd)));
@@ -58927,7 +58957,7 @@ function App2({ session, onThemeChange }) {
     },
     [clearInput, closeSlashMode, session, notify, commandContext]
   );
-  const handleSubmit = (0, import_react32.useCallback)((submittedValue) => {
+  const handleSubmit = (0, import_react31.useCallback)((submittedValue) => {
     const text = (submittedValue ?? input.text).trim();
     if (!text) return;
     if (running) {
@@ -59029,16 +59059,16 @@ function App2({ session, onThemeChange }) {
     closeSlashMode,
     commandContext
   ]);
-  const handleToolKeysChange = (0, import_react32.useCallback)((keys) => {
-    setToolKeys((prev) => {
+  const handleExpandableBlockKeysChange = (0, import_react31.useCallback)((keys) => {
+    setExpandableBlockKeys((prev) => {
       if (prev.length === keys.length && prev.every((key, index) => key === keys[index])) {
         return prev;
       }
       return keys;
     });
-    setSelectedToolIndex((prev) => keys.length === 0 ? 0 : Math.min(prev, keys.length - 1));
+    setSelectedBlockIndex((prev) => keys.length === 0 ? 0 : Math.min(prev, keys.length - 1));
   }, []);
-  const runRewind = (0, import_react32.useCallback)(() => {
+  const runRewind = (0, import_react31.useCallback)(() => {
     session.rewindLastTurn().then((files) => {
       if (files.length > 0) {
         notify(`Rewound: restored ${files.join(", ")}`);
@@ -59047,20 +59077,20 @@ function App2({ session, onThemeChange }) {
       }
     }).catch((err) => notify(`Rewind error: ${err.message}`));
   }, [session, notify]);
-  const openRewindDialog = (0, import_react32.useCallback)(() => {
+  const openRewindDialog = (0, import_react31.useCallback)(() => {
     previousFocusRef.current = focusModeRef.current;
     setModal("rewind");
     setFocusMode("rewind-confirm");
   }, []);
-  const closeRewindDialog = (0, import_react32.useCallback)(() => {
+  const closeRewindDialog = (0, import_react31.useCallback)(() => {
     setModal(null);
     setFocusMode(restoreFocusAfterBlockingMode(previousFocusRef.current));
   }, []);
-  const confirmRewind = (0, import_react32.useCallback)(() => {
+  const confirmRewind = (0, import_react31.useCallback)(() => {
     closeRewindDialog();
     runRewind();
   }, [closeRewindDialog, runRewind]);
-  const handleInputEscape = (0, import_react32.useCallback)(() => {
+  const handleInputEscape = (0, import_react31.useCallback)(() => {
     const now = Date.now();
     const lastEsc = lastEscRef.current;
     lastEscRef.current = now;
@@ -59069,7 +59099,7 @@ function App2({ session, onThemeChange }) {
       lastEscRef.current = 0;
     }
   }, [openRewindDialog]);
-  const resolvePermissionFocus = (0, import_react32.useCallback)(() => {
+  const resolvePermissionFocus = (0, import_react31.useCallback)(() => {
     setPendingPermission(null);
     setFocusMode(restoreFocusAfterBlockingMode(previousFocusRef.current));
   }, []);
@@ -59111,25 +59141,25 @@ function App2({ session, onThemeChange }) {
       if (key.escape) closeModal();
       return;
     }
-    if (isCtrlOInput(_input, key) && toolKeys.length > 0) {
-      const next = applyCtrlOToolToggle({
+    if (canUseGlobalShortcut(focusMode) && isCtrlOInput(_input, key) && expandableBlockKeys.length > 0) {
+      const next = applyCtrlOBlockToggle({
         focusMode,
-        selectedToolIndex,
-        toolKeys,
-        expandedToolIds
+        selectedBlockIndex,
+        blockKeys: expandableBlockKeys,
+        expandedBlockIds
       });
       setFocusMode(next.focusMode);
-      setSelectedToolIndex(next.selectedToolIndex);
-      setExpandedToolIds(next.expandedToolIds);
+      setSelectedBlockIndex(next.selectedBlockIndex);
+      setExpandedBlockIds(next.expandedBlockIds);
       return;
     }
-    if (focusMode === "tool-output") {
+    if (focusMode === "transcript-block") {
       if (key.downArrow || key.tab) {
-        setSelectedToolIndex((prev) => moveToolIndex(prev, toolKeys.length, "next"));
+        setSelectedBlockIndex((prev) => moveBlockIndex(prev, expandableBlockKeys.length, "next"));
         return;
       }
       if (key.upArrow) {
-        setSelectedToolIndex((prev) => moveToolIndex(prev, toolKeys.length, "previous"));
+        setSelectedBlockIndex((prev) => moveBlockIndex(prev, expandableBlockKeys.length, "previous"));
         return;
       }
       if (key.escape) {
@@ -59157,9 +59187,9 @@ function App2({ session, onThemeChange }) {
         events,
         model,
         cwd: session.getCwd(),
-        toolFocusKey: focusMode === "tool-output" ? toolKeys[selectedToolIndex] ?? null : null,
-        expandedToolIds,
-        onToolKeysChange: handleToolKeysChange
+        focusedBlockKey: focusMode === "transcript-block" ? expandableBlockKeys[selectedBlockIndex] ?? null : null,
+        expandedBlockIds,
+        onExpandableBlockKeysChange: handleExpandableBlockKeysChange
       }
     ),
     notifications.map((n, i) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: "yellow", children: n }) }, i)),
@@ -59287,11 +59317,11 @@ function findToolResult(messages, startIndex, toolCallId) {
 function toolResultText(message) {
   return message.content.map((part) => part.type === "text" ? part.text : `[${part.type}]`).join("\n");
 }
-var import_react32, import_jsx_runtime17;
+var import_react31, import_jsx_runtime17;
 var init_App2 = __esm({
   async "packages/ko-tui/src/App.tsx"() {
     "use strict";
-    import_react32 = __toESM(require_react(), 1);
+    import_react31 = __toESM(require_react(), 1);
     await init_build2();
     init_src2();
     await init_Header();
@@ -59318,10 +59348,10 @@ var init_App2 = __esm({
 function run(session, config) {
   const theme = config?.theme ?? "dark";
   render_default(
-    import_react33.default.createElement(
+    import_react32.default.createElement(
       ThemeProvider,
       { initialTheme: theme },
-      import_react33.default.createElement(App2, { session, onThemeChange: config?.onThemeChange })
+      import_react32.default.createElement(App2, { session, onThemeChange: config?.onThemeChange })
     ),
     {
       exitOnCtrlC: true,
@@ -59329,12 +59359,12 @@ function run(session, config) {
     }
   );
 }
-var import_react33;
+var import_react32;
 var init_run = __esm({
   async "packages/ko-tui/src/run.ts"() {
     "use strict";
     await init_build2();
-    import_react33 = __toESM(require_react(), 1);
+    import_react32 = __toESM(require_react(), 1);
     await init_App2();
     init_theme();
   }

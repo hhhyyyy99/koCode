@@ -10,8 +10,8 @@ import { useTheme } from "./theme.js";
 interface Props {
   turn: TurnType;
   streaming?: boolean;
-  toolFocusKey?: string | null;
-  expandedToolIds?: Set<string>;
+  focusedBlockKey?: string | null;
+  expandedBlockIds?: Set<string>;
 }
 
 function completionVerb(durationMs: number): string {
@@ -30,7 +30,7 @@ function formatDuration(ms: number): string {
   return rs > 0 ? `${m}m ${rs}s` : `${m}m`;
 }
 
-export function Turn({ turn, streaming, toolFocusKey, expandedToolIds }: Props) {
+export function Turn({ turn, streaming, focusedBlockKey, expandedBlockIds }: Props) {
   const { theme } = useTheme();
   const hasAssistant = turn.assistant.items.length > 0;
 
@@ -53,7 +53,8 @@ export function Turn({ turn, streaming, toolFocusKey, expandedToolIds }: Props) 
             <ThinkingBlock
               key={item.key}
               content={item.content}
-              focused={false}
+              focused={focusedBlockKey === item.key}
+              expanded={expandedBlockIds?.has(item.key) ?? false}
             />
           );
         }
@@ -67,8 +68,8 @@ export function Turn({ turn, streaming, toolFocusKey, expandedToolIds }: Props) 
           <ToolCallCard
             key={key}
             toolCall={item.toolCall}
-            focused={toolFocusKey === key}
-            expanded={expandedToolIds?.has(key) ?? false}
+            focused={focusedBlockKey === key}
+            expanded={expandedBlockIds?.has(key) ?? false}
           />
         );
       })}

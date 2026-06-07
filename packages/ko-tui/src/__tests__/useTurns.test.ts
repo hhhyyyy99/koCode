@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { processEvent, mergeDelta } from "../useTurns.js";
-import { turnTextContent, turnThinkingBlocks, turnToolCalls, type Turn } from "../types.js";
+import { turnExpandableBlockKeys, turnExpandableBlocks, turnTextContent, turnThinkingBlocks, turnToolCalls, type Turn } from "../types.js";
 import type { AgentSessionEvent } from "@kocode/ko-agent";
 
 function makeEvent(overrides: Partial<AgentSessionEvent> & { type: AgentSessionEvent["type"] }): AgentSessionEvent {
@@ -198,6 +198,54 @@ describe("processEvent (full turn lifecycle)", () => {
       type: "text",
       content: "The settings are project-local.",
     });
+  });
+
+  it("derives expandable thinking and tool block keys in visual order", () => {
+    const turns: Turn[] = [];
+
+    processEvent(makeEvent({ type: "user_message", content: "inspect mixed output" }), turns);
+    processEvent(makeEvent({ type: "message_delta", delta: "Text before thinking." }), turns);
+    processEvent(makeEvent({ type: "thinking_delta", delta: "First thought" }), turns);
+    processEvent(makeEvent({ type: "message_delta", delta: "Text before tool." }), turns);
+    processEvent(
+      makeEvent({
+        type: "tool_start",
+        toolCallId: "tool-call_0",
+        toolName: "read",
+        input: { file_path: "package.json" },
+      }),
+      turns,
+    );
+    processEvent(
+      makeEvent({
+        type: "tool_end",
+        toolCallId: "tool-call_0",
+        toolName: "read",
+        result: { isError: false, content: "{}" },
+      }),
+      turns,
+    );
+    processEvent(makeEvent({ type: "thinking_delta", delta: "Second thought" }), turns);
+    processEvent(makeEvent({ type: "message_delta", delta: "Done." }), turns);
+
+    expect(turns[0]!.assistant.items.map((item) => item.type)).toEqual([
+      "text",
+      "thinking",
+      "text",
+      "tool",
+      "thinking",
+      "text",
+    ]);
+    expect(turnExpandableBlockKeys(turns[0]!)).toEqual([
+      "0:1:thinking",
+      "0:0:tool-call_0",
+      "0:4:thinking",
+    ]);
+    expect(turnExpandableBlocks(turns[0]!)).toEqual([
+      { key: "0:1:thinking", itemKey: "0:1:thinking", kind: "thinking" },
+      { key: "0:0:tool-call_0", itemKey: "0:0:tool-call_0", kind: "tool" },
+      { key: "0:4:thinking", itemKey: "0:4:thinking", kind: "thinking" },
+    ]);
   });
 
   it("deduplicates repeated tool_start events for a running tool call", () => {

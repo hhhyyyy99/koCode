@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyCtrlOToolToggle,
+  applyCtrlOBlockToggle,
   busySubmitMessage,
   canUseGlobalShortcut,
   isBareEscapeInput,
   isCtrlOInput,
   isModalFocus,
-  moveToolIndex,
-  normalizeToolIndex,
+  moveBlockIndex,
+  normalizeBlockIndex,
   restoreFocusAfterBlockingMode,
+  toggleExpandedBlockId,
 } from "../focus.js";
 
 describe("focus routing helpers", () => {
@@ -21,10 +22,11 @@ describe("focus routing helpers", () => {
 
   it("blocks global shortcuts while a modal is focused", () => {
     expect(canUseGlobalShortcut("input")).toBe(true);
-    expect(canUseGlobalShortcut("tool-output")).toBe(true);
+    expect(canUseGlobalShortcut("transcript-block")).toBe(true);
     expect(canUseGlobalShortcut("permission")).toBe(false);
     expect(canUseGlobalShortcut("rewind-confirm")).toBe(false);
     expect(canUseGlobalShortcut("slash")).toBe(false);
+    expect(canUseGlobalShortcut("history-search")).toBe(false);
   });
 
   it("restores a usable focus mode after blocking flows", () => {
@@ -35,11 +37,11 @@ describe("focus routing helpers", () => {
     expect(restoreFocusAfterBlockingMode(null)).toBe("input");
   });
 
-  it("wraps tool focus indexes", () => {
-    expect(normalizeToolIndex(3, 3)).toBe(0);
-    expect(normalizeToolIndex(-1, 3)).toBe(2);
-    expect(moveToolIndex(2, 3, "next")).toBe(0);
-    expect(moveToolIndex(0, 3, "previous")).toBe(2);
+  it("wraps transcript block focus indexes", () => {
+    expect(normalizeBlockIndex(3, 3)).toBe(0);
+    expect(normalizeBlockIndex(-1, 3)).toBe(2);
+    expect(moveBlockIndex(2, 3, "next")).toBe(0);
+    expect(moveBlockIndex(0, 3, "previous")).toBe(2);
   });
 
   it("recognizes Ctrl+O from Ink and raw control input", () => {
@@ -49,28 +51,35 @@ describe("focus routing helpers", () => {
     expect(isCtrlOInput("\u000f", { ctrl: false })).toBe(false);
   });
 
-  it("enters tool-output focus and toggles on the first Ctrl+O action", () => {
-    const next = applyCtrlOToolToggle({
+  it("enters transcript-block focus and toggles on the first Ctrl+O action", () => {
+    const next = applyCtrlOBlockToggle({
       focusMode: "input",
-      selectedToolIndex: 1,
-      toolKeys: ["tool-a", "tool-b"],
-      expandedToolIds: new Set(),
+      selectedBlockIndex: 1,
+      blockKeys: ["thinking-a", "tool-b"],
+      expandedBlockIds: new Set(),
     });
 
-    expect(next.focusMode).toBe("tool-output");
-    expect(next.selectedToolIndex).toBe(1);
-    expect(next.expandedToolIds.has("tool-b")).toBe(true);
+    expect(next.focusMode).toBe("transcript-block");
+    expect(next.selectedBlockIndex).toBe(1);
+    expect(next.expandedBlockIds.has("tool-b")).toBe(true);
   });
 
-  it("collapses an expanded focused tool on Ctrl+O", () => {
-    const next = applyCtrlOToolToggle({
-      focusMode: "tool-output",
-      selectedToolIndex: 0,
-      toolKeys: ["tool-a"],
-      expandedToolIds: new Set(["tool-a"]),
+  it("collapses an expanded focused transcript block on Ctrl+O", () => {
+    const next = applyCtrlOBlockToggle({
+      focusMode: "transcript-block",
+      selectedBlockIndex: 0,
+      blockKeys: ["thinking-a"],
+      expandedBlockIds: new Set(["thinking-a"]),
     });
 
-    expect(next.expandedToolIds.has("tool-a")).toBe(false);
+    expect(next.expandedBlockIds.has("thinking-a")).toBe(false);
+  });
+
+  it("preserves tool-card keys under the generic block toggle model", () => {
+    const expanded = toggleExpandedBlockId(new Set(["thinking-a"]), "0:0:tool-call_0");
+
+    expect(expanded.has("thinking-a")).toBe(true);
+    expect(expanded.has("0:0:tool-call_0")).toBe(true);
   });
 
   it("identifies bare escape input without matching escape sequences", () => {

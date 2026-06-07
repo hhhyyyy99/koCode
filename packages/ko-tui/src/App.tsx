@@ -14,7 +14,7 @@ import { CommandPanel } from "./CommandPanel.js";
 import { SessionPanel } from "./SessionPanel.js";
 import { filterCommands, getCommands } from "./commands.js";
 import type { CommandDef } from "./commands.js";
-import { applyCtrlOToolToggle, busySubmitMessage, isCtrlOInput, moveToolIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
+import { applyCtrlOBlockToggle, busySubmitMessage, canUseGlobalShortcut, isCtrlOInput, moveBlockIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
 import { emptyInputBuffer, setInputText, type InputBuffer } from "./input-buffer.js";
 import { parseInputRoute } from "./input-prefix.js";
 import { useTheme, type ThemeName } from "./theme.js";
@@ -64,9 +64,9 @@ export function App({ session, onThemeChange }: AppProps) {
   const previousFocusRef = useRef<FocusMode>("input");
   const lastEscRef = useRef(0);
   const focusModeRef = useRef<FocusMode>("input");
-  const [toolKeys, setToolKeys] = useState<string[]>([]);
-  const [selectedToolIndex, setSelectedToolIndex] = useState(0);
-  const [expandedToolIds, setExpandedToolIds] = useState<Set<string>>(() => new Set());
+  const [expandableBlockKeys, setExpandableBlockKeys] = useState<string[]>([]);
+  const [selectedBlockIndex, setSelectedBlockIndex] = useState(0);
+  const [expandedBlockIds, setExpandedBlockIds] = useState<Set<string>>(() => new Set());
   const notify = useCallback((msg: string) => {
     setNotifications((prev) => [...prev, msg]);
     setTimeout(() => setNotifications((prev) => prev.filter((m) => m !== msg)), 6000);
@@ -311,14 +311,14 @@ export function App({ session, onThemeChange }: AppProps) {
     slashMode, slashIndex, filteredCommands, handleCommandSelect, clearInput, closeSlashMode, commandContext,
   ]);
 
-  const handleToolKeysChange = useCallback((keys: string[]) => {
-    setToolKeys((prev) => {
+  const handleExpandableBlockKeysChange = useCallback((keys: string[]) => {
+    setExpandableBlockKeys((prev) => {
       if (prev.length === keys.length && prev.every((key, index) => key === keys[index])) {
         return prev;
       }
       return keys;
     });
-    setSelectedToolIndex((prev) => (keys.length === 0 ? 0 : Math.min(prev, keys.length - 1)));
+    setSelectedBlockIndex((prev) => (keys.length === 0 ? 0 : Math.min(prev, keys.length - 1)));
   }, []);
 
   const runRewind = useCallback(() => {
@@ -403,26 +403,26 @@ export function App({ session, onThemeChange }: AppProps) {
       return;
     }
 
-    if (isCtrlOInput(_input, key) && toolKeys.length > 0) {
-      const next = applyCtrlOToolToggle({
+    if (canUseGlobalShortcut(focusMode) && isCtrlOInput(_input, key) && expandableBlockKeys.length > 0) {
+      const next = applyCtrlOBlockToggle({
         focusMode,
-        selectedToolIndex,
-        toolKeys,
-        expandedToolIds,
+        selectedBlockIndex,
+        blockKeys: expandableBlockKeys,
+        expandedBlockIds,
       });
       setFocusMode(next.focusMode);
-      setSelectedToolIndex(next.selectedToolIndex);
-      setExpandedToolIds(next.expandedToolIds);
+      setSelectedBlockIndex(next.selectedBlockIndex);
+      setExpandedBlockIds(next.expandedBlockIds);
       return;
     }
 
-    if (focusMode === "tool-output") {
+    if (focusMode === "transcript-block") {
       if (key.downArrow || key.tab) {
-        setSelectedToolIndex((prev) => moveToolIndex(prev, toolKeys.length, "next"));
+        setSelectedBlockIndex((prev) => moveBlockIndex(prev, expandableBlockKeys.length, "next"));
         return;
       }
       if (key.upArrow) {
-        setSelectedToolIndex((prev) => moveToolIndex(prev, toolKeys.length, "previous"));
+        setSelectedBlockIndex((prev) => moveBlockIndex(prev, expandableBlockKeys.length, "previous"));
         return;
       }
       if (key.escape) {
@@ -456,9 +456,9 @@ export function App({ session, onThemeChange }: AppProps) {
         events={events}
         model={model}
         cwd={session.getCwd()}
-        toolFocusKey={focusMode === "tool-output" ? toolKeys[selectedToolIndex] ?? null : null}
-        expandedToolIds={expandedToolIds}
-        onToolKeysChange={handleToolKeysChange}
+        focusedBlockKey={focusMode === "transcript-block" ? expandableBlockKeys[selectedBlockIndex] ?? null : null}
+        expandedBlockIds={expandedBlockIds}
+        onExpandableBlockKeysChange={handleExpandableBlockKeysChange}
       />
 
       {notifications.map((n, i) => (
