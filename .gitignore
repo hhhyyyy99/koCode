@@ -5,6 +5,7 @@ coverage/
 .env
 .env.*
 !.env.example
+.kocode/config.yaml
 .DS_Store
 *.log
 pnpm-debug.log*
