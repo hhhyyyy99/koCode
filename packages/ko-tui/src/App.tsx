@@ -21,6 +21,8 @@ import { useTheme, type ThemeName } from "./theme.js";
 import { ThemePanel } from "./ThemePanel.js";
 import { RewindDialog } from "./RewindDialog.js";
 import { currentTerminalWidth, horizontalSeparator } from "./layout.js";
+import { formatContextPressure, formatCostAbbrev } from "./StatusBar.js";
+import { execSync } from "node:child_process";
 
 interface PendingPermission {
   requestId: string;
@@ -50,6 +52,36 @@ export function slashCompletionInputText(commands: CommandDef[], selectedIndex: 
   return cmd ? commandInputText(cmd) : undefined;
 }
 
+/** TUI-local git branch read (SHOULD status field). No agent seam. */
+export function readGitBranch(cwd: string): string | undefined {
+  try {
+    const out = execSync("git rev-parse --abbrev-ref HEAD", {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      timeout: 500,
+    }).trim();
+    if (!out || out === "HEAD") return undefined;
+    return out;
+  } catch {
+    return undefined;
+  }
+}
+
+export function statusChromeFromSession(session: AgentSession): {
+  contextPressure: string;
+  costLabel: string;
+} {
+  const breakdown = session.getContextBreakdown();
+  const total = breakdown.Total ?? 0;
+  const window = session.getModel().contextWindow || 0;
+  const usage = session.getUsage();
+  return {
+    contextPressure: formatContextPressure(total, window),
+    costLabel: formatCostAbbrev(usage.cost.total),
+  };
+}
+
 export function App({ session, onThemeChange }: AppProps) {
   const { theme, setTheme } = useTheme();
   const [events, setEvents] = useState<AgentSessionEvent[]>([]);
@@ -67,6 +99,8 @@ export function App({ session, onThemeChange }: AppProps) {
   const [expandableBlockKeys, setExpandableBlockKeys] = useState<string[]>([]);
   const [selectedBlockIndex, setSelectedBlockIndex] = useState(0);
   const [expandedBlockIds, setExpandedBlockIds] = useState<Set<string>>(() => new Set());
+  const [statusTick, setStatusTick] = useState(0);
+  const [gitBranch, setGitBranch] = useState<string | undefined>(() => readGitBranch(session.getCwd()));
   const notify = useCallback((msg: string) => {
     setNotifications((prev) => [...prev, msg]);
     setTimeout(() => setNotifications((prev) => prev.filter((m) => m !== msg)), 6000);
@@ -108,6 +142,14 @@ export function App({ session, onThemeChange }: AppProps) {
   useEffect(() => {
     focusModeRef.current = focusMode;
   }, [focusMode]);
+
+  // Refresh footer pressure/cost after turns; git branch is TUI-local and cheap.
+  useEffect(() => {
+    setStatusTick((n) => n + 1);
+    setGitBranch(readGitBranch(session.getCwd()));
+  }, [running, events.length, session]);
+
+  const statusChrome = useMemo(() => statusChromeFromSession(session), [session, statusTick, model, events.length]);
 
   const commandContext = useMemo(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
 
@@ -348,6 +390,12 @@ export function App({ session, onThemeChange }: AppProps) {
   }, [closeRewindDialog, runRewind]);
 
   const handleInputEscape = useCallback(() => {
+    // Esc priority (text-input path): cancel running turn first; else double-Esc rewind.
+    if (running) {
+      session.cancel();
+      lastEscRef.current = 0;
+      return;
+    }
     const now = Date.now();
     const lastEsc = lastEscRef.current;
     lastEscRef.current = now;
@@ -355,7 +403,7 @@ export function App({ session, onThemeChange }: AppProps) {
       openRewindDialog();
       lastEscRef.current = 0;
     }
-  }, [openRewindDialog]);
+  }, [openRewindDialog, running, session]);
 
   const resolvePermissionFocus = useCallback(() => {
     setPendingPermission(null);
@@ -537,7 +585,20 @@ export function App({ session, onThemeChange }: AppProps) {
         </Box>
       )}
 
-      <StatusBar running={running} permissionMode={permissionMode} width={terminalWidth} />
+      <StatusBar
+        running={running}
+        permissionMode={permissionMode}
+        width={terminalWidth}
+        contextPressure={statusChrome.contextPressure}
+        costLabel={statusChrome.costLabel}
+        gitBranch={gitBranch}
+        yieldChrome={focusMode === "permission"}
+        shortcutsHint={
+          focusMode === "transcript-block"
+            ? "ctrl+o expand · esc input"
+            : undefined
+        }
+      />
     </Box>
   );
 }

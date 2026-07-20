@@ -16,19 +16,49 @@ export function splitDisplayLines(text: string): string[] {
   return text.replace(/\n$/, "").split("\n");
 }
 
-export function formatToolParams(input: Record<string, any>): string {
-  const entries = Object.entries(input);
-  if (entries.length === 0) return "";
-  // Show key params inline: file_path, command, old_string (truncated), pattern
-  const key = entries.find(([k]) => ["file_path", "command", "pattern"].includes(k));
-  if (key) {
-    const raw = typeof key[1] === "string" ? key[1] : JSON.stringify(key[1]);
-    const val = key[0] === "file_path" ? raw.replace(/^\.\//, "") : raw;
-    return val.length > 60 ? val.slice(0, 57) + "..." : val;
+function truncate(text: string, max = 60): string {
+  return text.length > max ? text.slice(0, max - 3) + "..." : text;
+}
+
+function firstShortStringField(input: Record<string, any>): string | undefined {
+  for (const value of Object.values(input)) {
+    if (typeof value === "string" && value.trim()) {
+      return truncate(value.replace(/\s+/g, " ").trim(), 60);
+    }
   }
-  const first = entries[0]!;
-  const val = typeof first[1] === "string" ? first[1] : JSON.stringify(first[1]);
-  return val.length > 60 ? val.slice(0, 57) + "..." : val;
+  return undefined;
+}
+
+/** Pick a human-readable key parameter for the title line (not a full JSON dump). */
+export function formatToolParams(input: Record<string, any>): string {
+  const entries = Object.entries(input ?? {});
+  if (entries.length === 0) return "";
+
+  const preferredKeys = [
+    "file_path",
+    "path",
+    "command",
+    "pattern",
+    "query",
+    "glob",
+    "include",
+    "target",
+  ];
+  const key = preferredKeys
+    .map((name) => entries.find(([k]) => k === name))
+    .find(Boolean);
+
+  if (key) {
+    const raw = typeof key[1] === "string" ? key[1] : String(key[1]);
+    const val =
+      key[0] === "file_path" || key[0] === "path"
+        ? raw.replace(/^\.\//, "")
+        : raw;
+    return truncate(val, 60);
+  }
+
+  const short = firstShortStringField(input);
+  return short ?? "";
 }
 
 function renderLinesWithNumbers(text: string): React.ReactNode[] {
@@ -89,37 +119,105 @@ function lineCount(text: string): number {
   return splitDisplayLines(text).length;
 }
 
+function pathLabel(filePath: string | undefined): string {
+  return (filePath ?? "").replace(/^\.\//, "") || "file";
+}
+
+function countMatches(resultText: string): { matches: number; files: number } {
+  const lines = splitDisplayLines(resultText).filter((l) => l.trim());
+  if (lines.length === 0) return { matches: 0, files: 0 };
+  // Heuristic: lines that look like "path:line:..." or plain paths
+  const fileSet = new Set<string>();
+  let matches = 0;
+  for (const line of lines) {
+    const m = line.match(/^([^:]+\.[^:]+):/);
+    if (m) fileSet.add(m[1]!);
+    matches += 1;
+  }
+  return { matches, files: fileSet.size || (matches > 0 ? 1 : 0) };
+}
+
+export function editChangeScale(oldStr: string, newStr: string): string {
+  const removed = lineCount(oldStr);
+  const added = lineCount(newStr);
+  if (removed === 0 && added === 0) return "0 lines changed";
+  if (removed === added) return `${added} line${added === 1 ? "" : "s"} changed`;
+  return `-${removed}/+${added}`;
+}
+
+/** Collapsed human-readable summary. Status `done` means success. */
 export function toolSummary(toolCall: ToolCallState): string {
   const resultText = toolCall.result?.content ?? "";
   const resultLines = splitDisplayLines(resultText);
   const filePath = toolCall.input?.file_path as string | undefined;
+  const path = (toolCall.input?.path as string | undefined) ?? filePath;
 
   if (toolCall.status !== "done" && toolCall.status !== "error") return "";
   if (toolCall.status === "error") {
     return resultText ? `Error: ${resultText.slice(0, 80)}` : "Error";
   }
-  if (toolCall.name === "read" && resultText) {
-    const lineCount = resultLines.length;
-    return `Read ${lineCount} line${lineCount > 1 ? "s" : ""}`;
+
+  switch (toolCall.name) {
+    case "read": {
+      if (!resultText) return path ? `Read ${pathLabel(path)}` : "Read 0 lines";
+      const n = resultLines.length;
+      return `Read ${n} line${n === 1 ? "" : "s"}`;
+    }
+    case "write": {
+      const count = lineCount(String(toolCall.input?.content ?? ""));
+      return `Wrote ${count} line${count === 1 ? "" : "s"} to ${pathLabel(filePath)}`;
+    }
+    case "edit": {
+      const oldStr = String(toolCall.input?.old_string ?? "");
+      const newStr = String(toolCall.input?.new_string ?? "");
+      const scale = editChangeScale(oldStr, newStr);
+      return `Edited ${pathLabel(filePath)} (${scale})`;
+    }
+    case "bash": {
+      if (!resultText) return "Done";
+      // Short gist only — never dump full stdout as primary summary
+      const firstLine = resultLines[0] ?? "";
+      const gist = firstLine.replace(/\s+/g, " ").trim() || resultText.replace(/\s+/g, " ").trim();
+      return truncate(gist, 80);
+    }
+    case "grep": {
+      const pattern = String(toolCall.input?.pattern ?? "");
+      const { matches, files } = countMatches(resultText);
+      if (matches === 0) {
+        return pattern ? `No matches for ${truncate(pattern, 40)}` : "No matches";
+      }
+      const scale = files > 1 ? `${matches} hits in ${files} files` : `${matches} match${matches === 1 ? "" : "es"}`;
+      return pattern ? `${truncate(pattern, 30)} · ${scale}` : scale;
+    }
+    case "find": {
+      const query =
+        (toolCall.input?.pattern as string | undefined) ??
+        (toolCall.input?.query as string | undefined) ??
+        (toolCall.input?.glob as string | undefined) ??
+        "";
+      const n = resultLines.filter((l) => l.trim()).length;
+      const scale = `${n} result${n === 1 ? "" : "s"}`;
+      return query ? `${truncate(query, 30)} · ${scale}` : scale;
+    }
+    case "ls": {
+      const target = pathLabel(path ?? (toolCall.input?.target as string | undefined) ?? ".");
+      const n = resultLines.filter((l) => l.trim()).length;
+      return `${target} · ${n} entr${n === 1 ? "y" : "ies"}`;
+    }
+    default: {
+      // Unknown / MCP: human name context is in title; summary is short result or key field
+      if (resultText) {
+        const gist = resultLines[0]?.replace(/\s+/g, " ").trim() || resultText.replace(/\s+/g, " ").trim();
+        return truncate(gist, 80);
+      }
+      const short = firstShortStringField(toolCall.input ?? {});
+      return short ?? "Done";
+    }
   }
-  if (toolCall.name === "bash" && resultText) {
-    return resultText.length > 80 ? resultText.slice(0, 77) + "..." : resultText;
-  }
-  if (toolCall.name === "write" && filePath) {
-    const count = lineCount(String(toolCall.input?.content ?? ""));
-    return `Wrote ${count} line${count === 1 ? "" : "s"} to ${filePath.replace(/^\.\//, "")}`;
-  }
-  if (toolCall.name === "edit" && filePath) {
-    return `Edited ${filePath.replace(/^\.\//, "")}`;
-  }
-  if (filePath && resultText) {
-    return resultText.length > 80 ? resultText.slice(0, 77) + "..." : resultText;
-  }
-  return "";
 }
 
 export function toolTitle(toolCall: ToolCallState, focused: boolean): string {
-  const params = formatToolParams(toolCall.input);
+  const params = formatToolParams(toolCall.input ?? {});
   const name = displayToolName(toolCall.name);
   const title = params ? `${name}(${params})` : name;
   const symbol = toolCall.status === "running" ? "●"
@@ -135,16 +233,13 @@ export function ToolCallCard({ toolCall, focused, expanded }: Props) {
   const isEdit = toolCall.name === "edit";
   const isWrite = toolCall.name === "write";
   const hasDiff = isEdit && toolCall.input?.old_string !== undefined && toolCall.input?.new_string !== undefined;
-  // Claude Code-style title: ● ToolName(params)
   const titleText = toolTitle(toolCall, focused);
-
 
   const symbolColor = toolCall.status === "running" ? theme.colors.warning
     : toolCall.status === "done" ? theme.colors.success
     : toolCall.status === "error" ? theme.colors.error
     : theme.colors.warning;
 
-  // Result summary for collapsed view
   const resultText = toolCall.result?.content ?? "";
   const resultLines = splitDisplayLines(resultText);
   const isTruncated = !expanded && resultLines.length > MAX_COLLAPSED_LINES;
@@ -154,26 +249,22 @@ export function ToolCallCard({ toolCall, focused, expanded }: Props) {
 
   return (
     <Box flexDirection="column" paddingX={0} marginTop={1}>
-      {/* ● ToolName(params) — yellow/green/red */}
       <Box>
         <Text color={focused ? theme.colors.secondary : symbolColor} bold>{titleText}</Text>
       </Box>
 
-      {/* Running state */}
       {toolCall.status === "running" && (
         <Box paddingLeft={2}>
           <Text color={theme.colors.warning}>Running...</Text>
         </Box>
       )}
 
-      {/* ⎿ Result summary */}
       {summary && !expanded && (
         <Box paddingLeft={2}>
           <Text color={symbolColor}>{"⎿"} {summary}</Text>
         </Box>
       )}
 
-      {/* Expanded: line-numbered output */}
       {expanded && toolCall.status !== "running" && (
         <Box flexDirection="column" paddingLeft={2}>
           {hasDiff ? (
@@ -183,6 +274,7 @@ export function ToolCallCard({ toolCall, focused, expanded }: Props) {
                 toolCall.input!.new_string as string,
                 theme.colors,
               )}
+              <Text color={theme.colors.dimmed}>ctrl+o to collapse</Text>
             </Box>
           ) : isWrite && typeof toolCall.input?.content === "string" ? (
             <Box flexDirection="column">
@@ -200,7 +292,6 @@ export function ToolCallCard({ toolCall, focused, expanded }: Props) {
         </Box>
       )}
 
-      {/* Truncation hint when collapsed and has output */}
       {!expanded && toolCall.status !== "running" && resultLines.length > MAX_COLLAPSED_LINES && (
         <Box paddingLeft={2}>
           <Text color={theme.colors.dimmed}>

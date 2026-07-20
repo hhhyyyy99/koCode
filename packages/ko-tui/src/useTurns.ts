@@ -1,14 +1,23 @@
 import { useRef, useEffect, useState } from "react";
 import type { AgentSessionEvent } from "@kocode/ko-agent";
-import { type ToolCallState, type Turn, createTurn, turnToolCalls } from "./types.js";
+import {
+  type SystemNotice,
+  type ToolCallState,
+  type Turn,
+  createTurn,
+  turnToolCalls,
+} from "./types.js";
 
 export interface TurnState {
   completedTurns: Turn[];
   activeTurn: Turn | null;
+  /** Standalone notices not yet attached to a turn (rare: compaction before any turn). */
+  pendingNotices: SystemNotice[];
 }
 
 export function useTurns(events: AgentSessionEvent[]): TurnState {
   const turnsRef = useRef<Turn[]>([]);
+  const pendingNoticesRef = useRef<SystemNotice[]>([]);
   const eventsRef = useRef(events);
   const lastIndexRef = useRef(0);
   const [, setVersion] = useState(0);
@@ -19,13 +28,14 @@ export function useTurns(events: AgentSessionEvent[]): TurnState {
       events !== eventsRef.current && events.length <= lastIndexRef.current;
     if (replacedEvents) {
       turnsRef.current = [];
+      pendingNoticesRef.current = [];
       lastIndexRef.current = 0;
       changed = true;
     }
     eventsRef.current = events;
 
     for (let i = lastIndexRef.current; i < events.length; i++) {
-      processEvent(events[i]!, turnsRef.current);
+      processEvent(events[i]!, turnsRef.current, pendingNoticesRef.current);
       changed = true;
     }
     lastIndexRef.current = events.length;
@@ -35,12 +45,13 @@ export function useTurns(events: AgentSessionEvent[]): TurnState {
   }, [events]);
 
   const allTurns = turnsRef.current;
-  const lastTurn = allTurns[allTurns.length - 1];
-  const isLastActive = lastTurn && lastTurn.status === "streaming";
+  const last = allTurns[allTurns.length - 1];
+  const isLastActive = last && last.status === "streaming";
 
   return {
     completedTurns: isLastActive ? allTurns.slice(0, -1) : allTurns,
-    activeTurn: isLastActive ? lastTurn : null,
+    activeTurn: isLastActive ? last : null,
+    pendingNotices: pendingNoticesRef.current,
   };
 }
 
@@ -62,7 +73,23 @@ function nextAssistantItemKey(turn: Turn, kind: "text" | "thinking"): string {
   return `${turn.id}:${turn.assistant.items.length}:${kind}`;
 }
 
-export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
+export function formatCompactionSummary(
+  reason: "manual" | "threshold" | "overflow",
+  result?: { inputTokensBefore: number; inputTokensAfter: number; messagesBefore: number; messagesAfter: number },
+): string {
+  const reasonLabel =
+    reason === "manual" ? "manual" : reason === "threshold" ? "threshold" : "overflow";
+  if (result) {
+    return `Context compacted (${reasonLabel}): ${result.messagesBefore}→${result.messagesAfter} msgs, ~${result.inputTokensBefore}→${result.inputTokensAfter} tokens`;
+  }
+  return `Context compacted (${reasonLabel})`;
+}
+
+export function processEvent(
+  event: AgentSessionEvent,
+  turns: Turn[],
+  pendingNotices: SystemNotice[] = [],
+): void {
   switch (event.type) {
     case "user_message": {
       const turn = createTurn(turns.length, event);
@@ -241,12 +268,27 @@ export function processEvent(event: AgentSessionEvent, turns: Turn[]): void {
       break;
     }
 
+    case "compaction_end": {
+      const notice: SystemNotice = {
+        key: `compaction:${turns.length}:${pendingNotices.length}:${event.reason}`,
+        kind: "compaction",
+        reason: event.reason,
+        summary: formatCompactionSummary(event.reason, event.result),
+      };
+      const last = lastTurn(turns);
+      if (last) {
+        last.notices = [...(last.notices ?? []), notice];
+      } else {
+        pendingNotices.push(notice);
+      }
+      break;
+    }
+
     case "message_start":
     case "message_end":
     case "thinking_start":
     case "thinking_end":
     case "compaction_start":
-    case "compaction_end":
     case "model_changed":
     case "thinking_level_changed":
     case "permission_mode_changed":

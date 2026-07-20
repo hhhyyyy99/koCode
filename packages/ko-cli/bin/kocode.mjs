@@ -56317,6 +56317,7 @@ var init_types2 = __esm({
 // packages/ko-tui/src/useTurns.ts
 function useTurns(events) {
   const turnsRef = (0, import_react23.useRef)([]);
+  const pendingNoticesRef = (0, import_react23.useRef)([]);
   const eventsRef = (0, import_react23.useRef)(events);
   const lastIndexRef = (0, import_react23.useRef)(0);
   const [, setVersion] = (0, import_react23.useState)(0);
@@ -56325,12 +56326,13 @@ function useTurns(events) {
     const replacedEvents = events !== eventsRef.current && events.length <= lastIndexRef.current;
     if (replacedEvents) {
       turnsRef.current = [];
+      pendingNoticesRef.current = [];
       lastIndexRef.current = 0;
       changed = true;
     }
     eventsRef.current = events;
     for (let i = lastIndexRef.current; i < events.length; i++) {
-      processEvent(events[i], turnsRef.current);
+      processEvent(events[i], turnsRef.current, pendingNoticesRef.current);
       changed = true;
     }
     lastIndexRef.current = events.length;
@@ -56339,11 +56341,12 @@ function useTurns(events) {
     }
   }, [events]);
   const allTurns = turnsRef.current;
-  const lastTurn2 = allTurns[allTurns.length - 1];
-  const isLastActive = lastTurn2 && lastTurn2.status === "streaming";
+  const last = allTurns[allTurns.length - 1];
+  const isLastActive = last && last.status === "streaming";
   return {
     completedTurns: isLastActive ? allTurns.slice(0, -1) : allTurns,
-    activeTurn: isLastActive ? lastTurn2 : null
+    activeTurn: isLastActive ? last : null,
+    pendingNotices: pendingNoticesRef.current
   };
 }
 function mergeDelta(cur, delta) {
@@ -56360,7 +56363,14 @@ function mergeDelta(cur, delta) {
 function nextAssistantItemKey(turn, kind) {
   return `${turn.id}:${turn.assistant.items.length}:${kind}`;
 }
-function processEvent(event, turns) {
+function formatCompactionSummary(reason, result) {
+  const reasonLabel = reason === "manual" ? "manual" : reason === "threshold" ? "threshold" : "overflow";
+  if (result) {
+    return `Context compacted (${reasonLabel}): ${result.messagesBefore}\u2192${result.messagesAfter} msgs, ~${result.inputTokensBefore}\u2192${result.inputTokensAfter} tokens`;
+  }
+  return `Context compacted (${reasonLabel})`;
+}
+function processEvent(event, turns, pendingNotices = []) {
   switch (event.type) {
     case "user_message": {
       const turn = createTurn(turns.length, event);
@@ -56527,12 +56537,26 @@ function processEvent(event, turns) {
       }
       break;
     }
+    case "compaction_end": {
+      const notice = {
+        key: `compaction:${turns.length}:${pendingNotices.length}:${event.reason}`,
+        kind: "compaction",
+        reason: event.reason,
+        summary: formatCompactionSummary(event.reason, event.result)
+      };
+      const last = lastTurn(turns);
+      if (last) {
+        last.notices = [...last.notices ?? [], notice];
+      } else {
+        pendingNotices.push(notice);
+      }
+      break;
+    }
     case "message_start":
     case "message_end":
     case "thinking_start":
     case "thinking_end":
     case "compaction_start":
-    case "compaction_end":
     case "model_changed":
     case "thinking_level_changed":
     case "permission_mode_changed":
@@ -57101,18 +57125,38 @@ function splitDisplayLines(text) {
   if (text === "") return [];
   return text.replace(/\n$/, "").split("\n");
 }
-function formatToolParams(input) {
-  const entries = Object.entries(input);
-  if (entries.length === 0) return "";
-  const key = entries.find(([k]) => ["file_path", "command", "pattern"].includes(k));
-  if (key) {
-    const raw = typeof key[1] === "string" ? key[1] : JSON.stringify(key[1]);
-    const val2 = key[0] === "file_path" ? raw.replace(/^\.\//, "") : raw;
-    return val2.length > 60 ? val2.slice(0, 57) + "..." : val2;
+function truncate(text, max = 60) {
+  return text.length > max ? text.slice(0, max - 3) + "..." : text;
+}
+function firstShortStringField(input) {
+  for (const value of Object.values(input)) {
+    if (typeof value === "string" && value.trim()) {
+      return truncate(value.replace(/\s+/g, " ").trim(), 60);
+    }
   }
-  const first = entries[0];
-  const val = typeof first[1] === "string" ? first[1] : JSON.stringify(first[1]);
-  return val.length > 60 ? val.slice(0, 57) + "..." : val;
+  return void 0;
+}
+function formatToolParams(input) {
+  const entries = Object.entries(input ?? {});
+  if (entries.length === 0) return "";
+  const preferredKeys = [
+    "file_path",
+    "path",
+    "command",
+    "pattern",
+    "query",
+    "glob",
+    "include",
+    "target"
+  ];
+  const key = preferredKeys.map((name) => entries.find(([k]) => k === name)).find(Boolean);
+  if (key) {
+    const raw = typeof key[1] === "string" ? key[1] : String(key[1]);
+    const val = key[0] === "file_path" || key[0] === "path" ? raw.replace(/^\.\//, "") : raw;
+    return truncate(val, 60);
+  }
+  const short = firstShortStringField(input);
+  return short ?? "";
 }
 function renderLinesWithNumbers(text) {
   const lines = splitDisplayLines(text);
@@ -57190,35 +57234,91 @@ function displayToolName(name) {
 function lineCount(text) {
   return splitDisplayLines(text).length;
 }
+function pathLabel(filePath) {
+  return (filePath ?? "").replace(/^\.\//, "") || "file";
+}
+function countMatches(resultText) {
+  const lines = splitDisplayLines(resultText).filter((l) => l.trim());
+  if (lines.length === 0) return { matches: 0, files: 0 };
+  const fileSet = /* @__PURE__ */ new Set();
+  let matches = 0;
+  for (const line of lines) {
+    const m = line.match(/^([^:]+\.[^:]+):/);
+    if (m) fileSet.add(m[1]);
+    matches += 1;
+  }
+  return { matches, files: fileSet.size || (matches > 0 ? 1 : 0) };
+}
+function editChangeScale(oldStr, newStr) {
+  const removed = lineCount(oldStr);
+  const added = lineCount(newStr);
+  if (removed === 0 && added === 0) return "0 lines changed";
+  if (removed === added) return `${added} line${added === 1 ? "" : "s"} changed`;
+  return `-${removed}/+${added}`;
+}
 function toolSummary(toolCall) {
   const resultText = toolCall.result?.content ?? "";
   const resultLines = splitDisplayLines(resultText);
   const filePath = toolCall.input?.file_path;
+  const path3 = toolCall.input?.path ?? filePath;
   if (toolCall.status !== "done" && toolCall.status !== "error") return "";
   if (toolCall.status === "error") {
     return resultText ? `Error: ${resultText.slice(0, 80)}` : "Error";
   }
-  if (toolCall.name === "read" && resultText) {
-    const lineCount2 = resultLines.length;
-    return `Read ${lineCount2} line${lineCount2 > 1 ? "s" : ""}`;
+  switch (toolCall.name) {
+    case "read": {
+      if (!resultText) return path3 ? `Read ${pathLabel(path3)}` : "Read 0 lines";
+      const n = resultLines.length;
+      return `Read ${n} line${n === 1 ? "" : "s"}`;
+    }
+    case "write": {
+      const count = lineCount(String(toolCall.input?.content ?? ""));
+      return `Wrote ${count} line${count === 1 ? "" : "s"} to ${pathLabel(filePath)}`;
+    }
+    case "edit": {
+      const oldStr = String(toolCall.input?.old_string ?? "");
+      const newStr = String(toolCall.input?.new_string ?? "");
+      const scale = editChangeScale(oldStr, newStr);
+      return `Edited ${pathLabel(filePath)} (${scale})`;
+    }
+    case "bash": {
+      if (!resultText) return "Done";
+      const firstLine = resultLines[0] ?? "";
+      const gist = firstLine.replace(/\s+/g, " ").trim() || resultText.replace(/\s+/g, " ").trim();
+      return truncate(gist, 80);
+    }
+    case "grep": {
+      const pattern = String(toolCall.input?.pattern ?? "");
+      const { matches, files } = countMatches(resultText);
+      if (matches === 0) {
+        return pattern ? `No matches for ${truncate(pattern, 40)}` : "No matches";
+      }
+      const scale = files > 1 ? `${matches} hits in ${files} files` : `${matches} match${matches === 1 ? "" : "es"}`;
+      return pattern ? `${truncate(pattern, 30)} \xB7 ${scale}` : scale;
+    }
+    case "find": {
+      const query = toolCall.input?.pattern ?? toolCall.input?.query ?? toolCall.input?.glob ?? "";
+      const n = resultLines.filter((l) => l.trim()).length;
+      const scale = `${n} result${n === 1 ? "" : "s"}`;
+      return query ? `${truncate(query, 30)} \xB7 ${scale}` : scale;
+    }
+    case "ls": {
+      const target = pathLabel(path3 ?? toolCall.input?.target ?? ".");
+      const n = resultLines.filter((l) => l.trim()).length;
+      return `${target} \xB7 ${n} entr${n === 1 ? "y" : "ies"}`;
+    }
+    default: {
+      if (resultText) {
+        const gist = resultLines[0]?.replace(/\s+/g, " ").trim() || resultText.replace(/\s+/g, " ").trim();
+        return truncate(gist, 80);
+      }
+      const short = firstShortStringField(toolCall.input ?? {});
+      return short ?? "Done";
+    }
   }
-  if (toolCall.name === "bash" && resultText) {
-    return resultText.length > 80 ? resultText.slice(0, 77) + "..." : resultText;
-  }
-  if (toolCall.name === "write" && filePath) {
-    const count = lineCount(String(toolCall.input?.content ?? ""));
-    return `Wrote ${count} line${count === 1 ? "" : "s"} to ${filePath.replace(/^\.\//, "")}`;
-  }
-  if (toolCall.name === "edit" && filePath) {
-    return `Edited ${filePath.replace(/^\.\//, "")}`;
-  }
-  if (filePath && resultText) {
-    return resultText.length > 80 ? resultText.slice(0, 77) + "..." : resultText;
-  }
-  return "";
 }
 function toolTitle(toolCall, focused) {
-  const params = formatToolParams(toolCall.input);
+  const params = formatToolParams(toolCall.input ?? {});
   const name = displayToolName(toolCall.name);
   const title = params ? `${name}(${params})` : name;
   const symbol = toolCall.status === "running" ? "\u25CF" : toolCall.status === "done" ? "\u2713" : toolCall.status === "error" ? "\u2717" : "\u25CF";
@@ -57244,11 +57344,14 @@ function ToolCallCard({ toolCall, focused, expanded }) {
       " ",
       summary
     ] }) }),
-    expanded && toolCall.status !== "running" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", paddingLeft: 2, children: hasDiff ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", children: renderDiff(
-      toolCall.input.old_string,
-      toolCall.input.new_string,
-      theme.colors
-    ) }) : isWrite && typeof toolCall.input?.content === "string" ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "column", children: [
+    expanded && toolCall.status !== "running" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", paddingLeft: 2, children: hasDiff ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "column", children: [
+      renderDiff(
+        toolCall.input.old_string,
+        toolCall.input.new_string,
+        theme.colors
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.colors.dimmed, children: "ctrl+o to collapse" })
+    ] }) : isWrite && typeof toolCall.input?.content === "string" ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "column", children: [
       renderLinesWithNumbers(toolCall.input.content),
       /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.colors.dimmed, children: "ctrl+o to collapse" })
     ] }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "column", children: [
@@ -57374,7 +57477,11 @@ function Turn({ turn, streaming, focusedBlockKey, expandedBlockIds }) {
       completionVerb(turn.completedAt - turn.startedAt),
       " for ",
       formatDuration(turn.completedAt - turn.startedAt)
-    ] }) })
+    ] }) }),
+    (turn.notices ?? []).map((notice) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Box_default, { paddingY: 0, children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Text, { color: theme.colors.dimmed, children: [
+      "\u25B8 ",
+      notice.summary
+    ] }) }, notice.key))
   ] });
 }
 var import_jsx_runtime7;
@@ -57405,7 +57512,7 @@ var init_Welcome = __esm({
 
 // packages/ko-tui/src/Conversation.tsx
 function Conversation({ events, model, cwd: cwd2, focusedBlockKey, expandedBlockIds, onExpandableBlockKeysChange }) {
-  const { completedTurns, activeTurn } = useTurns(events);
+  const { completedTurns, activeTurn, pendingNotices } = useTurns(events);
   const turns = (0, import_react24.useMemo)(
     () => activeTurn ? [...completedTurns, activeTurn] : completedTurns,
     [completedTurns, activeTurn]
@@ -57423,6 +57530,10 @@ function Conversation({ events, model, cwd: cwd2, focusedBlockKey, expandedBlock
     return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Welcome, { model, cwd: cwd2 });
   }
   return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", paddingY: 0, children: [
+    pendingNotices.map((notice) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { paddingY: 0, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { dimColor: true, children: [
+      "\u25B8 ",
+      notice.summary
+    ] }) }, notice.key)),
     completedTurns.map((turn) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
       Turn,
       {
@@ -57522,7 +57633,8 @@ function inputPlaceholder(running) {
   return running ? "Agent running; draft next message..." : "\u8F93\u5165\u6D88\u606F\uFF0C\u6216 / \u67E5\u770B\u547D\u4EE4...";
 }
 function inputKeyAction(input, key) {
-  if (key.meta && key.return || key.ctrl && input === "\n") return "newline";
+  if (key.return && (key.shift || key.meta || key.ctrl)) return "newline";
+  if (key.ctrl && (input === "\n" || input === "j")) return "newline";
   if (key.return || input === "\r") return "submit";
   return "none";
 }
@@ -57821,15 +57933,108 @@ var init_InputBox = __esm({
 });
 
 // packages/ko-tui/src/StatusBar.tsx
-function StatusBar({ running, permissionMode, width = 60 }) {
+function formatContextPressure(usedTokens, contextWindow) {
+  if (contextWindow <= 0) return "";
+  const pct = Math.min(100, Math.max(0, Math.round(usedTokens / contextWindow * 100)));
+  return `${pct}%`;
+}
+function formatCostAbbrev(total) {
+  if (!Number.isFinite(total) || total <= 0) return "$0";
+  if (total < 0.01) return `$${total.toFixed(3)}`;
+  if (total < 10) return `$${total.toFixed(2)}`;
+  return `$${total.toFixed(1)}`;
+}
+function buildStatusBarFields(input) {
+  const modeInfo = MODE_LABELS[input.permissionMode] ?? MODE_LABELS.default;
+  return {
+    shortcuts: input.compactShortcuts ? "?" : input.shortcutsHint ?? "? for shortcuts",
+    mode: input.compactMode ? modeInfo.short : modeInfo.long,
+    running: input.running ? "Running" : null,
+    context: input.contextPressure?.trim() || null,
+    cost: input.costLabel?.trim() || null,
+    git: input.gitBranch?.trim() || null
+  };
+}
+function layoutStatusBarLine(fields, width) {
+  const w = Math.max(20, width);
+  const rightPieces = [];
+  if (fields.git) rightPieces.push({ id: "git", text: fields.git, priority: 1 });
+  if (fields.cost) rightPieces.push({ id: "cost", text: fields.cost, priority: 2 });
+  if (fields.context) rightPieces.push({ id: "context", text: fields.context, priority: 3 });
+  if (fields.mode) rightPieces.push({ id: "mode", text: fields.mode, priority: 5 });
+  if (fields.running) rightPieces.push({ id: "running", text: fields.running, priority: 6 });
+  let left = fields.shortcuts;
+  let right = [...rightPieces];
+  const joinRight = (parts) => parts.map((p) => p.text).join(" \xB7 ");
+  const fits = (l, r) => l.length + 1 + r.length <= w;
+  while (!fits(left, joinRight(right)) && right.length > 0) {
+    const droppable = right.filter((p) => {
+      if (p.id === "running" && right.some((x) => x.id === "mode")) return false;
+      if (p.id === "mode" && right.some((x) => x.id === "running")) return false;
+      return true;
+    }).sort((a, b) => a.priority - b.priority);
+    if (droppable.length === 0) break;
+    const dropId = droppable[0].id;
+    right = right.filter((p) => p.id !== dropId);
+  }
+  if (!fits(left, joinRight(right)) && left.length > 1) {
+    left = "?";
+  }
+  if (!fits(left, joinRight(right))) {
+    right = right.map(
+      (p) => p.id === "mode" && p.text.length > 4 ? { ...p, text: p.text.slice(0, 3) } : p
+    );
+  }
+  const rightText = joinRight(right);
+  const pad = Math.max(1, w - left.length - rightText.length);
+  return `${left}${" ".repeat(pad)}${rightText}`;
+}
+function StatusBar({
+  running,
+  permissionMode,
+  width = 60,
+  contextPressure,
+  costLabel,
+  gitBranch,
+  yieldChrome = false,
+  shortcutsHint
+}) {
   const { theme } = useTheme();
-  const left = "  ? for shortcuts";
-  const right = running ? "\u25CF Running..." : MODE_LABELS[permissionMode] ?? "\u25C9 Default";
-  const padding = Math.max(1, width - left.length - right.length);
+  if (yieldChrome) {
+    return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { paddingX: 0, children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: " " }) });
+  }
+  const narrow = width < 60;
+  const fields = buildStatusBarFields({
+    running,
+    permissionMode,
+    contextPressure,
+    costLabel,
+    gitBranch,
+    shortcutsHint,
+    compactMode: narrow,
+    compactShortcuts: width < 40
+  });
+  const line = layoutStatusBarLine(fields, width);
+  const leftLen = fields.shortcuts.length;
+  const runningIdx = line.lastIndexOf("Running");
+  const modeColor = running ? theme.colors.warning : theme.colors.primary;
+  if (runningIdx >= 0) {
+    return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { paddingX: 0, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: line.slice(0, runningIdx) }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.warning, children: line.slice(runningIdx) })
+    ] });
+  }
+  const padMatch = line.match(/^(.*?)(\s{2,})(.*)$/);
+  if (padMatch) {
+    return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { paddingX: 0, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: padMatch[1] }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { children: padMatch[2] }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: modeColor, children: padMatch[3] })
+    ] });
+  }
   return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { paddingX: 0, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: left }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { children: " ".repeat(padding) }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: running ? theme.colors.warning : theme.colors.primary, children: right })
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: line.slice(0, leftLen) }),
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: modeColor, children: line.slice(leftLen) })
   ] });
 }
 var import_jsx_runtime10, MODE_LABELS;
@@ -57840,9 +58045,9 @@ var init_StatusBar = __esm({
     init_theme();
     import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
     MODE_LABELS = {
-      default: "\u25C9 Default",
-      accept_edits: "\u25C9 Accept Edits",
-      auto: "\u25C9 Auto"
+      default: { long: "Default", short: "Def" },
+      accept_edits: { long: "Accept Edits", short: "Edit" },
+      auto: { long: "Auto", short: "Auto" }
     };
   }
 });
@@ -57873,9 +58078,13 @@ function permissionDialogTitle(toolType) {
       return "Tool permission";
   }
 }
-function permissionDialogOptions(toolType, command, dir, toolName) {
+function permissionDialogOptions(toolType, command, _dir, toolName) {
   if (toolType === "bash") {
-    return ["Yes", `Yes, and always allow ${command?.split(" ")[0] ?? "this command"} in this project`, "No"];
+    return [
+      "Yes",
+      "Yes, allow bash commands for the rest of this session",
+      "No"
+    ];
   }
   if (toolType === "write" || toolType === "edit") {
     return ["Yes", "Yes, allow all edits during this session", "No"];
@@ -58803,12 +59012,37 @@ var init_layout = __esm({
 });
 
 // packages/ko-tui/src/App.tsx
+import { execSync as execSync2 } from "node:child_process";
 function commandInputText(cmd) {
   return cmd.takesArgs ? `${cmd.name} ` : cmd.name;
 }
 function slashCompletionInputText(commands, selectedIndex) {
   const cmd = commands[selectedIndex];
   return cmd ? commandInputText(cmd) : void 0;
+}
+function readGitBranch(cwd2) {
+  try {
+    const out = execSync2("git rev-parse --abbrev-ref HEAD", {
+      cwd: cwd2,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      timeout: 500
+    }).trim();
+    if (!out || out === "HEAD") return void 0;
+    return out;
+  } catch {
+    return void 0;
+  }
+}
+function statusChromeFromSession(session) {
+  const breakdown = session.getContextBreakdown();
+  const total = breakdown.Total ?? 0;
+  const window2 = session.getModel().contextWindow || 0;
+  const usage = session.getUsage();
+  return {
+    contextPressure: formatContextPressure(total, window2),
+    costLabel: formatCostAbbrev(usage.cost.total)
+  };
 }
 function App2({ session, onThemeChange }) {
   const { theme, setTheme } = useTheme();
@@ -58827,6 +59061,8 @@ function App2({ session, onThemeChange }) {
   const [expandableBlockKeys, setExpandableBlockKeys] = (0, import_react31.useState)([]);
   const [selectedBlockIndex, setSelectedBlockIndex] = (0, import_react31.useState)(0);
   const [expandedBlockIds, setExpandedBlockIds] = (0, import_react31.useState)(() => /* @__PURE__ */ new Set());
+  const [statusTick, setStatusTick] = (0, import_react31.useState)(0);
+  const [gitBranch, setGitBranch] = (0, import_react31.useState)(() => readGitBranch(session.getCwd()));
   const notify = (0, import_react31.useCallback)((msg) => {
     setNotifications((prev) => [...prev, msg]);
     setTimeout(() => setNotifications((prev) => prev.filter((m) => m !== msg)), 6e3);
@@ -58862,6 +59098,11 @@ function App2({ session, onThemeChange }) {
   (0, import_react31.useEffect)(() => {
     focusModeRef.current = focusMode;
   }, [focusMode]);
+  (0, import_react31.useEffect)(() => {
+    setStatusTick((n) => n + 1);
+    setGitBranch(readGitBranch(session.getCwd()));
+  }, [running, events.length, session]);
+  const statusChrome = (0, import_react31.useMemo)(() => statusChromeFromSession(session), [session, statusTick, model, events.length]);
   const commandContext = (0, import_react31.useMemo)(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
   const [slashMode, setSlashMode] = (0, import_react31.useState)(false);
   const [slashFilter, setSlashFilter] = (0, import_react31.useState)("");
@@ -59091,6 +59332,11 @@ function App2({ session, onThemeChange }) {
     runRewind();
   }, [closeRewindDialog, runRewind]);
   const handleInputEscape = (0, import_react31.useCallback)(() => {
+    if (running) {
+      session.cancel();
+      lastEscRef.current = 0;
+      return;
+    }
     const now = Date.now();
     const lastEsc = lastEscRef.current;
     lastEscRef.current = now;
@@ -59098,7 +59344,7 @@ function App2({ session, onThemeChange }) {
       openRewindDialog();
       lastEscRef.current = 0;
     }
-  }, [openRewindDialog]);
+  }, [openRewindDialog, running, session]);
   const resolvePermissionFocus = (0, import_react31.useCallback)(() => {
     setPendingPermission(null);
     setFocusMode(restoreFocusAfterBlockingMode(previousFocusRef.current));
@@ -59252,7 +59498,19 @@ function App2({ session, onThemeChange }) {
         width: terminalWidth
       }
     ) }),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(StatusBar, { running, permissionMode, width: terminalWidth })
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      StatusBar,
+      {
+        running,
+        permissionMode,
+        width: terminalWidth,
+        contextPressure: statusChrome.contextPressure,
+        costLabel: statusChrome.costLabel,
+        gitBranch,
+        yieldChrome: focusMode === "permission",
+        shortcutsHint: focusMode === "transcript-block" ? "ctrl+o expand \xB7 esc input" : void 0
+      }
+    )
   ] });
 }
 function messagesToEvents(messages) {
@@ -59340,6 +59598,7 @@ var init_App2 = __esm({
     await init_ThemePanel();
     await init_RewindDialog();
     init_layout();
+    await init_StatusBar();
     import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
   }
 });

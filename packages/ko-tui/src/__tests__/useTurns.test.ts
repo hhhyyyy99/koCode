@@ -392,4 +392,41 @@ describe("processEvent (full turn lifecycle)", () => {
     expect(turns).toHaveLength(1);
     expect(turns[0]!.status).toBe("error");
   });
+
+  it("attaches compaction notice to the last turn from existing events", () => {
+    const turns: Turn[] = [];
+    processEvent(makeEvent({ type: "user_message", content: "hello" }), turns);
+    processEvent(makeEvent({ type: "message_delta", delta: "Hi" }), turns);
+    processEvent(makeEvent({ type: "turn_end" }), turns);
+    processEvent(
+      makeEvent({
+        type: "compaction_end",
+        reason: "manual",
+        result: {
+          inputTokensBefore: 1000,
+          inputTokensAfter: 400,
+          messagesBefore: 20,
+          messagesAfter: 5,
+        },
+      }),
+      turns,
+    );
+    expect(turns[0]!.notices?.length).toBe(1);
+    expect(turns[0]!.notices?.[0]?.kind).toBe("compaction");
+    expect(turns[0]!.notices?.[0]?.summary).toContain("compacted");
+    expect(turns[0]!.notices?.[0]?.summary).toContain("20→5");
+  });
+
+  it("keeps pending compaction notice when no turn exists yet", () => {
+    const turns: Turn[] = [];
+    const pending: import("../types.js").SystemNotice[] = [];
+    processEvent(
+      makeEvent({ type: "compaction_end", reason: "threshold" }),
+      turns,
+      pending,
+    );
+    expect(turns).toHaveLength(0);
+    expect(pending).toHaveLength(1);
+    expect(pending[0]!.summary).toContain("threshold");
+  });
 });

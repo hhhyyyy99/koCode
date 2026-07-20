@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function Conversation({ events, model, cwd, focusedBlockKey, expandedBlockIds, onExpandableBlockKeysChange }: Props) {
-  const { completedTurns, activeTurn } = useTurns(events);
+  const { completedTurns, activeTurn, pendingNotices } = useTurns(events);
   const turns = useMemo(
     () => (activeTurn ? [...completedTurns, activeTurn] : completedTurns),
     [completedTurns, activeTurn],
@@ -40,6 +40,11 @@ export function Conversation({ events, model, cwd, focusedBlockKey, expandedBloc
 
   return (
     <Box flexDirection="column" paddingY={0}>
+      {pendingNotices.map((notice) => (
+        <Box key={notice.key} paddingY={0}>
+          <Text dimColor>▸ {notice.summary}</Text>
+        </Box>
+      ))}
       {completedTurns.map((turn) => (
         <Turn
           key={turn.id}
