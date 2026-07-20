@@ -56364,11 +56364,10 @@ function nextAssistantItemKey(turn, kind) {
   return `${turn.id}:${turn.assistant.items.length}:${kind}`;
 }
 function formatCompactionSummary(reason, result) {
-  const reasonLabel = reason === "manual" ? "manual" : reason === "threshold" ? "threshold" : "overflow";
   if (result) {
-    return `Context compacted (${reasonLabel}): ${result.messagesBefore}\u2192${result.messagesAfter} msgs, ~${result.inputTokensBefore}\u2192${result.inputTokensAfter} tokens`;
+    return `Context compacted (${reason}): ${result.messagesBefore}\u2192${result.messagesAfter} msgs, ~${result.inputTokensBefore}\u2192${result.inputTokensAfter} tokens`;
   }
-  return `Context compacted (${reasonLabel})`;
+  return `Context compacted (${reason})`;
 }
 function processEvent(event, turns, pendingNotices = []) {
   switch (event.type) {
@@ -58822,6 +58821,12 @@ function applyCtrlOBlockToggle(state) {
 function busySubmitMessage(text) {
   return text.trim() ? "Agent is still running; draft kept. Submit after this turn finishes." : "Agent is still running.";
 }
+function bareEscapeAction(focusMode, running) {
+  if (focusMode === "slash") return "ignore";
+  if (focusMode !== "input") return "ignore";
+  if (running) return "cancel-turn";
+  return "rewind-or-ignore";
+}
 var init_focus = __esm({
   "packages/ko-tui/src/focus.ts"() {
     "use strict";
@@ -59100,9 +59105,11 @@ function App2({ session, onThemeChange }) {
   }, [focusMode]);
   (0, import_react31.useEffect)(() => {
     setStatusTick((n) => n + 1);
+  }, [running, model]);
+  (0, import_react31.useEffect)(() => {
     setGitBranch(readGitBranch(session.getCwd()));
-  }, [running, events.length, session]);
-  const statusChrome = (0, import_react31.useMemo)(() => statusChromeFromSession(session), [session, statusTick, model, events.length]);
+  }, [session, running]);
+  const statusChrome = (0, import_react31.useMemo)(() => statusChromeFromSession(session), [session, statusTick, model]);
   const commandContext = (0, import_react31.useMemo)(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
   const [slashMode, setSlashMode] = (0, import_react31.useState)(false);
   const [slashFilter, setSlashFilter] = (0, import_react31.useState)("");
@@ -59332,8 +59339,13 @@ function App2({ session, onThemeChange }) {
     runRewind();
   }, [closeRewindDialog, runRewind]);
   const handleInputEscape = (0, import_react31.useCallback)(() => {
-    if (running) {
+    const action = bareEscapeAction(focusModeRef.current, running);
+    if (action === "cancel-turn") {
       session.cancel();
+      lastEscRef.current = 0;
+      return;
+    }
+    if (action === "ignore") {
       lastEscRef.current = 0;
       return;
     }

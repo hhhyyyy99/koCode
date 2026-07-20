@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyCtrlOBlockToggle,
+  bareEscapeAction,
   busySubmitMessage,
   canUseGlobalShortcut,
   isBareEscapeInput,
@@ -27,6 +28,16 @@ describe("focus routing helpers", () => {
     expect(canUseGlobalShortcut("rewind-confirm")).toBe(false);
     expect(canUseGlobalShortcut("slash")).toBe(false);
     expect(canUseGlobalShortcut("history-search")).toBe(false);
+  });
+
+  it("bare Esc cancels only under input focus while running", () => {
+    expect(bareEscapeAction("input", true)).toBe("cancel-turn");
+    expect(bareEscapeAction("input", false)).toBe("rewind-or-ignore");
+    expect(bareEscapeAction("slash", true)).toBe("ignore");
+    expect(bareEscapeAction("slash", false)).toBe("ignore");
+    expect(bareEscapeAction("permission", true)).toBe("ignore");
+    expect(bareEscapeAction("transcript-block", true)).toBe("ignore");
+    expect(bareEscapeAction("history-search", true)).toBe("ignore");
   });
 
   it("restores a usable focus mode after blocking flows", () => {

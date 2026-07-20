@@ -78,7 +78,7 @@ export function buildStatusBarFields(input: {
 export function layoutStatusBarLine(fields: StatusBarFieldSet, width: number): string {
   const w = Math.max(20, width);
 
-  type Piece = { id: string; text: string; priority: number; mustKeepWith?: string };
+  type Piece = { id: string; text: string; priority: number };
   const rightPieces: Piece[] = [];
   if (fields.git) rightPieces.push({ id: "git", text: fields.git, priority: 1 });
   if (fields.cost) rightPieces.push({ id: "cost", text: fields.cost, priority: 2 });

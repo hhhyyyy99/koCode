@@ -77,12 +77,10 @@ export function formatCompactionSummary(
   reason: "manual" | "threshold" | "overflow",
   result?: { inputTokensBefore: number; inputTokensAfter: number; messagesBefore: number; messagesAfter: number },
 ): string {
-  const reasonLabel =
-    reason === "manual" ? "manual" : reason === "threshold" ? "threshold" : "overflow";
   if (result) {
-    return `Context compacted (${reasonLabel}): ${result.messagesBefore}→${result.messagesAfter} msgs, ~${result.inputTokensBefore}→${result.inputTokensAfter} tokens`;
+    return `Context compacted (${reason}): ${result.messagesBefore}→${result.messagesAfter} msgs, ~${result.inputTokensBefore}→${result.inputTokensAfter} tokens`;
   }
-  return `Context compacted (${reasonLabel})`;
+  return `Context compacted (${reason})`;
 }
 
 export function processEvent(

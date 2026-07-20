@@ -14,7 +14,7 @@ import { CommandPanel } from "./CommandPanel.js";
 import { SessionPanel } from "./SessionPanel.js";
 import { filterCommands, getCommands } from "./commands.js";
 import type { CommandDef } from "./commands.js";
-import { applyCtrlOBlockToggle, busySubmitMessage, canUseGlobalShortcut, isCtrlOInput, moveBlockIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
+import { applyCtrlOBlockToggle, bareEscapeAction, busySubmitMessage, canUseGlobalShortcut, isCtrlOInput, moveBlockIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
 import { emptyInputBuffer, setInputText, type InputBuffer } from "./input-buffer.js";
 import { parseInputRoute } from "./input-prefix.js";
 import { useTheme, type ThemeName } from "./theme.js";
@@ -143,13 +143,16 @@ export function App({ session, onThemeChange }: AppProps) {
     focusModeRef.current = focusMode;
   }, [focusMode]);
 
-  // Refresh footer pressure/cost after turns; git branch is TUI-local and cheap.
+  // Refresh footer pressure/cost when turn activity flips; git branch is TUI-local.
   useEffect(() => {
     setStatusTick((n) => n + 1);
-    setGitBranch(readGitBranch(session.getCwd()));
-  }, [running, events.length, session]);
+  }, [running, model]);
 
-  const statusChrome = useMemo(() => statusChromeFromSession(session), [session, statusTick, model, events.length]);
+  useEffect(() => {
+    setGitBranch(readGitBranch(session.getCwd()));
+  }, [session, running]);
+
+  const statusChrome = useMemo(() => statusChromeFromSession(session), [session, statusTick, model]);
 
   const commandContext = useMemo(() => ({ currentTheme: theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange }), [theme.name, setTheme, openBranchPanel, openResumePanel, openThemePanel, onThemeChange]);
 
@@ -390,9 +393,13 @@ export function App({ session, onThemeChange }: AppProps) {
   }, [closeRewindDialog, runRewind]);
 
   const handleInputEscape = useCallback(() => {
-    // Esc priority (text-input path): cancel running turn first; else double-Esc rewind.
-    if (running) {
+    const action = bareEscapeAction(focusModeRef.current, running);
+    if (action === "cancel-turn") {
       session.cancel();
+      lastEscRef.current = 0;
+      return;
+    }
+    if (action === "ignore") {
       lastEscRef.current = 0;
       return;
     }
