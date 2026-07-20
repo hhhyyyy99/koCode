@@ -31,65 +31,81 @@ The TUI SHALL display an interactive unbordered command completion list when the
 
 ### Requirement: Command registration system
 
-The system SHALL provide a command registry that maps command names (e.g., `/help`, `/model`, `/clear`) to their descriptions and handler functions.
+The system SHALL provide a command registry that maps command names to descriptions and handler functions. For progressive Claude Code–style alignment, the registry MUST include the **required alignment command set** with real behavior (not “coming soon” stubs for these names).
 
-#### Scenario: Command registry contains all built-in commands
+Required alignment commands:
+
+`/help`, `/clear`, `/compact`, `/model`, `/models`, `/status`, `/context`, `/cost`, `/permissions`, `/resume`, `/branch`, `/rewind`, `/theme`, `/session`, `/quit`, `/exit`
+
+Other registered names (for example `/diff`, `/config`, `/review`, `/doctor`, `/export`, `/skills`, `/feedback`) MAY remain listed as stubs; this package MUST NOT claim full product behavior for stubs and MUST NOT require Claude’s full command catalog as completeness criteria.
+
+#### Scenario: Command registry contains required alignment commands
 
 - **WHEN** the command registry is initialized
-- **THEN** it contains at minimum: `/help`, `/model`, `/models`, `/clear`, `/session`, `/status`, `/quit`, `/exit`
+- **THEN** it contains the required alignment command set listed above
+- **AND** those commands have real handlers (not empty product stubs)
 
 #### Scenario: Command handlers are invocable
 
-- **WHEN** a registered command is selected and confirmed
+- **WHEN** a registered required command is selected and confirmed
 - **THEN** the corresponding handler function is called with the provided arguments
 
+#### Scenario: Stubs are not over-claimed
+
+- **WHEN** a stub command remains in the registry
+- **THEN** progressive-alignment acceptance does not require full product behavior for that stub
+
 ### Requirement: Command panel trigger and filter
-The system SHALL display the command panel below the input area separator when the user types `/`, filtering commands in real-time as the user continues typing.
+
+The system SHALL display the command panel when the user types `/` at the start of input, filtering commands in real-time as the user continues typing (name-priority ranking, then description, is acceptable; cloning Claude’s full fuzzy engine is not required).
 
 #### Scenario: Slash triggers command panel
+
 - **WHEN** the user types `/` as the first character in the input
-- **THEN** the command panel appears below the input area separator
-- **AND** all commands are listed (unfiltered)
+- **THEN** the command panel appears
+- **AND** commands are listed (unfiltered)
 - **AND** the first command is selected by default
-- **AND** rows reserve stable columns for selection marker, command name, and description
-- **AND** the command panel is visually adjacent to the input frame
 
 #### Scenario: Filtering commands
+
 - **WHEN** the user types `/mod` in the input
 - **THEN** only commands matching "mod" in name or description are shown
 - **AND** the list updates on each keystroke
 
 ### Requirement: Command panel expands to 20+ commands
-The system SHALL include at minimum 20 built-in commands organized by category, matching Claude Code's command set.
 
-#### Scenario: Categories visible
-- **WHEN** the command panel is displayed
-- **THEN** commands are grouped by category: Session, Information, Configuration, Development
+The system MAY include a broad built-in command list organized by category for discovery. Matching Claude Code’s entire command set is NOT a package completeness MUST. Categories MAY be shown when useful.
 
-#### Scenario: Full command set
+#### Scenario: Categories visible when grouped
+
+- **WHEN** the command panel is displayed and commands are grouped
+- **THEN** grouping MAY use categories such as Session, Information, Configuration, Development
+
+#### Scenario: Required set is discoverable without full catalog mandate
+
 - **WHEN** all commands are listed
-- **THEN** the command set SHALL include: /help, /clear, /compact, /context, /cost, /diff, /status, /model, /models, /config, /init, /permissions, /theme, /resume, /branch, /quit, /exit, /feedback, /doctor, /export, /review, /skills
+- **THEN** the required alignment command set is present and discoverable
+- **AND** absence of a Claude-only or stub-only command is not a package failure
 
 ### Requirement: Command keyboard navigation
-The system SHALL support up/down arrow keys to navigate the command list, Enter to select, and Escape to close.
+
+The system SHALL support up/down arrow keys to navigate the command list, Enter to select (fill when `takesArgs` or run immediately otherwise), and Escape to close without cancelling a running turn solely via slash Esc.
 
 #### Scenario: Arrow key navigation
-- **WHEN** the command panel is open
-- **THEN** pressing ↓ moves selection down (wrap to top)
-- **AND** pressing ↑ moves selection up (wrap to bottom)
-- **AND** the selected command is highlighted with `❯` prefix
-- **AND** unselected rows reserve the same prefix width so command names remain aligned
+
+- **WHEN** the command panel is open and the user presses Up or Down
+- **THEN** the selection moves within the filtered list
 
 #### Scenario: Enter selects command
-- **WHEN** a command is selected and Enter is pressed
-- **THEN** the command is selected according to its argument requirements
-- **AND** the command panel closes
-- **AND** focus returns to the input or the opened command modal
+
+- **WHEN** a command is selected and the user presses Enter
+- **THEN** the command is filled or executed according to its handler contract
 
 #### Scenario: Escape closes panel
-- **WHEN** Escape is pressed while command panel is open
-- **THEN** the command panel closes
-- **AND** the input is cleared
+
+- **WHEN** the command panel is open and the user presses Escape
+- **THEN** the panel closes / slash mode ends
+- **AND** a running turn is not cancelled by that Escape alone
 
 ### Requirement: Command completion cursor placement
 The command panel SHALL place the input cursor at the intended edit position whenever a command is completed or filled into the input.
@@ -128,3 +144,4 @@ The command panel SHALL format each visible command row using stable text column
 #### Scenario: Long description wrapping
 - **WHEN** a command description exceeds the available width
 - **THEN** wrapped description text remains aligned with the description column
+
