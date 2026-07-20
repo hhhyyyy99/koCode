@@ -1,11 +1,12 @@
 # tui-tool-output-navigation Specification
 
 ## Purpose
-TBD - created by archiving change kocode-tui-interaction-integrity. Update Purpose after archive.
+Tool-card focus, expand/collapse, and long-output scannability under the shared expandable transcript block model.
+
 ## Requirements
 ### Requirement: Tool cards expose visible focus
 
-The TUI SHALL show which tool card is focused when expandable transcript block navigation is active and the focused block is a tool card. This package references the shared expandable transcript block contract from `unify-expandable-transcript-blocks` and MUST NOT re-author a conflicting tool-only navigation model.
+The TUI SHALL show which tool card is focused when expandable transcript block navigation is active and the focused block is a tool card. This capability references the shared expandable transcript block contract from `tui-expandable-transcript-blocks` and MUST NOT re-author a conflicting tool-only navigation model.
 
 #### Scenario: Tool focus marker appears
 
@@ -21,6 +22,17 @@ The TUI SHALL ensure the displayed expand/collapse hint matches the actual keybo
 
 - **WHEN** a focused collapsed tool card displays a `ctrl+o` expand hint and the user presses Ctrl+O
 - **THEN** that tool card expands to show detailed output
+
+#### Scenario: Ctrl+O accepts Ink Ctrl-letter input
+
+- **WHEN** the terminal input layer delivers Ctrl+O as a ctrl-letter combination
+- **THEN** the TUI treats it as the expand/collapse shortcut for the focused expandable tool block
+
+#### Scenario: Ctrl+O enters tool-output focus and toggles
+
+- **WHEN** expandable tool/thinking blocks exist, input focus is active, and the user presses Ctrl+O
+- **THEN** the TUI enters expandable transcript block focus
+- **AND** the selected tool or thinking block expands or collapses in the same keypress
 
 ### Requirement: Expanded tool output can collapse
 
@@ -40,4 +52,3 @@ Long tool output SHALL remain scannable by default via collapsed summary first; 
 - **WHEN** tool output is long
 - **THEN** the default collapsed view stays short and scannable
 - **AND** full detail is available after expand via the shared expandable-block shortcut
-

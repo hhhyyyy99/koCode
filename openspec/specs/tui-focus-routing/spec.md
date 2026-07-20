@@ -74,7 +74,17 @@ When expandable transcript block focus is active, Escape SHALL return focus to i
 
 ### Requirement: Expandable transcript block focus routes navigation keys
 
-The TUI SHALL route expandable transcript block navigation consistently with the active `unify-expandable-transcript-blocks` contract: when expandable-block focus is active, Up/Down (and existing nav) move among expandable keys; Ctrl+O toggles the focused block; modal/permission focus continues to block these global shortcuts.
+The TUI SHALL route expandable transcript block navigation consistently with the `tui-expandable-transcript-blocks` contract: when expandable-block focus is active, Up/Down (and existing nav) move among expandable keys; Ctrl+O toggles the focused block; modal/permission focus continues to block these global shortcuts.
+
+#### Scenario: Move focused expandable block
+
+- **WHEN** expandable transcript block focus is active and the user presses Up, Down, or Tab
+- **THEN** focus moves between expandable transcript blocks without modifying the input draft
+
+#### Scenario: Escape returns to input from expandable blocks
+
+- **WHEN** expandable transcript block focus is active and the user presses Escape
+- **THEN** focus returns to the input mode
 
 #### Scenario: Modal blocks expandable shortcuts
 
