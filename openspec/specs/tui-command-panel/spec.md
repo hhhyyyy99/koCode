@@ -145,3 +145,71 @@ The command panel SHALL format each visible command row using stable text column
 - **WHEN** a command description exceeds the available width
 - **THEN** wrapped description text remains aligned with the description column
 
+### Requirement: Tab completion follows highlighted command
+The TUI SHALL complete the slash command currently highlighted in the command panel when the user presses Tab.
+
+#### Scenario: Tab completes selected non-first command
+- **GIVEN** the slash command panel is open with multiple matching commands
+- **AND** the highlighted command is not the first visible or filtered command
+- **WHEN** the user presses Tab
+- **THEN** the input is replaced with the highlighted command text
+- **AND** the cursor is placed at the end of the completed command text
+- **AND** the first filtered command is not used unless it is also highlighted
+
+#### Scenario: Tab completes selected argument command
+- **GIVEN** the slash command panel is open
+- **AND** the highlighted command requires arguments
+- **WHEN** the user presses Tab
+- **THEN** the input is replaced with the command name followed by one trailing space
+- **AND** the cursor is placed after the trailing space
+
+### Requirement: Command filter ranks name matches before description matches
+The TUI SHALL rank slash command filter results by match relevance so command-name matches appear before description-only matches.
+
+#### Scenario: Exact command name outranks description synonym
+- **WHEN** the user types `/exit`
+- **THEN** `/exit` appears before `/quit` in the command panel results
+- **AND** `/exit` is selected by default
+
+#### Scenario: Description matches remain available
+- **WHEN** the user types a term that matches a command description but not its command name
+- **THEN** matching commands remain visible in the command panel
+
+#### Scenario: Empty query preserves default command order
+- **WHEN** the user types only `/`
+- **THEN** the command panel shows commands in the default registry order
+
+### Requirement: Description matches are fallback results
+The TUI SHALL show description-only slash command matches only when the current query has no command-name matches.
+
+#### Scenario: Exact command name suppresses description-only matches
+- **WHEN** the user types `/context`
+- **THEN** `/context` appears in the command panel results
+- **AND** `/compact` does not appear only because its description contains `context`
+
+#### Scenario: Command-name prefix suppresses description-only matches
+- **WHEN** the user types `/con`
+- **THEN** command-name matches for `con` appear in the command panel results
+- **AND** commands that only match `con` through their descriptions do not appear
+
+#### Scenario: Description fallback remains available
+- **WHEN** the user types a term that does not match any command name
+- **AND** the term matches one or more command descriptions
+- **THEN** matching commands appear in the command panel results
+
+### Requirement: Slash panel updates while deleting completed input
+The command panel SHALL remain synchronized with the input while the user deletes slash command text, including text inserted by completion.
+
+#### Scenario: Deleting completed command updates filter
+- **WHEN** the command panel is open after completing `/help`
+- **AND** the user presses the erase key
+- **THEN** the input changes to `/hel`
+- **AND** the command panel remains open with filtering based on `/hel`
+
+#### Scenario: Deleting slash closes panel when prefix removed
+- **WHEN** the command panel is open with input `/`
+- **AND** the user presses the erase key
+- **THEN** the input becomes empty
+- **AND** the command panel closes
+- **AND** focus returns to normal input mode
+
