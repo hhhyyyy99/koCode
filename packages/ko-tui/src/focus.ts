@@ -110,6 +110,22 @@ export function busySubmitMessage(text: string): string {
     : "Agent is still running.";
 }
 
+/**
+ * Decide bare-Esc from InputBox (input|slash focusActive path).
+ * Higher owners (permission/modals/transcript-block/history-search) never reach here.
+ * - slash → dismiss only (handled by App slash handler); do not cancel
+ * - input + running → cancel turn
+ * - input + idle → double-Esc rewind path (caller)
+ */
+export type BareEscapeAction = "cancel-turn" | "rewind-or-ignore" | "ignore";
+
+export function bareEscapeAction(focusMode: FocusMode, running: boolean): BareEscapeAction {
+  if (focusMode === "slash") return "ignore";
+  if (focusMode !== "input") return "ignore";
+  if (running) return "cancel-turn";
+  return "rewind-or-ignore";
+}
+
 export function isBareEscapeInput(input: string): boolean {
   if (!input.includes("\x1b")) return false;
   return input.split("").every((char) => char === "\x1b");

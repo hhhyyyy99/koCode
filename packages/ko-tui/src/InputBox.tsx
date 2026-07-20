@@ -34,7 +34,9 @@ export interface InputKeyInfo {
 }
 
 export function inputKeyAction(input: string, key: InputKeyInfo): "submit" | "newline" | "none" {
-  if ((key.meta && key.return) || (key.ctrl && input === "\n")) return "newline";
+  // Newline without submit: Shift+Enter (SHOULD Claude-aligned), Alt/Option+Enter, Ctrl+Enter, Ctrl+J
+  if (key.return && (key.shift || key.meta || key.ctrl)) return "newline";
+  if (key.ctrl && (input === "\n" || input === "j")) return "newline";
   if (key.return || input === "\r") return "submit";
   return "none";
 }

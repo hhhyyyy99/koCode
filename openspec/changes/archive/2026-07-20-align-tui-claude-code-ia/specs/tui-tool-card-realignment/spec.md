@@ -1,8 +1,5 @@
-# tui-tool-card-realignment Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-full-alignment. Update Purpose after archive.
-## Requirements
 ### Requirement: Tool card symbol and format
 
 The system SHALL render each tool call as a single tool-card surface with a clear status vocabulary and human-readable title line. Status values SHALL be only `running`, `done`, and `error`, where `done` means successful completion. Exact Claude Code glyph/symbol parity (`●`, `✓`, `⎿`, etc.) is NOT a package MUST under fidelity A; status color or equivalent cues SHOULD remain.
@@ -62,6 +59,8 @@ The system SHALL keep tool cards collapsed by default, truncate long detail behi
 - **WHEN** the user presses Ctrl+O on a focused collapsed tool card (expandable transcript block)
 - **THEN** the card expands to show detailed output
 - **AND** Enter is not required as the expand key for this package
+
+## ADDED Requirements
 
 ### Requirement: Specialized collapsed tool summaries
 
@@ -127,4 +126,3 @@ The TUI MUST NOT present the full tool `input` object or tool envelope via `JSON
 
 - **WHEN** a specialized built-in tool completes successfully
 - **THEN** the collapsed summary is the specialized form defined above rather than a full input JSON dump
-

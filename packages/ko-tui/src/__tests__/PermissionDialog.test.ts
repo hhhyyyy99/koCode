@@ -17,7 +17,10 @@ describe("PermissionDialog semantics", () => {
   });
 
   it("uses category-specific allow-all wording", () => {
-    expect(permissionDialogOptions("bash", "ls -la", "/", "bash")[1]).toContain("allow ls");
+    const bashAllowAll = permissionDialogOptions("bash", "ls -la", "/", "bash")[1]!;
+    expect(bashAllowAll.toLowerCase()).toContain("session");
+    expect(bashAllowAll.toLowerCase()).not.toContain("project");
+    expect(bashAllowAll.toLowerCase()).not.toContain("always allow");
     expect(permissionDialogOptions("write", undefined, "/tmp", "write")[1]).toContain("all edits");
     expect(permissionDialogOptions("edit", undefined, "/tmp", "edit")[1]).toContain("all edits");
     expect(permissionDialogOptions("unknown", undefined, "/", "custom_tool")[1]).toContain("custom_tool");

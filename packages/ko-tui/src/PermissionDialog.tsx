@@ -40,11 +40,16 @@ export function permissionDialogTitle(toolType: PermissionRequestToolType): stri
 export function permissionDialogOptions(
   toolType: PermissionRequestToolType,
   command: string | undefined,
-  dir: string,
+  _dir: string,
   toolName: string,
 ): string[] {
+  // approve_all = rest of this session + permission category (not project-level / per-command permanent)
   if (toolType === "bash") {
-    return ["Yes", `Yes, and always allow ${command?.split(" ")[0] ?? "this command"} in this project`, "No"];
+    return [
+      "Yes",
+      "Yes, allow bash commands for the rest of this session",
+      "No",
+    ];
   }
   if (toolType === "write" || toolType === "edit") {
     return ["Yes", "Yes, allow all edits during this session", "No"];

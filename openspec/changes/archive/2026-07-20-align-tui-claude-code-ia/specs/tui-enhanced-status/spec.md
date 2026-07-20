@@ -1,8 +1,5 @@
-# tui-enhanced-status Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-rewrite. Update Purpose after archive.
-## Requirements
 ### Requirement: Status bar shows session information
 
 The status surface SHALL place dense runtime fields on the StatusBar footer as defined by `tui-status-bar`, identity fields on the Header, and deep session detail in `/status` / `/cost` / `/context` panels. This requirement supersedes prior wording that forced the footer to MUST-display all of: full model id, token input/output detail lines, and abbreviated session id together.
@@ -37,4 +34,3 @@ The footer SHALL follow the `tui-status-bar` field package:
 - **WHEN** the user opens `/status`, `/cost`, or `/context`
 - **THEN** deep fields such as session id and token detail MAY be shown there
 - **AND** those fields are not StatusBar MUST content under this package
-

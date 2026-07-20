@@ -30,6 +30,14 @@ export interface ToolAssistantItem {
 
 export type AssistantItem = TextAssistantItem | ThinkingAssistantItem | ToolAssistantItem;
 
+/** Transcript-level system notice (e.g. compaction), not part of a single turn's assistant items. */
+export interface SystemNotice {
+  key: string;
+  kind: "compaction";
+  reason?: "manual" | "threshold" | "overflow";
+  summary: string;
+}
+
 export type ExpandableTranscriptBlockKind = "thinking" | "tool";
 
 export interface ExpandableTranscriptBlock {
@@ -48,6 +56,8 @@ export interface Turn {
   errorMessage?: string;
   startedAt?: number;
   completedAt?: number;
+  /** Optional system notices attached after this turn (e.g. compaction). */
+  notices?: SystemNotice[];
 }
 
 export function turnTextContent(turn: Turn): string {

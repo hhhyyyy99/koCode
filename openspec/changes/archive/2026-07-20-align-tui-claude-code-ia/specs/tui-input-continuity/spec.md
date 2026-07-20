@@ -1,8 +1,5 @@
-# tui-input-continuity Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-interaction-integrity. Update Purpose after archive.
-## Requirements
 ### Requirement: Input remains visible during agent execution
 
 The TUI SHALL keep the input prompt visible while an agent turn is running.
@@ -35,4 +32,3 @@ The TUI SHALL provide deterministic behavior when the user presses Enter while a
 - **WHEN** the user presses Enter with non-empty input while an agent turn is running
 - **THEN** the TUI rejects submission with a visible message (queueing MAY exist but is not required)
 - **AND** the draft is not lost
-

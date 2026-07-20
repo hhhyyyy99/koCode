@@ -91,6 +91,12 @@ export function Turn({ turn, streaming, focusedBlockKey, expandedBlockIds }: Pro
           <Text color={theme.colors.success}>{"✻"} {completionVerb(turn.completedAt - turn.startedAt)} for {formatDuration(turn.completedAt - turn.startedAt)}</Text>
         </Box>
       )}
+
+      {(turn.notices ?? []).map((notice) => (
+        <Box key={notice.key} paddingY={0}>
+          <Text color={theme.colors.dimmed}>▸ {notice.summary}</Text>
+        </Box>
+      ))}
     </Box>
   );
 }

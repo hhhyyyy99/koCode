@@ -35,7 +35,10 @@ describe("InputBox helpers", () => {
 
   it("keeps explicit multiline shortcuts for newlines", () => {
     expect(inputKeyAction("\r", { meta: true, return: true })).toBe("newline");
+    expect(inputKeyAction("\r", { ctrl: true, return: true })).toBe("newline");
+    expect(inputKeyAction("\r", { shift: true, return: true })).toBe("newline");
     expect(inputKeyAction("\n", { ctrl: true })).toBe("newline");
+    expect(inputKeyAction("j", { ctrl: true })).toBe("newline");
   });
 
   it("removes bare escape bytes from text-input echoes and reports them", () => {

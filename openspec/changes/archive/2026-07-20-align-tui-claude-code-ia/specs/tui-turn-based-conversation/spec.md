@@ -1,8 +1,5 @@
-# tui-turn-based-conversation Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-rewrite. Update Purpose after archive.
-## Requirements
 ### Requirement: Conversation rendered as grouped turns
 
 The TUI SHALL group conversation events into Turns, where each Turn contains one user message and the assistant's complete response. Within the assistant response, displayed thinking blocks, text blocks, and tool call cards SHALL preserve their **observable stream / arrival order** from display-producing events (not a fixed thinking-first layout).
@@ -40,29 +37,6 @@ The TUI SHALL group conversation events into Turns, where each Turn contains one
 
 - **WHEN** the TUI receives a `turn_end` event
 - **THEN** the current Turn is marked as complete and moved to the static completed area
-
-### Requirement: User message display
-
-Each Turn SHALL display the user's message with a distinct visual prefix (e.g., "❯") and bold styling to differentiate it from assistant content.
-
-#### Scenario: User message rendered
-
-- **WHEN** a Turn contains a user message
-- **THEN** the message is displayed with a distinct prefix and bold text style
-
-### Requirement: Streaming assistant text
-
-The TUI SHALL render assistant text content as streaming Markdown, updating in real-time as `message_delta` events arrive.
-
-#### Scenario: Text appears incrementally
-
-- **WHEN** `message_delta` events arrive for the current Turn
-- **THEN** the displayed text updates incrementally with each delta
-
-#### Scenario: Markdown rendered on completion
-
-- **WHEN** the text block is complete
-- **THEN** the content is rendered as Markdown (code blocks, bold, lists, headers)
 
 ### Requirement: Tool call cards with collapse
 
@@ -115,32 +89,6 @@ Thinking content SHALL be displayed in secondary/dimmed style, grouped by thinki
 - **WHEN** progressive-alignment acceptance for thinking expansion is evaluated
 - **THEN** Enter is not required (and MUST NOT be the sole documented expand key) for thinking blocks
 
-### Requirement: Completed turns in Static
-
-Completed Turns SHALL be rendered using Ink's `<Static>` component to avoid unnecessary re-renders and enable natural terminal scrollback.
-
-#### Scenario: Completed turn moves to Static
-
-- **WHEN** a Turn transitions from streaming to complete
-- **THEN** it is rendered in a `<Static>` component and no longer participates in React re-renders
-
-#### Scenario: Active turn in regular Box
-
-- **WHEN** a Turn is currently receiving events
-- **THEN** it is rendered in a regular `<Box>` component that updates on each event
-
-### Requirement: Turn renders completion marker
-The system SHALL render a completion marker after each finished turn's assistant content.
-
-#### Scenario: Turn ends with text reply
-- **WHEN** a turn with text content receives turn_end
-- **THEN** the completion marker `✻ <verb> for <duration>` is rendered below the last assistant content block
-- **AND** the marker uses green ✻ symbol
-
-#### Scenario: Turn ends with tool calls
-- **WHEN** a turn with tool calls receives turn_end
-- **THEN** the completion marker is rendered below the last tool card
-
 ### Requirement: Tool card rendering within turn
 
 The system SHALL render tool cards with the human-readable summary contract defined in `tui-tool-card-realignment`, at the position where the tool call occurs in the turn's ordered assistant content.
@@ -165,6 +113,8 @@ The system SHALL render thinking blocks in **stream / arrival order** among assi
 
 - **WHEN** archived wording required thinking above tools above text regardless of event order
 - **THEN** that fixed-order requirement is superseded by stream-order rendering for this package
+
+## ADDED Requirements
 
 ### Requirement: Observable streaming acceptance without micro-benchmarks
 
@@ -202,4 +152,3 @@ The TUI SHALL consume existing `compaction_start` / `compaction_end` events (opt
 
 - **WHEN** compaction presentation is implemented for this package
 - **THEN** it MUST use existing `compaction_*` events only
-

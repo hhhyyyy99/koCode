@@ -1,8 +1,5 @@
-# tui-tool-output-navigation Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-interaction-integrity. Update Purpose after archive.
-## Requirements
 ### Requirement: Tool cards expose visible focus
 
 The TUI SHALL show which tool card is focused when expandable transcript block navigation is active and the focused block is a tool card. This package references the shared expandable transcript block contract from `unify-expandable-transcript-blocks` and MUST NOT re-author a conflicting tool-only navigation model.
@@ -40,4 +37,3 @@ Long tool output SHALL remain scannable by default via collapsed summary first; 
 - **WHEN** tool output is long
 - **THEN** the default collapsed view stays short and scannable
 - **AND** full detail is available after expand via the shared expandable-block shortcut
-

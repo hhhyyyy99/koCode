@@ -1,8 +1,5 @@
-# tui-status-bar Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tui-full-alignment. Update Purpose after archive.
-## Requirements
 ### Requirement: Status bar layout
 
 The system SHALL render a persistent bottom StatusBar (footer) for **runtime / pressure** fields, distinct from the Header identity chrome and from `/status` / `/cost` / `/context` detail panels.
@@ -54,6 +51,8 @@ The system SHALL display the most relevant keyboard shortcuts based on current s
 - **WHEN** expandable transcript block focus is active and a tool or thinking block is focused
 - **THEN** the shortcut hint reflects expand/collapse (`ctrl+o`) rather than unrelated global hints when space allows
 
+## ADDED Requirements
+
 ### Requirement: Narrow-terminal StatusBar drop priority
 
 When terminal width is insufficient, the StatusBar SHALL drop or compress fields in this order (first → last):
@@ -93,4 +92,3 @@ StatusBar fields SHALL be derived from existing session pull APIs (permission mo
 - **WHEN** git branch is shown in the footer
 - **THEN** it may come from a TUI-local git read
 - **AND** absence of an agent git event is not a defect
-

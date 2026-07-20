@@ -1,8 +1,5 @@
-# permission-dialog-semantics Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change kocode-tool-permission-taxonomy. Update Purpose after archive.
-## Requirements
 ### Requirement: Dialog title matches permission category
 
 The TUI SHALL render permission dialog titles from the permission category without misleading fallbacks. Exact English strings may vary under fidelity A; category honesty MUST NOT.
@@ -60,6 +57,8 @@ The TUI SHALL render allow-all (`approve_all`) option text that matches the perm
 
 - **WHEN** the permission request category is unknown
 - **THEN** the allow-all option avoids claiming the action is a file edit or file creation
+
+## ADDED Requirements
 
 ### Requirement: Three-way permission actions
 
@@ -131,4 +130,3 @@ The dialog MUST show: (i) category/title for bash · edit · write · unknown, (
 - **WHEN** a gated tool triggers `permission_request` in `default` mode
 - **THEN** the dialog presents category/title, key target, three options, and keyboard hints
 - **AND** focus mode is `permission`
-
