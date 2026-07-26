@@ -6,7 +6,9 @@ import type { PermissionMode, PermissionRequestToolType } from "@kocode/ko-agent
 import type { Message, Model, ToolResultMessage } from "@kocode/ko-ai";
 import { Header } from "./Header.js";
 import { Conversation } from "./Conversation.js";
-import { InputBox } from "./InputBox.js";
+import { InputBox, isSlashModeInput } from "./InputBox.js";
+import { FilePickerPanel } from "./FilePickerPanel.js";
+import { applyCandidate, deriveFilePickerState, filePickerKeyAction, listFileCandidates, type FilePickerState } from "./file-picker.js";
 import { StatusBar } from "./StatusBar.js";
 import { PermissionDialog } from "./PermissionDialog.js";
 import { StatusPanel } from "./StatusPanel.js";
@@ -14,7 +16,7 @@ import { CommandPanel } from "./CommandPanel.js";
 import { SessionPanel } from "./SessionPanel.js";
 import { filterCommands, getCommands } from "./commands.js";
 import type { CommandDef } from "./commands.js";
-import { applyCtrlOBlockToggle, bareEscapeAction, busySubmitMessage, canUseGlobalShortcut, isCtrlOInput, moveBlockIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
+import { applyCtrlOBlockToggle, bareEscapeAction, busySubmitMessage, canUseGlobalShortcut, isCtrlOInput, isTextInputFocus, moveBlockIndex, restoreFocusAfterBlockingMode, type FocusMode } from "./focus.js";
 import { emptyInputBuffer, setInputText, type InputBuffer } from "./input-buffer.js";
 import { parseInputRoute } from "./input-prefix.js";
 import { useTheme, type ThemeName } from "./theme.js";
@@ -163,6 +165,47 @@ export function App({ session, onThemeChange }: AppProps) {
     getCommands(),
   );
 
+  const [filePicker, setFilePicker] = useState<FilePickerState | null>(null);
+  const filePickerRef = useRef<FilePickerState | null>(null);
+  useEffect(() => {
+    filePickerRef.current = filePicker;
+  }, [filePicker]);
+
+  const listCandidates = useCallback(
+    (fragment: string) => listFileCandidates(session.getCwd(), fragment),
+    [session],
+  );
+
+  const handleInputChange = useCallback((nextBuffer: InputBuffer) => {
+    setInput(nextBuffer);
+    const prev = filePickerRef.current;
+    const next = deriveFilePickerState(
+      prev,
+      nextBuffer.text,
+      nextBuffer.cursorOffset,
+      isSlashModeInput(nextBuffer.text),
+      listCandidates,
+    );
+    if (next !== prev) setFilePicker(next);
+    const mode = focusModeRef.current;
+    // "slash" here is the same-tick transition where slash text was replaced by
+    // an @ token (e.g. external editor); closeSlashMode uses a functional
+    // update that preserves the file-picker focus set below.
+    if (next && (mode === "input" || mode === "slash")) setFocusMode("file-picker");
+    else if (!next && mode === "file-picker") setFocusMode("input");
+  }, [listCandidates]);
+
+  const closeFilePicker = useCallback(() => {
+    setFilePicker(null);
+    setFocusMode("input");
+  }, []);
+
+  // Blocking flows (permission, modals) restore focus to input; drop any stale
+  // picker state left behind so it cannot resurface with old candidates.
+  useEffect(() => {
+    if (focusMode !== "file-picker" && filePicker) setFilePicker(null);
+  }, [focusMode, filePicker]);
+
   useEffect(() => {
     const listener = (event: AgentSessionEvent) => {
       setEvents((prev) => [...prev, event]);
@@ -215,7 +258,9 @@ export function App({ session, onThemeChange }: AppProps) {
     setSlashFilter("");
     setSlashIndex(0);
     setFilteredCommands(getCommands());
-    setFocusMode("input");
+    // Only downgrade slash focus; never clobber file-picker or modal focus
+    // (this runs on every non-slash buffer change via onSlashModeChange).
+    setFocusMode((mode) => (mode === "slash" ? "input" : mode));
   }, []);
 
   const clearInput = useCallback(() => {
@@ -420,6 +465,40 @@ export function App({ session, onThemeChange }: AppProps) {
   useInput((_input, key) => {
     if (focusMode === "permission" || focusMode === "rewind-confirm") return;
 
+    if (focusMode === "file-picker" && filePicker) {
+      const action = filePickerKeyAction(_input, key);
+      if (action === "previous") {
+        setFilePicker((prev) => prev && {
+          ...prev,
+          selectedIndex: prev.candidates.length === 0
+            ? 0
+            : (prev.selectedIndex - 1 + prev.candidates.length) % prev.candidates.length,
+        });
+        return;
+      }
+      if (action === "next") {
+        setFilePicker((prev) => prev && {
+          ...prev,
+          selectedIndex: prev.candidates.length === 0
+            ? 0
+            : (prev.selectedIndex + 1) % prev.candidates.length,
+        });
+        return;
+      }
+      if (action === "insert") {
+        const candidate = filePicker.candidates[filePicker.selectedIndex];
+        if (!candidate) return;
+        const applied = applyCandidate(input.text, input.cursorOffset, filePicker.tokenStart, candidate);
+        handleInputChange(setInputText(applied.text, applied.cursorOffset));
+        return;
+      }
+      if (action === "dismiss") {
+        closeFilePicker();
+        return;
+      }
+      return;
+    }
+
     if (focusMode === "slash") {
       if (key.downArrow) {
         setSlashIndex((prev) =>
@@ -571,12 +650,12 @@ export function App({ session, onThemeChange }: AppProps) {
 
       <InputBox
         buffer={input}
-        onChange={setInput}
+        onChange={handleInputChange}
         onSubmit={handleSubmit}
         onBareEscape={handleInputEscape}
         onSlashModeChange={handleSlashModeChange}
         running={running}
-        focusActive={focusMode === "input" || focusMode === "slash"}
+        focusActive={isTextInputFocus(focusMode)}
         submitActive={focusMode === "input"}
         onHistorySearchModeChange={(active) => setFocusMode(active ? "history-search" : "input")}
         separator={sep}
@@ -588,6 +667,15 @@ export function App({ session, onThemeChange }: AppProps) {
             commands={filteredCommands}
             selectedIndex={slashIndex}
             width={terminalWidth}
+          />
+        </Box>
+      )}
+
+      {focusMode === "file-picker" && filePicker && (
+        <Box flexDirection="column">
+          <FilePickerPanel
+            candidates={filePicker.candidates}
+            selectedIndex={filePicker.selectedIndex}
           />
         </Box>
       )}

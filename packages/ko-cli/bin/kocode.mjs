@@ -90,8 +90,8 @@ var init_stream = __esm({
           if (this.ended) {
             return { value: void 0, done: true };
           }
-          return new Promise((resolve2) => {
-            this.resolveNext = resolve2;
+          return new Promise((resolve3) => {
+            this.resolveNext = resolve3;
           });
         };
         return { next };
@@ -408,7 +408,7 @@ var init_values = __esm({
 var sleep;
 var init_sleep = __esm({
   "node_modules/.pnpm/@anthropic-ai+sdk@0.54.0/node_modules/@anthropic-ai/sdk/internal/utils/sleep.mjs"() {
-    sleep = (ms) => new Promise((resolve2) => setTimeout(resolve2, ms));
+    sleep = (ms) => new Promise((resolve3) => setTimeout(resolve3, ms));
   }
 });
 
@@ -1157,8 +1157,8 @@ var init_api_promise = __esm({
     init_parse();
     APIPromise = class _APIPromise extends Promise {
       constructor(client, responsePromise, parseResponse2 = defaultParseResponse) {
-        super((resolve2) => {
-          resolve2(null);
+        super((resolve3) => {
+          resolve3(null);
         });
         this.responsePromise = responsePromise;
         this.parseResponse = parseResponse2;
@@ -2339,12 +2339,12 @@ var init_BetaMessageStream = __esm({
           }
           return this._emit("error", new AnthropicError(String(error)));
         });
-        __classPrivateFieldSet(this, _BetaMessageStream_connectedPromise, new Promise((resolve2, reject) => {
-          __classPrivateFieldSet(this, _BetaMessageStream_resolveConnectedPromise, resolve2, "f");
+        __classPrivateFieldSet(this, _BetaMessageStream_connectedPromise, new Promise((resolve3, reject) => {
+          __classPrivateFieldSet(this, _BetaMessageStream_resolveConnectedPromise, resolve3, "f");
           __classPrivateFieldSet(this, _BetaMessageStream_rejectConnectedPromise, reject, "f");
         }), "f");
-        __classPrivateFieldSet(this, _BetaMessageStream_endPromise, new Promise((resolve2, reject) => {
-          __classPrivateFieldSet(this, _BetaMessageStream_resolveEndPromise, resolve2, "f");
+        __classPrivateFieldSet(this, _BetaMessageStream_endPromise, new Promise((resolve3, reject) => {
+          __classPrivateFieldSet(this, _BetaMessageStream_resolveEndPromise, resolve3, "f");
           __classPrivateFieldSet(this, _BetaMessageStream_rejectEndPromise, reject, "f");
         }), "f");
         __classPrivateFieldGet(this, _BetaMessageStream_connectedPromise, "f").catch(() => {
@@ -2502,11 +2502,11 @@ var init_BetaMessageStream = __esm({
        *   const message = await stream.emitted('message') // rejects if the stream errors
        */
       emitted(event) {
-        return new Promise((resolve2, reject) => {
+        return new Promise((resolve3, reject) => {
           __classPrivateFieldSet(this, _BetaMessageStream_catchingPromiseCreated, true, "f");
           if (event !== "error")
             this.once("error", reject);
-          this.once(event, resolve2);
+          this.once(event, resolve3);
         });
       }
       async done() {
@@ -2808,7 +2808,7 @@ var init_BetaMessageStream = __esm({
               if (done) {
                 return { value: void 0, done: true };
               }
-              return new Promise((resolve2, reject) => readQueue.push({ resolve: resolve2, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
+              return new Promise((resolve3, reject) => readQueue.push({ resolve: resolve3, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
             }
             const chunk = pushQueue.shift();
             return { value: chunk, done: false };
@@ -3035,12 +3035,12 @@ var init_MessageStream = __esm({
           }
           return this._emit("error", new AnthropicError(String(error)));
         });
-        __classPrivateFieldSet(this, _MessageStream_connectedPromise, new Promise((resolve2, reject) => {
-          __classPrivateFieldSet(this, _MessageStream_resolveConnectedPromise, resolve2, "f");
+        __classPrivateFieldSet(this, _MessageStream_connectedPromise, new Promise((resolve3, reject) => {
+          __classPrivateFieldSet(this, _MessageStream_resolveConnectedPromise, resolve3, "f");
           __classPrivateFieldSet(this, _MessageStream_rejectConnectedPromise, reject, "f");
         }), "f");
-        __classPrivateFieldSet(this, _MessageStream_endPromise, new Promise((resolve2, reject) => {
-          __classPrivateFieldSet(this, _MessageStream_resolveEndPromise, resolve2, "f");
+        __classPrivateFieldSet(this, _MessageStream_endPromise, new Promise((resolve3, reject) => {
+          __classPrivateFieldSet(this, _MessageStream_resolveEndPromise, resolve3, "f");
           __classPrivateFieldSet(this, _MessageStream_rejectEndPromise, reject, "f");
         }), "f");
         __classPrivateFieldGet(this, _MessageStream_connectedPromise, "f").catch(() => {
@@ -3198,11 +3198,11 @@ var init_MessageStream = __esm({
        *   const message = await stream.emitted('message') // rejects if the stream errors
        */
       emitted(event) {
-        return new Promise((resolve2, reject) => {
+        return new Promise((resolve3, reject) => {
           __classPrivateFieldSet(this, _MessageStream_catchingPromiseCreated, true, "f");
           if (event !== "error")
             this.once("error", reject);
-          this.once(event, resolve2);
+          this.once(event, resolve3);
         });
       }
       async done() {
@@ -3498,7 +3498,7 @@ var init_MessageStream = __esm({
               if (done) {
                 return { value: void 0, done: true };
               }
-              return new Promise((resolve2, reject) => readQueue.push({ resolve: resolve2, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
+              return new Promise((resolve3, reject) => readQueue.push({ resolve: resolve3, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
             }
             const chunk = pushQueue.shift();
             return { value: chunk, done: false };
@@ -4817,7 +4817,7 @@ var init_values2 = __esm({
 var sleep2;
 var init_sleep2 = __esm({
   "node_modules/.pnpm/openai@5.0.1_ws@8.21.0/node_modules/openai/internal/utils/sleep.mjs"() {
-    sleep2 = (ms) => new Promise((resolve2) => setTimeout(resolve2, ms));
+    sleep2 = (ms) => new Promise((resolve3) => setTimeout(resolve3, ms));
   }
 });
 
@@ -5968,8 +5968,8 @@ var init_api_promise2 = __esm({
     init_parse2();
     APIPromise2 = class _APIPromise extends Promise {
       constructor(client, responsePromise, parseResponse2 = defaultParseResponse2) {
-        super((resolve2) => {
-          resolve2(null);
+        super((resolve3) => {
+          resolve3(null);
         });
         this.responsePromise = responsePromise;
         this.parseResponse = parseResponse2;
@@ -6424,12 +6424,12 @@ var init_EventStream = __esm({
         _EventStream_errored.set(this, false);
         _EventStream_aborted.set(this, false);
         _EventStream_catchingPromiseCreated.set(this, false);
-        __classPrivateFieldSet2(this, _EventStream_connectedPromise, new Promise((resolve2, reject) => {
-          __classPrivateFieldSet2(this, _EventStream_resolveConnectedPromise, resolve2, "f");
+        __classPrivateFieldSet2(this, _EventStream_connectedPromise, new Promise((resolve3, reject) => {
+          __classPrivateFieldSet2(this, _EventStream_resolveConnectedPromise, resolve3, "f");
           __classPrivateFieldSet2(this, _EventStream_rejectConnectedPromise, reject, "f");
         }), "f");
-        __classPrivateFieldSet2(this, _EventStream_endPromise, new Promise((resolve2, reject) => {
-          __classPrivateFieldSet2(this, _EventStream_resolveEndPromise, resolve2, "f");
+        __classPrivateFieldSet2(this, _EventStream_endPromise, new Promise((resolve3, reject) => {
+          __classPrivateFieldSet2(this, _EventStream_resolveEndPromise, resolve3, "f");
           __classPrivateFieldSet2(this, _EventStream_rejectEndPromise, reject, "f");
         }), "f");
         __classPrivateFieldGet2(this, _EventStream_connectedPromise, "f").catch(() => {
@@ -6513,11 +6513,11 @@ var init_EventStream = __esm({
        *   const message = await stream.emitted('message') // rejects if the stream errors
        */
       emitted(event) {
-        return new Promise((resolve2, reject) => {
+        return new Promise((resolve3, reject) => {
           __classPrivateFieldSet2(this, _EventStream_catchingPromiseCreated, true, "f");
           if (event !== "error")
             this.once("error", reject);
-          this.once(event, resolve2);
+          this.once(event, resolve3);
         });
       }
       async done() {
@@ -7663,7 +7663,7 @@ var init_ChatCompletionStream = __esm({
               if (done) {
                 return { value: void 0, done: true };
               }
-              return new Promise((resolve2, reject) => readQueue.push({ resolve: resolve2, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
+              return new Promise((resolve3, reject) => readQueue.push({ resolve: resolve3, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
             }
             const chunk = pushQueue.shift();
             return { value: chunk, done: false };
@@ -8471,7 +8471,7 @@ var init_AssistantStream = __esm({
               if (done) {
                 return { value: void 0, done: true };
               }
-              return new Promise((resolve2, reject) => readQueue.push({ resolve: resolve2, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
+              return new Promise((resolve3, reject) => readQueue.push({ resolve: resolve3, reject })).then((chunk2) => chunk2 ? { value: chunk2, done: false } : { value: void 0, done: true });
             }
             const chunk = pushQueue.shift();
             return { value: chunk, done: false };
@@ -10458,7 +10458,7 @@ var init_ResponseStream = __esm({
               if (done) {
                 return { value: void 0, done: true };
               }
-              return new Promise((resolve2, reject) => readQueue.push({ resolve: resolve2, reject })).then((event2) => event2 ? { value: event2, done: false } : { value: void 0, done: true });
+              return new Promise((resolve3, reject) => readQueue.push({ resolve: resolve3, reject })).then((event2) => event2 ? { value: event2, done: false } : { value: void 0, done: true });
             }
             const event = pushQueue.shift();
             return { value: event, done: false };
@@ -13725,7 +13725,7 @@ var init_agent_session = __esm({
       async execShell(command, _cwd) {
         this.emit({ type: "shell_start", command });
         const { exec: exec2 } = await import("node:child_process");
-        return new Promise((resolve2) => {
+        return new Promise((resolve3) => {
           exec2(command, { cwd: _cwd ?? this.cwd, timeout: 3e4 }, (error, stdout, stderr) => {
             const result = {
               exitCode: error ? error.code ?? 1 : 0,
@@ -13733,7 +13733,7 @@ var init_agent_session = __esm({
               stderr: stderr.trimEnd()
             };
             this.emit({ type: "shell_end", ...result });
-            resolve2(result);
+            resolve3(result);
           });
         });
       }
@@ -13996,8 +13996,8 @@ var init_agent_session = __esm({
                 const requestId = randomUUID2();
                 const toolType = permissionDecision.requestToolType ?? "unknown";
                 const description = permissionDecision.description;
-                const permission = await new Promise((resolve2) => {
-                  this.pendingPermissions.set(requestId, { resolve: resolve2 });
+                const permission = await new Promise((resolve3) => {
+                  this.pendingPermissions.set(requestId, { resolve: resolve3 });
                   this.emit({
                     type: "permission_request",
                     requestId,
@@ -14408,7 +14408,7 @@ var init_tools = __esm({
         const permErr = await checkPermission("bash", input);
         if (permErr) return { isError: true, content: permErr };
         const timeoutMs = input.timeout ?? 3e4;
-        return new Promise((resolve2) => {
+        return new Promise((resolve3) => {
           const proc = spawn(input.command, { shell: true, cwd: cwd2, detached: true });
           let stdout = "";
           let stderr = "";
@@ -14428,14 +14428,14 @@ var init_tools = __esm({
           proc.on("close", (code) => {
             clearTimeout(timer);
             if (code === 0) {
-              resolve2({ isError: false, content: stdout });
+              resolve3({ isError: false, content: stdout });
             } else {
-              resolve2({ isError: true, content: stderr || stdout || `Process exited with code ${code}` });
+              resolve3({ isError: true, content: stderr || stdout || `Process exited with code ${code}` });
             }
           });
           proc.on("error", (e) => {
             clearTimeout(timer);
-            resolve2({ isError: true, content: e.message });
+            resolve3({ isError: true, content: e.message });
           });
         });
       }
@@ -18512,10 +18512,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep, value } = collItem;
+        const { start, key, sep: sep2, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep?.[0],
+          next: key ?? sep2?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -18529,7 +18529,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep) {
+          if (!keyProps.anchor && !keyProps.tag && !sep2) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -18553,7 +18553,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep ?? [], {
+        const valueProps = resolveProps.resolveProps(sep2 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -18569,7 +18569,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep2, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -18660,7 +18660,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep = "";
+        let sep2 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -18674,13 +18674,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep + cb;
-              sep = "";
+                comment += sep2 + cb;
+              sep2 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep += source;
+                sep2 += source;
               hasSpace = true;
               break;
             default:
@@ -18723,18 +18723,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep, value } = collItem;
+        const { start, key, sep: sep2, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep?.[0],
+          next: key ?? sep2?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep && !value) {
+          if (!props.anchor && !props.tag && !sep2 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -18788,8 +18788,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep, null, props, onError);
+        if (!isMap && !sep2 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep2, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -18801,7 +18801,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep ?? [], {
+          const valueProps = resolveProps.resolveProps(sep2 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -18812,8 +18812,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap && !props.found && ctx.options.strict) {
-              if (sep)
-                for (const st of sep) {
+              if (sep2)
+                for (const st of sep2) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -18830,7 +18830,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep2, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -19010,7 +19010,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep = "";
+      let sep2 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
@@ -19027,24 +19027,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep + indent.slice(trimIndent) + content;
-          sep = "\n";
+          value += sep2 + indent.slice(trimIndent) + content;
+          sep2 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep === " ")
-            sep = "\n";
-          else if (!prevMoreIndented && sep === "\n")
-            sep = "\n\n";
-          value += sep + indent.slice(trimIndent) + content;
-          sep = "\n";
+          if (sep2 === " ")
+            sep2 = "\n";
+          else if (!prevMoreIndented && sep2 === "\n")
+            sep2 = "\n\n";
+          value += sep2 + indent.slice(trimIndent) + content;
+          sep2 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep === "\n")
+          if (sep2 === "\n")
             value += "\n";
           else
-            sep = "\n";
+            sep2 = "\n";
         } else {
-          value += sep + content;
-          sep = " ";
+          value += sep2 + content;
+          sep2 = " ";
           prevMoreIndented = false;
         }
       }
@@ -19226,25 +19226,25 @@ var require_resolve_flow_scalar = __commonJS({
       if (!match)
         return source;
       let res = match[1];
-      let sep = " ";
+      let sep2 = " ";
       let pos = first.lastIndex;
       line.lastIndex = pos;
       while (match = line.exec(source)) {
         if (match[1] === "") {
-          if (sep === "\n")
-            res += sep;
+          if (sep2 === "\n")
+            res += sep2;
           else
-            sep = "\n";
+            sep2 = "\n";
         } else {
-          res += sep + match[1];
-          sep = " ";
+          res += sep2 + match[1];
+          sep2 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep + (match?.[1] ?? "");
+      return res + sep2 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -20054,14 +20054,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep, value }) {
+    function stringifyItem({ start, key, sep: sep2, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep)
-        for (const st of sep)
+      if (sep2)
+        for (const st of sep2)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -21228,18 +21228,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep;
+          let sep2;
           if (scalar.end) {
-            sep = scalar.end;
-            sep.push(this.sourceToken);
+            sep2 = scalar.end;
+            sep2.push(this.sourceToken);
             delete scalar.end;
           } else
-            sep = [this.sourceToken];
+            sep2 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar.offset,
             indent: scalar.indent,
-            items: [{ start, key: scalar, sep }]
+            items: [{ start, key: scalar, sep: sep2 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -21392,15 +21392,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep = it.sep;
-                  sep.push(this.sourceToken);
+                  const sep2 = it.sep;
+                  sep2.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep }]
+                    items: [{ start: start2, key, sep: sep2 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -21594,13 +21594,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep = fc.end.splice(1, fc.end.length);
-            sep.push(this.sourceToken);
+            const sep2 = fc.end.splice(1, fc.end.length);
+            sep2.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep }]
+              items: [{ start, key: fc, sep: sep2 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -23858,14 +23858,14 @@ var require_react_development = __commonJS({
               var thenableResult = result;
               var wasAwaited = false;
               var thenable = {
-                then: function(resolve2, reject) {
+                then: function(resolve3, reject) {
                   wasAwaited = true;
                   thenableResult.then(function(returnValue2) {
                     popActScope(prevActScopeDepth);
                     if (actScopeDepth === 0) {
-                      recursivelyFlushAsyncActWork(returnValue2, resolve2, reject);
+                      recursivelyFlushAsyncActWork(returnValue2, resolve3, reject);
                     } else {
-                      resolve2(returnValue2);
+                      resolve3(returnValue2);
                     }
                   }, function(error2) {
                     popActScope(prevActScopeDepth);
@@ -23895,20 +23895,20 @@ var require_react_development = __commonJS({
                   ReactCurrentActQueue.current = null;
                 }
                 var _thenable = {
-                  then: function(resolve2, reject) {
+                  then: function(resolve3, reject) {
                     if (ReactCurrentActQueue.current === null) {
                       ReactCurrentActQueue.current = [];
-                      recursivelyFlushAsyncActWork(returnValue, resolve2, reject);
+                      recursivelyFlushAsyncActWork(returnValue, resolve3, reject);
                     } else {
-                      resolve2(returnValue);
+                      resolve3(returnValue);
                     }
                   }
                 };
                 return _thenable;
               } else {
                 var _thenable2 = {
-                  then: function(resolve2, reject) {
-                    resolve2(returnValue);
+                  then: function(resolve3, reject) {
+                    resolve3(returnValue);
                   }
                 };
                 return _thenable2;
@@ -23924,7 +23924,7 @@ var require_react_development = __commonJS({
             actScopeDepth = prevActScopeDepth;
           }
         }
-        function recursivelyFlushAsyncActWork(returnValue, resolve2, reject) {
+        function recursivelyFlushAsyncActWork(returnValue, resolve3, reject) {
           {
             var queue = ReactCurrentActQueue.current;
             if (queue !== null) {
@@ -23933,16 +23933,16 @@ var require_react_development = __commonJS({
                 enqueueTask(function() {
                   if (queue.length === 0) {
                     ReactCurrentActQueue.current = null;
-                    resolve2(returnValue);
+                    resolve3(returnValue);
                   } else {
-                    recursivelyFlushAsyncActWork(returnValue, resolve2, reject);
+                    recursivelyFlushAsyncActWork(returnValue, resolve3, reject);
                   }
                 });
               } catch (error2) {
                 reject(error2);
               }
             } else {
-              resolve2(returnValue);
+              resolve3(returnValue);
             }
           }
         }
@@ -54738,8 +54738,8 @@ var init_ink = __esm({
         }
       }
       async waitUntilExit() {
-        this.exitPromise ||= new Promise((resolve2, reject) => {
-          this.resolveExitPromise = resolve2;
+        this.exitPromise ||= new Promise((resolve3, reject) => {
+          this.resolveExitPromise = resolve3;
           this.rejectExitPromise = reject;
         });
         return this.exitPromise;
@@ -56221,11 +56221,11 @@ var require_react_jsx_runtime_development = __commonJS({
             return jsxWithValidation(type, props, key, false);
           }
         }
-        var jsx18 = jsxWithValidationDynamic;
-        var jsxs17 = jsxWithValidationStatic;
+        var jsx19 = jsxWithValidationDynamic;
+        var jsxs18 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
-        exports.jsx = jsx18;
-        exports.jsxs = jsxs17;
+        exports.jsx = jsx19;
+        exports.jsxs = jsxs18;
       })();
     }
   }
@@ -57908,23 +57908,23 @@ async function launchEditor(text) {
   const editor = process.env.EDITOR || process.env.VISUAL || "vim";
   const tmpFile = join6(tmpdir(), `kocode-input-${randomUUID3()}.md`);
   await writeFile(tmpFile, text, "utf-8");
-  return new Promise((resolve2) => {
+  return new Promise((resolve3) => {
     const child = spawn2(editor, [tmpFile], { stdio: "inherit" });
     child.on("exit", async (code) => {
       if (code === 0) {
         try {
           const content = await readFile(tmpFile, "utf-8");
           await unlink(tmpFile);
-          resolve2(content.trimEnd());
+          resolve3(content.trimEnd());
         } catch {
-          resolve2(void 0);
+          resolve3(void 0);
         }
       } else {
         try {
           await unlink(tmpFile);
         } catch {
         }
-        resolve2(void 0);
+        resolve3(void 0);
       }
     });
   });
@@ -57939,6 +57939,211 @@ var init_InputBox = __esm({
     init_input_buffer();
     init_theme();
     import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+  }
+});
+
+// packages/ko-tui/src/FilePickerPanel.tsx
+function formatFileRows(candidates, selectedIndex) {
+  return candidates.map((candidate, index) => {
+    const selected = index === selectedIndex;
+    const prefix = selected ? "\u276F " : "  ";
+    return {
+      key: candidate.path,
+      selected,
+      line: `${prefix}${candidate.path}`
+    };
+  });
+}
+function filePickerWindow(total, selectedIndex) {
+  let start = Math.max(0, selectedIndex - Math.floor(WINDOW_SIZE / 2));
+  const end = Math.min(total, start + WINDOW_SIZE);
+  if (end === total) {
+    start = Math.max(0, total - WINDOW_SIZE);
+  }
+  return { start, end };
+}
+function FilePickerPanel({ candidates, selectedIndex }) {
+  const { theme } = useTheme();
+  if (candidates.length === 0) {
+    return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: "No matching files" }) });
+  }
+  const total = candidates.length;
+  const { start, end } = filePickerWindow(total, selectedIndex);
+  const rows = formatFileRows(candidates.slice(start, end), selectedIndex - start);
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { flexDirection: "column", children: [
+    start > 0 && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Text, { color: theme.colors.dimmed, children: [
+      "  \u2191",
+      " ",
+      start,
+      " more above"
+    ] }) }),
+    rows.map((row) => /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { children: row.selected ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.secondary, bold: true, children: row.line }) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { children: row.line }) }, row.key)),
+    end < total && /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Text, { color: theme.colors.dimmed, children: [
+      "  \u2193",
+      " ",
+      total - end,
+      " more below"
+    ] }) })
+  ] });
+}
+var import_jsx_runtime10, WINDOW_SIZE;
+var init_FilePickerPanel = __esm({
+  async "packages/ko-tui/src/FilePickerPanel.tsx"() {
+    "use strict";
+    await init_build2();
+    init_theme();
+    import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+    WINDOW_SIZE = 6;
+  }
+});
+
+// packages/ko-tui/src/focus.ts
+function isModalFocus(mode) {
+  return mode === "status-modal" || mode === "model-modal" || mode === "theme-modal" || mode === "session-modal" || mode === "permission" || mode === "rewind-confirm";
+}
+function isTextInputFocus(mode) {
+  return mode === "input" || mode === "slash" || mode === "file-picker";
+}
+function canUseGlobalShortcut(mode) {
+  return mode === "input" || mode === "transcript-block" || mode === "tool-output";
+}
+function restoreFocusAfterBlockingMode(previous) {
+  if (!previous || isModalFocus(previous) || previous === "history-search" || previous === "file-picker") return "input";
+  return previous;
+}
+function normalizeBlockIndex(index, count) {
+  if (count <= 0) return 0;
+  if (index < 0) return count - 1;
+  if (index >= count) return 0;
+  return index;
+}
+function moveBlockIndex(index, count, direction) {
+  return normalizeBlockIndex(index + (direction === "next" ? 1 : -1), count);
+}
+function isCtrlOInput(input, key) {
+  return key.ctrl === true && (input === "o" || input === "");
+}
+function toggleExpandedBlockId(expanded, blockKey) {
+  const next = new Set(expanded);
+  if (!blockKey) return next;
+  if (next.has(blockKey)) next.delete(blockKey);
+  else next.add(blockKey);
+  return next;
+}
+function applyCtrlOBlockToggle(state) {
+  if (state.blockKeys.length === 0) return state;
+  const selectedBlockIndex = Math.min(state.selectedBlockIndex, state.blockKeys.length - 1);
+  const blockKey = state.blockKeys[selectedBlockIndex];
+  return {
+    ...state,
+    focusMode: "transcript-block",
+    selectedBlockIndex,
+    expandedBlockIds: toggleExpandedBlockId(state.expandedBlockIds, blockKey)
+  };
+}
+function busySubmitMessage(text) {
+  return text.trim() ? "Agent is still running; draft kept. Submit after this turn finishes." : "Agent is still running.";
+}
+function bareEscapeAction(focusMode, running) {
+  if (focusMode === "slash") return "ignore";
+  if (focusMode !== "input") return "ignore";
+  if (running) return "cancel-turn";
+  return "rewind-or-ignore";
+}
+function isBareEscapeInput(input) {
+  if (!input.includes("\x1B")) return false;
+  return input.split("").every((char) => char === "\x1B");
+}
+var init_focus = __esm({
+  "packages/ko-tui/src/focus.ts"() {
+    "use strict";
+  }
+});
+
+// packages/ko-tui/src/file-picker.ts
+import { readdirSync as readdirSync3 } from "node:fs";
+import { resolve as resolve2, sep } from "node:path";
+function atTokenAt(text, cursorOffset) {
+  const cursor = Math.max(0, Math.min(text.length, cursorOffset));
+  for (let i = cursor - 1; i >= 0; i--) {
+    const char = text[i];
+    if (/\s/.test(char)) return void 0;
+    if (char === "@") {
+      if (i > 0 && !/\s/.test(text[i - 1])) return void 0;
+      return { start: i, fragment: text.slice(i + 1, cursor) };
+    }
+  }
+  return void 0;
+}
+function listFileCandidates(cwd2, fragment, limit2 = DEFAULT_LIMIT) {
+  const slashIndex = fragment.lastIndexOf("/");
+  const dirPart = slashIndex >= 0 ? fragment.slice(0, slashIndex + 1) : "";
+  const namePart = slashIndex >= 0 ? fragment.slice(slashIndex + 1) : fragment;
+  const baseCwd = resolve2(cwd2);
+  const target = resolve2(baseCwd, dirPart);
+  if (target !== baseCwd && !target.startsWith(baseCwd + sep)) return [];
+  let entries;
+  try {
+    entries = readdirSync3(target, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const query = namePart.toLowerCase();
+  const showDotfiles = namePart.startsWith(".");
+  const matched = entries.filter((entry) => {
+    if (NOISE_DIRS.has(entry.name)) return false;
+    if (entry.name.startsWith(".") && !showDotfiles) return false;
+    return query === "" || entry.name.toLowerCase().includes(query);
+  });
+  const tier = (name) => query === "" || name.toLowerCase().startsWith(query) ? 0 : 1;
+  matched.sort((a, b) => {
+    const tierDiff = tier(a.name) - tier(b.name);
+    if (tierDiff !== 0) return tierDiff;
+    const dirDiff = Number(b.isDirectory()) - Number(a.isDirectory());
+    if (dirDiff !== 0) return dirDiff;
+    return a.name.localeCompare(b.name);
+  });
+  return matched.slice(0, limit2).map((entry) => ({
+    path: entry.isDirectory() ? `${dirPart}${entry.name}/` : `${dirPart}${entry.name}`,
+    name: entry.name,
+    isDirectory: entry.isDirectory()
+  }));
+}
+function deriveFilePickerState(prev, text, cursorOffset, slashActive, list) {
+  if (slashActive) return null;
+  const token = atTokenAt(text, cursorOffset);
+  if (!token) return null;
+  if (prev && prev.fragment === token.fragment && prev.tokenStart === token.start) return prev;
+  return {
+    tokenStart: token.start,
+    fragment: token.fragment,
+    candidates: list(token.fragment),
+    selectedIndex: 0
+  };
+}
+function filePickerKeyAction(input, key) {
+  if (key.escape || isBareEscapeInput(input)) return "dismiss";
+  if (key.upArrow || key.tab && key.shift) return "previous";
+  if (key.downArrow) return "next";
+  if (key.tab || key.return || input === "\r" || input === "\n") return "insert";
+  return "none";
+}
+function applyCandidate(text, cursorOffset, tokenStart, candidate) {
+  const insert = candidate.isDirectory ? candidate.path : `${candidate.path} `;
+  const nextText = text.slice(0, tokenStart + 1) + insert + text.slice(cursorOffset);
+  return {
+    text: nextText,
+    cursorOffset: tokenStart + 1 + insert.length,
+    keepOpen: candidate.isDirectory
+  };
+}
+var NOISE_DIRS, DEFAULT_LIMIT;
+var init_file_picker = __esm({
+  "packages/ko-tui/src/file-picker.ts"() {
+    "use strict";
+    init_focus();
+    NOISE_DIRS = /* @__PURE__ */ new Set(["node_modules", ".git", "dist"]);
+    DEFAULT_LIMIT = 50;
   }
 });
 
@@ -58011,7 +58216,7 @@ function StatusBar({
 }) {
   const { theme } = useTheme();
   if (yieldChrome) {
-    return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { paddingX: 0, children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: " " }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { paddingX: 0, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.colors.dimmed, children: " " }) });
   }
   const narrow = width < 60;
   const fields = buildStatusBarFields({
@@ -58029,31 +58234,31 @@ function StatusBar({
   const runningIdx = line.lastIndexOf("Running");
   const modeColor = running ? theme.colors.warning : theme.colors.primary;
   if (runningIdx >= 0) {
-    return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { paddingX: 0, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: line.slice(0, runningIdx) }),
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.warning, children: line.slice(runningIdx) })
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Box_default, { paddingX: 0, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.colors.dimmed, children: line.slice(0, runningIdx) }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.colors.warning, children: line.slice(runningIdx) })
     ] });
   }
   const padMatch = line.match(/^(.*?)(\s{2,})(.*)$/);
   if (padMatch) {
-    return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { paddingX: 0, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: padMatch[1] }),
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { children: padMatch[2] }),
-      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: modeColor, children: padMatch[3] })
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Box_default, { paddingX: 0, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.colors.dimmed, children: padMatch[1] }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { children: padMatch[2] }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: modeColor, children: padMatch[3] })
     ] });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(Box_default, { paddingX: 0, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.colors.dimmed, children: line.slice(0, leftLen) }),
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: modeColor, children: line.slice(leftLen) })
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Box_default, { paddingX: 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.colors.dimmed, children: line.slice(0, leftLen) }),
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: modeColor, children: line.slice(leftLen) })
   ] });
 }
-var import_jsx_runtime10, MODE_LABELS;
+var import_jsx_runtime11, MODE_LABELS;
 var init_StatusBar = __esm({
   async "packages/ko-tui/src/StatusBar.tsx"() {
     "use strict";
     await init_build2();
     init_theme();
-    import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
     MODE_LABELS = {
       default: { long: "Default", short: "Def" },
       accept_edits: { long: "Accept Edits", short: "Edit" },
@@ -58070,7 +58275,7 @@ function splitDisplayLines2(text) {
 function renderLinesWithNumbers2(text) {
   const lines = splitDisplayLines2(text);
   const width = Math.max(2, String(lines.length).length);
-  return lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { children: [
+  return lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
     String(i + 1).padStart(width),
     " ",
     line
@@ -58125,7 +58330,7 @@ function PermissionDialog({ session, requestId, toolType, toolName, params, desc
     const numeric = _input === "1" ? 0 : _input === "2" ? 1 : _input === "3" ? 2 : null;
     if (numeric !== null) {
       setSelected(numeric);
-      resolve2(numeric);
+      resolve3(numeric);
       return;
     }
     if (key.upArrow) {
@@ -58133,12 +58338,12 @@ function PermissionDialog({ session, requestId, toolType, toolName, params, desc
     } else if (key.downArrow) {
       setSelected((prev) => prev < 2 ? prev + 1 : 0);
     } else if (key.return) {
-      resolve2(selected);
+      resolve3(selected);
     } else if (key.escape) {
-      resolve2(2);
+      resolve3(2);
     }
   });
-  function resolve2(index) {
+  function resolve3(index) {
     switch (index) {
       case 0:
         session.resolvePermission(requestId, "approve");
@@ -58156,33 +58361,33 @@ function PermissionDialog({ session, requestId, toolType, toolName, params, desc
   const title = permissionDialogTitle(toolType);
   const dir = filePath ? filePath.split("/").slice(0, -1).join("/") || "/" : "";
   const options = permissionDialogOptions(toolType, command, dir, toolName);
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { bold: true, children: title }) }),
-    filePath && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: filePath }) }),
-    command && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { paddingLeft: 2, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { children: command }) }),
-    (toolType === "write" || toolType === "edit") && permissionPreviewLines(toolType, params).length > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: SEP2 }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { flexDirection: "column", paddingLeft: 1, children: renderLinesWithNumbers2(permissionPreviewLines(toolType, params).join("\n")) })
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { bold: true, children: title }) }),
+    filePath && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: filePath }) }),
+    command && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { paddingLeft: 2, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: command }) }),
+    (toolType === "write" || toolType === "edit") && permissionPreviewLines(toolType, params).length > 0 && /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: SEP2 }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { flexDirection: "column", paddingLeft: 1, children: renderLinesWithNumbers2(permissionPreviewLines(toolType, params).join("\n")) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: SEP2 }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { children: toolType === "write" && filePath ? `Do you want to create ${filePath.replace(/^.*\//, "")}?` : "Do you want to proceed?" }) }),
-    options.map((opt, i) => /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { color: selected === i ? "cyan" : void 0, bold: selected === i, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: SEP2 }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: toolType === "write" && filePath ? `Do you want to create ${filePath.replace(/^.*\//, "")}?` : "Do you want to proceed?" }) }),
+    options.map((opt, i) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: selected === i ? "cyan" : void 0, bold: selected === i, children: [
       selected === i ? "\u276F" : " ",
       " ",
       i + 1,
       ". ",
       opt
     ] }) }, i)),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { dimColor: true, children: "Esc to cancel \xB7 Enter to confirm" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { dimColor: true, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react26, import_jsx_runtime11, SEP2;
+var import_react26, import_jsx_runtime12, SEP2;
 var init_PermissionDialog = __esm({
   async "packages/ko-tui/src/PermissionDialog.tsx"() {
     "use strict";
     import_react26 = __toESM(require_react(), 1);
     await init_build2();
-    import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
     SEP2 = "\u254C".repeat(60);
   }
 });
@@ -58536,67 +58741,67 @@ function StatusPanel({ session, onClose, active = true }) {
       onClose();
     }
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { bold: t === tab2, color: t === tab2 ? theme.colors.secondary : theme.colors.primary, children: ` ${t} ` }, t)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(50) }) }),
-    tab2 === "Settings" && /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Auto-compact:            true" }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: TABS.map((t) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: t === tab2, color: t === tab2 ? theme.colors.secondary : theme.colors.primary, children: ` ${t} ` }, t)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(50) }) }),
+    tab2 === "Settings" && /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Auto-compact:            true" }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Thinking mode:           ",
         session.getThinkingLevel() !== "off" ? "true" : "false"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Fast mode:               false" }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Fast mode:               false" }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Default permission mode: ",
         session.getPermissionMode()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Theme:                   dark" })
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Theme:                   dark" })
     ] }),
-    tab2 === "Status" && /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: "Version:         koCode v0.1.0" }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+    tab2 === "Status" && /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: "Version:         koCode v0.1.0" }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Session name:    ",
         session.getSessionId().slice(0, 8)
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Session ID:      ",
         session.getSessionId()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "cwd:             ",
         session.getCwd()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Model:           ",
         m.provider,
         "/",
         m.id
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "API base URL:    ",
         m.baseUrl ?? "N/A"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Context window:  ",
         m.contextWindow ? `${Math.round(m.contextWindow / 1e3)}k` : "N/A"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Permission:      ",
         session.getPermissionMode()
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { children: [
         "Running:         ",
         session.isRunning() ? "Yes" : "No"
       ] })
     ] }),
-    tab2 === "Usage" && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { flexDirection: "column", children: usageLines.map((line, index) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { children: line }, index)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.colors.dimmed, children: [
+    tab2 === "Usage" && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { flexDirection: "column", children: usageLines.map((line, index) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: line }, index)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.colors.dimmed, children: [
       "\u2190/\u2192",
       " to switch tabs \xB7 Esc to close"
     ] }) })
   ] });
 }
-var import_react27, import_jsx_runtime12, TABS;
+var import_react27, import_jsx_runtime13, TABS;
 var init_StatusPanel = __esm({
   async "packages/ko-tui/src/StatusPanel.tsx"() {
     "use strict";
@@ -58604,7 +58809,7 @@ var init_StatusPanel = __esm({
     await init_build2();
     init_theme();
     init_commands();
-    import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
     TABS = ["Settings", "Status", "Usage"];
   }
 });
@@ -58660,32 +58865,32 @@ function formatCommandRows(commands, selectedIndex, width = 80) {
 function CommandPanel({ commands, selectedIndex, width = 80 }) {
   const { theme } = useTheme();
   if (commands.length === 0) {
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.dimmed, children: "No matching commands" }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: "No matching commands" }) });
   }
   const total = commands.length;
-  let start = Math.max(0, selectedIndex - Math.floor(WINDOW_SIZE / 2));
-  const end = Math.min(total, start + WINDOW_SIZE);
+  let start = Math.max(0, selectedIndex - Math.floor(WINDOW_SIZE2 / 2));
+  const end = Math.min(total, start + WINDOW_SIZE2);
   if (end === total) {
-    start = Math.max(0, total - WINDOW_SIZE);
+    start = Math.max(0, total - WINDOW_SIZE2);
   }
   const visible = commands.slice(start, end);
   const showUp = start > 0;
   const showDown = end < total;
   const rows = formatCommandRows(visible, selectedIndex - start, width);
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
-    showUp && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.colors.dimmed, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Box_default, { flexDirection: "column", children: [
+    showUp && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: theme.colors.dimmed, children: [
       "  \u2191",
       " ",
       start,
       " more above"
     ] }) }),
     rows.map((row) => {
-      return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", children: [
-        row.selected ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.secondary, bold: true, children: row.commandLine }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: row.commandLine }),
-        row.metadataLine && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.colors.dimmed, children: row.metadataLine })
+      return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Box_default, { flexDirection: "column", children: [
+        row.selected ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.secondary, bold: true, children: row.commandLine }) : /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { children: row.commandLine }),
+        row.metadataLine && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: row.metadataLine })
       ] }, row.key);
     }),
-    showDown && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.colors.dimmed, children: [
+    showDown && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: theme.colors.dimmed, children: [
       "  \u2193",
       " ",
       total - end,
@@ -58693,14 +58898,14 @@ function CommandPanel({ commands, selectedIndex, width = 80 }) {
     ] }) })
   ] });
 }
-var import_jsx_runtime13, WINDOW_SIZE, COMMAND_COLUMN_WIDTH, PREFIX_WIDTH;
+var import_jsx_runtime14, WINDOW_SIZE2, COMMAND_COLUMN_WIDTH, PREFIX_WIDTH;
 var init_CommandPanel = __esm({
   async "packages/ko-tui/src/CommandPanel.tsx"() {
     "use strict";
     await init_build2();
     init_theme();
-    import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
-    WINDOW_SIZE = 6;
+    import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+    WINDOW_SIZE2 = 6;
     COMMAND_COLUMN_WIDTH = 30;
     PREFIX_WIDTH = 2;
   }
@@ -58732,17 +58937,17 @@ function SessionPanel(props) {
     }
   });
   const windowed = (0, import_react28.useMemo)(() => {
-    const start = Math.max(0, Math.min(selected - Math.floor(WINDOW_SIZE2 / 2), Math.max(0, items.length - WINDOW_SIZE2)));
-    return { start, visible: items.slice(start, start + WINDOW_SIZE2) };
+    const start = Math.max(0, Math.min(selected - Math.floor(WINDOW_SIZE3 / 2), Math.max(0, items.length - WINDOW_SIZE3)));
+    return { start, visible: items.slice(start, start + WINDOW_SIZE3) };
   }, [items, selected]);
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { bold: true, color: theme.colors.primary, children: title }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "Current branch is marked with *" : "\u2191/\u2193 select \xB7 Enter resume \xB7 Esc close" }),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(56) }) }),
-    items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "No branches" : "No saved sessions" }) : windowed.visible.map((item, offset) => {
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { bold: true, color: theme.colors.primary, children: title }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "Current branch is marked with *" : "\u2191/\u2193 select \xB7 Enter resume \xB7 Esc close" }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(56) }) }),
+    items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: props.mode === "branch" ? "No branches" : "No saved sessions" }) : windowed.visible.map((item, offset) => {
       const absoluteIndex = windowed.start + offset;
       const active = absoluteIndex === selected;
-      return props.mode === "branch" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(BranchRow, { branch: item, active }, `${item.sessionId}-${absoluteIndex}`) : /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(SessionRow, { session: item, active }, item.id);
+      return props.mode === "branch" ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(BranchRow, { branch: item, active }, `${item.sessionId}-${absoluteIndex}`) : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(SessionRow, { session: item, active }, item.id);
     })
   ] });
 }
@@ -58750,7 +58955,7 @@ function BranchRow({ branch, active }) {
   const { theme } = useTheme();
   const marker = active ? "\u276F" : " ";
   const current = branch.current ? "*" : " ";
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
     marker,
     " ",
     current,
@@ -58764,7 +58969,7 @@ function SessionRow({ session, active }) {
   const { theme } = useTheme();
   const marker = active ? "\u276F" : " ";
   const date = new Date(session.lastAccessTime).toLocaleString();
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: active ? theme.colors.secondary : theme.colors.primary, bold: active, children: [
     marker,
     " ",
     session.name.padEnd(14),
@@ -58776,71 +58981,15 @@ function SessionRow({ session, active }) {
     date
   ] });
 }
-var import_react28, import_jsx_runtime14, WINDOW_SIZE2;
+var import_react28, import_jsx_runtime15, WINDOW_SIZE3;
 var init_SessionPanel = __esm({
   async "packages/ko-tui/src/SessionPanel.tsx"() {
     "use strict";
     import_react28 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
-    import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
-    WINDOW_SIZE2 = 8;
-  }
-});
-
-// packages/ko-tui/src/focus.ts
-function isModalFocus(mode) {
-  return mode === "status-modal" || mode === "model-modal" || mode === "theme-modal" || mode === "session-modal" || mode === "permission" || mode === "rewind-confirm";
-}
-function canUseGlobalShortcut(mode) {
-  return mode === "input" || mode === "transcript-block" || mode === "tool-output";
-}
-function restoreFocusAfterBlockingMode(previous) {
-  if (!previous || isModalFocus(previous) || previous === "history-search") return "input";
-  return previous;
-}
-function normalizeBlockIndex(index, count) {
-  if (count <= 0) return 0;
-  if (index < 0) return count - 1;
-  if (index >= count) return 0;
-  return index;
-}
-function moveBlockIndex(index, count, direction) {
-  return normalizeBlockIndex(index + (direction === "next" ? 1 : -1), count);
-}
-function isCtrlOInput(input, key) {
-  return key.ctrl === true && (input === "o" || input === "");
-}
-function toggleExpandedBlockId(expanded, blockKey) {
-  const next = new Set(expanded);
-  if (!blockKey) return next;
-  if (next.has(blockKey)) next.delete(blockKey);
-  else next.add(blockKey);
-  return next;
-}
-function applyCtrlOBlockToggle(state) {
-  if (state.blockKeys.length === 0) return state;
-  const selectedBlockIndex = Math.min(state.selectedBlockIndex, state.blockKeys.length - 1);
-  const blockKey = state.blockKeys[selectedBlockIndex];
-  return {
-    ...state,
-    focusMode: "transcript-block",
-    selectedBlockIndex,
-    expandedBlockIds: toggleExpandedBlockId(state.expandedBlockIds, blockKey)
-  };
-}
-function busySubmitMessage(text) {
-  return text.trim() ? "Agent is still running; draft kept. Submit after this turn finishes." : "Agent is still running.";
-}
-function bareEscapeAction(focusMode, running) {
-  if (focusMode === "slash") return "ignore";
-  if (focusMode !== "input") return "ignore";
-  if (running) return "cancel-turn";
-  return "rewind-or-ignore";
-}
-var init_focus = __esm({
-  "packages/ko-tui/src/focus.ts"() {
-    "use strict";
+    import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+    WINDOW_SIZE3 = 8;
   }
 });
 
@@ -58900,14 +59049,14 @@ function ThemePanel({ active, onClose, onSelect }) {
       onSelect(OPTIONS[selected].name);
     }
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { borderStyle: "round", paddingX: 1, flexDirection: "column", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Theme" }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "\u2191/\u2193 select \xB7 Enter apply \xB7 Esc close" }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(48) }) }),
+  return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { borderStyle: "round", paddingX: 1, flexDirection: "column", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Theme" }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "\u2191/\u2193 select \xB7 Enter apply \xB7 Esc close" }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "\u2500".repeat(48) }) }),
     OPTIONS.map((option, index) => {
       const isSelected = index === selected;
       const isCurrent = option.name === theme.name;
-      return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: isSelected ? theme.colors.secondary : theme.colors.primary, bold: isSelected, children: [
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: isSelected ? theme.colors.secondary : theme.colors.primary, bold: isSelected, children: [
         isSelected ? "\u276F" : " ",
         " ",
         isCurrent ? "\u2714" : " ",
@@ -58915,32 +59064,32 @@ function ThemePanel({ active, onClose, onSelect }) {
         option.label
       ] }, option.name);
     }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { marginTop: 1, flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.colors.dimmed, children: "Preview" }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: previewTheme.colors.secondary, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { marginTop: 1, flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "Preview" }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: previewTheme.colors.secondary, children: [
         "function greet(name: string) ",
         "{"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.dimmed, children: "  // selected theme preview" }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.dimmed, children: "  // selected theme preview" }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { children: [
         "  return ",
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.success, children: "`hello ${name}`" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.success, children: "`hello ${name}`" }),
         ";"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.secondary, children: "}" }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.warning, children: "\u25CF Running tool" }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: previewTheme.colors.error, children: "\u2717 Error state" })
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.secondary, children: "}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.warning, children: "\u25CF Running tool" }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: previewTheme.colors.error, children: "\u2717 Error state" })
     ] })
   ] });
 }
-var import_react29, import_jsx_runtime15, OPTIONS;
+var import_react29, import_jsx_runtime16, OPTIONS;
 var init_ThemePanel = __esm({
   async "packages/ko-tui/src/ThemePanel.tsx"() {
     "use strict";
     import_react29 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
-    import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
     OPTIONS = [
       { name: "auto", label: "Auto (match terminal)" },
       { name: "dark", label: "Dark mode" },
@@ -58982,27 +59131,27 @@ function RewindDialog({ active = true, onConfirm, onCancel }) {
     }
     if (key.escape) onCancel();
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Rewind checkpoint" }),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { children: "Rewind to before the last change?" }) }),
-    options.map((option, index) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: selected === index ? theme.colors.secondary : theme.colors.primary, bold: selected === index, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", paddingX: 1, marginY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.colors.primary, children: "Rewind checkpoint" }),
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { children: "Rewind to before the last change?" }) }),
+    options.map((option, index) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: selected === index ? theme.colors.secondary : theme.colors.primary, bold: selected === index, children: [
       selected === index ? "\u276F" : " ",
       " ",
       index + 1,
       ". ",
       option
     ] }, option)),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.colors.dimmed, children: "Esc to cancel \xB7 Enter to confirm" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.colors.dimmed, children: "Esc to cancel \xB7 Enter to confirm" }) })
   ] });
 }
-var import_react30, import_jsx_runtime16;
+var import_react30, import_jsx_runtime17;
 var init_RewindDialog = __esm({
   async "packages/ko-tui/src/RewindDialog.tsx"() {
     "use strict";
     import_react30 = __toESM(require_react(), 1);
     await init_build2();
     init_theme();
-    import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
@@ -59128,6 +59277,37 @@ function App2({ session, onThemeChange }) {
   const [filteredCommands, setFilteredCommands] = (0, import_react31.useState)(
     getCommands()
   );
+  const [filePicker, setFilePicker] = (0, import_react31.useState)(null);
+  const filePickerRef = (0, import_react31.useRef)(null);
+  (0, import_react31.useEffect)(() => {
+    filePickerRef.current = filePicker;
+  }, [filePicker]);
+  const listCandidates = (0, import_react31.useCallback)(
+    (fragment) => listFileCandidates(session.getCwd(), fragment),
+    [session]
+  );
+  const handleInputChange = (0, import_react31.useCallback)((nextBuffer) => {
+    setInput(nextBuffer);
+    const prev = filePickerRef.current;
+    const next = deriveFilePickerState(
+      prev,
+      nextBuffer.text,
+      nextBuffer.cursorOffset,
+      isSlashModeInput(nextBuffer.text),
+      listCandidates
+    );
+    if (next !== prev) setFilePicker(next);
+    const mode = focusModeRef.current;
+    if (next && (mode === "input" || mode === "slash")) setFocusMode("file-picker");
+    else if (!next && mode === "file-picker") setFocusMode("input");
+  }, [listCandidates]);
+  const closeFilePicker = (0, import_react31.useCallback)(() => {
+    setFilePicker(null);
+    setFocusMode("input");
+  }, []);
+  (0, import_react31.useEffect)(() => {
+    if (focusMode !== "file-picker" && filePicker) setFilePicker(null);
+  }, [focusMode, filePicker]);
   (0, import_react31.useEffect)(() => {
     const listener = (event) => {
       setEvents((prev) => [...prev, event]);
@@ -59178,7 +59358,7 @@ function App2({ session, onThemeChange }) {
     setSlashFilter("");
     setSlashIndex(0);
     setFilteredCommands(getCommands());
-    setFocusMode("input");
+    setFocusMode((mode) => mode === "slash" ? "input" : mode);
   }, []);
   const clearInput = (0, import_react31.useCallback)(() => {
     setInput(emptyInputBuffer());
@@ -59374,6 +59554,35 @@ function App2({ session, onThemeChange }) {
   }, []);
   use_input_default((_input, key) => {
     if (focusMode === "permission" || focusMode === "rewind-confirm") return;
+    if (focusMode === "file-picker" && filePicker) {
+      const action = filePickerKeyAction(_input, key);
+      if (action === "previous") {
+        setFilePicker((prev) => prev && {
+          ...prev,
+          selectedIndex: prev.candidates.length === 0 ? 0 : (prev.selectedIndex - 1 + prev.candidates.length) % prev.candidates.length
+        });
+        return;
+      }
+      if (action === "next") {
+        setFilePicker((prev) => prev && {
+          ...prev,
+          selectedIndex: prev.candidates.length === 0 ? 0 : (prev.selectedIndex + 1) % prev.candidates.length
+        });
+        return;
+      }
+      if (action === "insert") {
+        const candidate = filePicker.candidates[filePicker.selectedIndex];
+        if (!candidate) return;
+        const applied = applyCandidate(input.text, input.cursorOffset, filePicker.tokenStart, candidate);
+        handleInputChange(setInputText(applied.text, applied.cursorOffset));
+        return;
+      }
+      if (action === "dismiss") {
+        closeFilePicker();
+        return;
+      }
+      return;
+    }
     if (focusMode === "slash") {
       if (key.downArrow) {
         setSlashIndex(
@@ -59447,10 +59656,10 @@ function App2({ session, onThemeChange }) {
     }
   });
   const terminalWidth = currentTerminalWidth();
-  const sep = horizontalSeparator(terminalWidth);
-  return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", padding: 0, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Header, { model, cwd: session.getCwd(), hasContent: events.length > 0 }),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+  const sep2 = horizontalSeparator(terminalWidth);
+  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", padding: 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Header, { model, cwd: session.getCwd(), hasContent: events.length > 0 }),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       Conversation,
       {
         events,
@@ -59461,8 +59670,8 @@ function App2({ session, onThemeChange }) {
         onExpandableBlockKeysChange: handleExpandableBlockKeysChange
       }
     ),
-    notifications.map((n, i) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: "yellow", children: n }) }, i)),
-    pendingPermission && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    notifications.map((n, i) => /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "yellow", children: n }) }, i)),
+    pendingPermission && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       PermissionDialog,
       {
         session,
@@ -59475,16 +59684,16 @@ function App2({ session, onThemeChange }) {
         onResolve: resolvePermissionFocus
       }
     ),
-    modal === "status" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(StatusPanel, { session, onClose: closeModal, active: focusMode === "status-modal" }),
-    modal === "model" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { borderStyle: "round", paddingX: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { dimColor: true, children: [
+    modal === "status" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(StatusPanel, { session, onClose: closeModal, active: focusMode === "status-modal" }),
+    modal === "model" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { borderStyle: "round", paddingX: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { dimColor: true, children: [
       "Use /model ",
       "<provider/id>",
       " to switch. Use /models to list available models."
     ] }) }),
-    modal === "theme" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ThemePanel, { active: focusMode === "theme-modal", onClose: closeModal, onSelect: applyTheme }),
-    modal === "rewind" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(RewindDialog, { active: focusMode === "rewind-confirm", onConfirm: confirmRewind, onCancel: closeRewindDialog }),
-    modal === "branch" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(SessionPanel, { mode: "branch", branches: session.listBranches(), active: focusMode === "session-modal", onClose: closeModal }),
-    modal === "resume" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    modal === "theme" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(ThemePanel, { active: focusMode === "theme-modal", onClose: closeModal, onSelect: applyTheme }),
+    modal === "rewind" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(RewindDialog, { active: focusMode === "rewind-confirm", onConfirm: confirmRewind, onCancel: closeRewindDialog }),
+    modal === "branch" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(SessionPanel, { mode: "branch", branches: session.listBranches(), active: focusMode === "session-modal", onClose: closeModal }),
+    modal === "resume" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       SessionPanel,
       {
         mode: "resume",
@@ -59498,22 +59707,22 @@ function App2({ session, onThemeChange }) {
         }
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       InputBox,
       {
         buffer: input,
-        onChange: setInput,
+        onChange: handleInputChange,
         onSubmit: handleSubmit,
         onBareEscape: handleInputEscape,
         onSlashModeChange: handleSlashModeChange,
         running,
-        focusActive: focusMode === "input" || focusMode === "slash",
+        focusActive: isTextInputFocus(focusMode),
         submitActive: focusMode === "input",
         onHistorySearchModeChange: (active) => setFocusMode(active ? "history-search" : "input"),
-        separator: sep
+        separator: sep2
       }
     ),
-    slashMode && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { flexDirection: "column", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    slashMode && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { flexDirection: "column", children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       CommandPanel,
       {
         commands: filteredCommands,
@@ -59521,7 +59730,14 @@ function App2({ session, onThemeChange }) {
         width: terminalWidth
       }
     ) }),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    focusMode === "file-picker" && filePicker && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { flexDirection: "column", children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      FilePickerPanel,
+      {
+        candidates: filePicker.candidates,
+        selectedIndex: filePicker.selectedIndex
+      }
+    ) }),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       StatusBar,
       {
         running,
@@ -59598,7 +59814,7 @@ function findToolResult(messages, startIndex, toolCallId) {
 function toolResultText(message) {
   return message.content.map((part) => part.type === "text" ? part.text : `[${part.type}]`).join("\n");
 }
-var import_react31, import_jsx_runtime17;
+var import_react31, import_jsx_runtime18;
 var init_App2 = __esm({
   async "packages/ko-tui/src/App.tsx"() {
     "use strict";
@@ -59608,6 +59824,8 @@ var init_App2 = __esm({
     await init_Header();
     await init_Conversation();
     await init_InputBox();
+    await init_FilePickerPanel();
+    init_file_picker();
     await init_StatusBar();
     await init_PermissionDialog();
     await init_StatusPanel();
@@ -59622,7 +59840,7 @@ var init_App2 = __esm({
     await init_RewindDialog();
     init_layout();
     await init_StatusBar();
-    import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+    import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
   }
 });
 
