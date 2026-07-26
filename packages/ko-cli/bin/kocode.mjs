@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { createRequire as __kocodeCreateRequire } from "node:module";
+const require = __kocodeCreateRequire(import.meta.url);
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -51832,13 +51834,22 @@ var init_devtools_window_polyfill = __esm({
   }
 });
 
+// react-devtools-core-stub:react-devtools-core
+var react_devtools_core_default;
+var init_react_devtools_core = __esm({
+  "react-devtools-core-stub:react-devtools-core"() {
+    react_devtools_core_default = { connectToDevTools() {
+    } };
+  }
+});
+
 // node_modules/.pnpm/ink@5.2.1_@types+react@18.3.29_react@18.2.0/node_modules/ink/build/devtools.js
 var devtools_exports = {};
-import devtools from "react-devtools-core";
 var init_devtools = __esm({
   "node_modules/.pnpm/ink@5.2.1_@types+react@18.3.29_react@18.2.0/node_modules/ink/build/devtools.js"() {
     init_devtools_window_polyfill();
-    devtools.connectToDevTools();
+    init_react_devtools_core();
+    react_devtools_core_default.connectToDevTools();
   }
 });
 
