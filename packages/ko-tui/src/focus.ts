@@ -1,6 +1,7 @@
 export type FocusMode =
   | "input"
   | "slash"
+  | "file-picker"
   | "status-modal"
   | "model-modal"
   | "theme-modal"
@@ -16,7 +17,7 @@ export function isModalFocus(mode: FocusMode): boolean {
 }
 
 export function isTextInputFocus(mode: FocusMode): boolean {
-  return mode === "input" || mode === "slash";
+  return mode === "input" || mode === "slash" || mode === "file-picker";
 }
 
 export function canUseGlobalShortcut(mode: FocusMode): boolean {
@@ -24,7 +25,8 @@ export function canUseGlobalShortcut(mode: FocusMode): boolean {
 }
 
 export function restoreFocusAfterBlockingMode(previous: FocusMode | null | undefined): FocusMode {
-  if (!previous || isModalFocus(previous) || previous === "history-search") return "input";
+  // file-picker candidates may be stale after an interruption; fall back to input.
+  if (!previous || isModalFocus(previous) || previous === "history-search" || previous === "file-picker") return "input";
   return previous;
 }
 
@@ -111,9 +113,9 @@ export function busySubmitMessage(text: string): string {
 }
 
 /**
- * Decide bare-Esc from InputBox (input|slash focusActive path).
+ * Decide bare-Esc from InputBox (input|slash|file-picker focusActive path).
  * Higher owners (permission/modals/transcript-block/history-search) never reach here.
- * - slash → dismiss only (handled by App slash handler); do not cancel
+ * - slash / file-picker → dismiss only (handled by App branch); do not cancel
  * - input + running → cancel turn
  * - input + idle → double-Esc rewind path (caller)
  */

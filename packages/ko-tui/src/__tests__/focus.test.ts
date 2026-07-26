@@ -7,6 +7,7 @@ import {
   isBareEscapeInput,
   isCtrlOInput,
   isModalFocus,
+  isTextInputFocus,
   moveBlockIndex,
   normalizeBlockIndex,
   restoreFocusAfterBlockingMode,
@@ -27,7 +28,13 @@ describe("focus routing helpers", () => {
     expect(canUseGlobalShortcut("permission")).toBe(false);
     expect(canUseGlobalShortcut("rewind-confirm")).toBe(false);
     expect(canUseGlobalShortcut("slash")).toBe(false);
+    expect(canUseGlobalShortcut("file-picker")).toBe(false);
     expect(canUseGlobalShortcut("history-search")).toBe(false);
+  });
+
+  it("keeps text editing active for file-picker focus", () => {
+    expect(isTextInputFocus("file-picker")).toBe(true);
+    expect(isModalFocus("file-picker")).toBe(false);
   });
 
   it("bare Esc cancels only under input focus while running", () => {
@@ -35,6 +42,8 @@ describe("focus routing helpers", () => {
     expect(bareEscapeAction("input", false)).toBe("rewind-or-ignore");
     expect(bareEscapeAction("slash", true)).toBe("ignore");
     expect(bareEscapeAction("slash", false)).toBe("ignore");
+    expect(bareEscapeAction("file-picker", true)).toBe("ignore");
+    expect(bareEscapeAction("file-picker", false)).toBe("ignore");
     expect(bareEscapeAction("permission", true)).toBe("ignore");
     expect(bareEscapeAction("transcript-block", true)).toBe("ignore");
     expect(bareEscapeAction("history-search", true)).toBe("ignore");
@@ -45,6 +54,7 @@ describe("focus routing helpers", () => {
     expect(restoreFocusAfterBlockingMode("permission")).toBe("input");
     expect(restoreFocusAfterBlockingMode("rewind-confirm")).toBe("input");
     expect(restoreFocusAfterBlockingMode("history-search")).toBe("input");
+    expect(restoreFocusAfterBlockingMode("file-picker")).toBe("input");
     expect(restoreFocusAfterBlockingMode(null)).toBe("input");
   });
 
